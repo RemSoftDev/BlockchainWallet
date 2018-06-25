@@ -1,0 +1,4 @@
+install node.js https://nodejs.org/en/
+
+npm install -g @angular/cli
+ng generate component heroes
