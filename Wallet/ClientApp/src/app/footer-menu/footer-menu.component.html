@@ -1,0 +1,32 @@
+<footer class="page-footer font-small">
+  <hr />
+
+  <div class="container-fluid text-center text-md-left">
+    <div class="row">
+
+      <div class="col-md-4 col-md-offset-4">
+        <h5>Blockchain Wallets Analytics</h5>
+        <a [routerLink]='["/log-in"]'>
+          About
+        </a>
+        &nbsp;
+        <a [routerLink]='["/log-in"]'>
+          Contact
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <h5><dfn>Tips</dfn></h5>
+        <ul class="list-unstyled">
+          <li>
+            ETH <a [routerLink]='["/log-in"]'>{{ ethAddress }}</a>
+          </li>
+          <li>
+            BTC <a [routerLink]='["/log-in"]'>{{ btcAddress }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</footer>
