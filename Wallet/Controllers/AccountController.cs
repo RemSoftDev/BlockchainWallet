@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using JWT;
-using JWT.Serializers;
-using JWT.Algorithms;
-using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Wallet.Helpers;
 using Wallet.Models;
 using Wallet.ViewModels;
@@ -18,19 +15,15 @@ namespace Wallet.Controllers
     public class AccountController : Controller
     {
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly JWTSettings _options;
+        private readonly IJwtFactory _jwtFactory;
+        private readonly JWTSettings _jwtOptions;
 
-        public AccountController(
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
-            IOptions<JWTSettings> optionsAccessor)
+        public AccountController(UserManager<User> userManager, IJwtFactory jwtFactory, IOptions<JWTSettings> jwtOptions)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
-            _options = optionsAccessor.Value;
+            _jwtFactory = jwtFactory;
+            _jwtOptions = jwtOptions.Value;
         }
-
 
         [HttpPost("[action]")]
         public async Task<IActionResult> Register([FromBody]RegistrationViewModel model)
@@ -44,7 +37,6 @@ namespace Wallet.Controllers
                 return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
 
             return new OkResult();
-
         }
 
         [HttpPost("[action]")]
@@ -53,69 +45,33 @@ namespace Wallet.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-            if (!result.Succeeded)
+            var result = await GetClaimsIdentity(model.Email, model.Password);
+            if (result == null)
                 return BadRequest(HttpErrorHandler.AddError("Failure", "Invalid username or password.", ModelState));
-            User user = await _userManager.FindByEmailAsync(model.Email);
-            return new JsonResult(new Dictionary<string, object>
+            var jwt = await Tokens.GenerateJwt(result, _jwtFactory, model.Email, _jwtOptions,
+                new JsonSerializerSettings {Formatting = Formatting.Indented});
+
+            return new OkObjectResult(jwt);
+        }
+
+        private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)
+        {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+                return await Task.FromResult<ClaimsIdentity>(null);
+
+            // get the user to verifty
+            var userToVerify = await _userManager.FindByNameAsync(userName);
+
+            if (userToVerify == null) return await Task.FromResult<ClaimsIdentity>(null);
+
+            // check the credentials
+            if (await _userManager.CheckPasswordAsync(userToVerify, password))
             {
-                { "access_token", GetAccessToken(model.Email) },
-                { "id", GetIdToken(user) }
-            });
-        }
+                return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id));
+            }
 
-        private string GetIdToken(IdentityUser user)
-        {
-            var payload = new Dictionary<string, object>
-            {
-                { "id", user.Id },
-                { "sub", user.Email },
-                { "email", user.Email },
-                { "emailConfirmed", user.EmailConfirmed },
-            };
-            return GetToken(payload);
-        }
-
-        private string GetAccessToken(string Email)
-        {
-            var payload = new Dictionary<string, object>
-            {
-                { "sub", Email },
-                { "email", Email }
-            };
-            return GetToken(payload);
-        }
-
-        private string GetToken(Dictionary<string, object> payload)
-        {
-            var secret = _options.SecretKey;
-
-            payload.Add("iss", _options.Issuer);
-            payload.Add("aud", _options.Audience);
-            payload.Add("nbf", ConvertToUnixTimestamp(DateTime.Now));
-            payload.Add("iat", ConvertToUnixTimestamp(DateTime.Now));
-            payload.Add("exp", ConvertToUnixTimestamp(DateTime.Now.AddDays(7)));
-            IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
-            IJsonSerializer serializer = new JsonNetSerializer();
-            IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
-            IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
-
-            return encoder.Encode(payload, secret);
-        }
-
-        private static double ConvertToUnixTimestamp(DateTime date)
-        {
-            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            TimeSpan diff = date.ToUniversalTime() - origin;
-            return Math.Floor(diff.TotalSeconds);
-        }
-
-        private JsonResult Errors(IdentityResult result)
-        {
-            var items = result.Errors
-                .Select(x => x.Description)
-                .ToArray();
-            return new JsonResult(items) { StatusCode = 400 };
+            // Credentials are invalid, or account doesn't exist
+            return await Task.FromResult<ClaimsIdentity>(null);
         }
     }
 }

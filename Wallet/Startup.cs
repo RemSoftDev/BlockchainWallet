@@ -1,11 +1,8 @@
-using System.Net;
+using System;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -13,13 +10,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Wallet.Extensions;
+using Wallet.Helpers;
 using Wallet.Models;
 
 namespace Wallet
 {
     public class Startup
     {
+
+        private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVkH";
+        private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -30,32 +31,64 @@ namespace Wallet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<JWTSettings>(Configuration.GetSection("JWTSettings"));
-
             services.AddDbContext<WalletDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<WalletDbContext>();
+            services.AddSingleton<IJwtFactory, JwtFactory>();
 
-            services.Configure<IdentityOptions>(options =>
+            var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTSettings));
+
+            services.Configure<JWTSettings>(options =>
             {
-                options.Password.RequiredLength = 6;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequiredUniqueChars = 1;
+                options.Issuer = jwtAppSettingOptions[nameof(JWTSettings.Issuer)];
+                options.Audience = jwtAppSettingOptions[nameof(JWTSettings.Audience)];
+                options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
             });
 
-            services.ConfigureApplicationCookie(options =>
+            var tokenValidationParameters = new TokenValidationParameters
             {
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    context.Response.StatusCode = 401;
+                ValidateIssuer = true,
+                ValidIssuer = jwtAppSettingOptions[nameof(JWTSettings.Issuer)],
 
-                    return Task.CompletedTask;
-                };
+                ValidateAudience = true,
+                ValidAudience = jwtAppSettingOptions[nameof(JWTSettings.Audience)],
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _signingKey,
+
+                RequireExpirationTime = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(configureOptions =>
+            {
+                configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JWTSettings.Issuer)];
+                configureOptions.TokenValidationParameters = tokenValidationParameters;
+                configureOptions.SaveToken = true;
             });
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ApiUser", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess));
+            });
+
+            var builder = services.AddIdentityCore<User>(o =>
+            {
+                // configure identity options
+                o.Password.RequireDigit = false;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireUppercase = false;
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequiredLength = 6;
+            });
+            builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);
+            builder.AddEntityFrameworkStores<WalletDbContext>().AddDefaultTokenProviders();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the Angular files will be served from this directory
@@ -81,9 +114,7 @@ namespace Wallet
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-
             app.UseAuthentication();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
