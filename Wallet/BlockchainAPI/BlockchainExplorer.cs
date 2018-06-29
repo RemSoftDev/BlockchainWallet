@@ -2,10 +2,13 @@
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Wallet.BlockchainAPI.Model;
@@ -29,6 +32,27 @@ namespace Wallet.BlockchainAPI
             new Token("OMG", "0xd26114cd6EE289AccF82350c8d8487fedB8A0C07", 18),
             new Token("LCT", "0x05c7065d644096a4e4c3fe24af86e36de021074b", 18)
         };
+
+
+
+        public static List<Token> tokenContractsJson()
+        {
+            string ethTokens;
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "BlockchainProject.ethTokens.json";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    ethTokens = reader.ReadToEnd();
+
+                }
+            }
+            return JsonConvert.DeserializeObject<List<Token>>(ethTokens);
+
+        }
+
 
         public static List<CustomTransaction> GetTokenTransfersForAcc(string account, int searchInLastBlocksCount)
         {

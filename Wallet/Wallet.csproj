@@ -31,10 +31,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="BlockchainAPI\ethTokens.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\app\login\login.component.ts" />
     <None Remove="ClientApp\src\app\shared\services\auth.service.ts" />
     <None Remove="ClientApp\src\app\shared\services\base.service.ts" />
     <None Remove="ClientApp\src\app\sign-in\signin.component.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="BlockchainAPI\ethTokens.json" />
   </ItemGroup>
 
   <ItemGroup>
