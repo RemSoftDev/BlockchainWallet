@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Wallet.Helpers;
 using Wallet.Models;
 using Wallet.ViewModels;
 
@@ -37,12 +38,12 @@ namespace Wallet.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            User user = new User() {UserName = model.Email, Email = model.Email};
+            User user = new User() { UserName = model.Email, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return Errors(result);
+                return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
 
-            return new OkObjectResult("Account created");
+            return new OkResult();
 
         }
 
@@ -54,7 +55,7 @@ namespace Wallet.Controllers
 
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
             if (!result.Succeeded)
-                return BadRequest("Invalid username or password.");
+                return BadRequest(HttpErrorHandler.AddError("Failure", "Invalid username or password.", ModelState));
             User user = await _userManager.FindByEmailAsync(model.Email);
             return new JsonResult(new Dictionary<string, object>
             {

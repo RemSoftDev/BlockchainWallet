@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Wallet.Controllers
 {
+
+    [Authorize]
     [Route("api/[controller]")]
     public class SampleDataController : Controller
     {

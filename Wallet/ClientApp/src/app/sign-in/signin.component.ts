@@ -1,24 +1,31 @@
 import { Component } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { NgForm } from '@angular/forms';
+import { AuthService } from '../shared/services/auth.service';
+import { Router, ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-signin',
   templateUrl: './signin.component.html',
 })
 export class SigninComponent {
-}
 
+  errors: string;
+  isRequesting: boolean;
 
-export class PasswordValidation {
+  constructor(private authService: AuthService, private router: Router, private activatedRoute: ActivatedRoute) { }
 
-  static MatchPassword(AC: AbstractControl) {
-    let password = AC.get('password').value; // to get value in input tag
-    let confirmPassword = AC.get('confirm_password').value; // to get value in input tag
-    if (password != confirmPassword) {
-      console.log('false');
-      AC.get('confirmPassword').setErrors({ MatchPassword: true })
-    } else {
-      console.log('true');
-      return null
-    }
+  signIn(form: NgForm) {
+    this.isRequesting = true;
+    this.authService.signIn(form.value.email, form.value.password, form.value.confirmPassword)
+      .finally(() => this.isRequesting = false)
+      .subscribe(
+        result => {
+          if (result) {
+            this.router.navigate(['/log-in']);
+          }
+        },
+        error => this.errors = error);
   }
+
 }
+
