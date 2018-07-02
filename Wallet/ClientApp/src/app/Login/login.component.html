@@ -21,17 +21,15 @@
     </div>
 
 
+    <div class="g-recaptcha" data-sitekey="6LeM0WEUAAAAACazkj0iQm-4OKPdrJdTyadTEuud"></div>
+
+
 
   </form>
-  <form #declarativeForm="ngForm">
-    <re-captcha [(ngModel)]="declarativeFormCaptchaValue"
-                name="captcha"
-                required
-                (resolved)="$event && submit($event)"></re-captcha>
-    <button [disabled]="!declarativeForm.valid">Submit</button>
-  </form>
+
 
 
 
 
 </div>
+<script src='https://www.google.com/recaptcha/api.js'></script>
