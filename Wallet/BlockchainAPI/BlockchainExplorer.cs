@@ -12,6 +12,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Wallet.BlockchainAPI.Model;
+using Wallet.Models;
+using Wallet.ViewModels;
 
 namespace Wallet.BlockchainAPI
 {
@@ -169,18 +171,18 @@ namespace Wallet.BlockchainAPI
         /// <param name="account"></param>
         /// <returns></returns>
         /// 
-        public static IList<Token> BalanceToken(string account)
+        public async Task<ERC20TokenViewModel> BalanceToken(ERC20Token token, string account)
         {
-            List<Token> balanceToken = new List<Token>();
-            foreach (var token in tokenContracts)
+            var cont = web3.Eth.GetContract(abi, token.Address);
+            var eth = cont.GetFunction("balanceOf");
+            var balance = await eth.CallAsync<BigInteger>(account);
+            return new ERC20TokenViewModel()
             {
-                var cont = web3.Eth.GetContract(abi, token.Address);
-                var eth = cont.GetFunction("balanceOf");
-                var balance = eth.CallAsync<BigInteger>(account).Result;
-                balanceToken.Add(new Token(token.Name, Web3.Convert.FromWei(balance, token.DecimalPlaces)));
-            }
-
-            return balanceToken;
+                Address = token.Address,
+                Balance = Web3.Convert.FromWei(balance, token.DecimalPlaces),
+                DecimalPlaces = token.DecimalPlaces,
+                Symbol = token.Symbol
+            };
         }
     }
 }

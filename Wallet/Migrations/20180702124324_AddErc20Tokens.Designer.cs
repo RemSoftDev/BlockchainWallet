@@ -10,8 +10,8 @@ using Wallet.Models;
 namespace Wallet.Migrations
 {
     [DbContext(typeof(WalletDbContext))]
-    [Migration("20180627102821_Initial")]
-    partial class Initial
+    [Migration("20180702124324_AddErc20Tokens")]
+    partial class AddErc20Tokens
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -129,6 +129,25 @@ namespace Wallet.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("Wallet.Models.ERC20Token", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address");
+
+                    b.Property<int>("DecimalPlaces");
+
+                    b.Property<string>("Symbol");
+
+                    b.Property<string>("Type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Erc20Tokens");
                 });
 
             modelBuilder.Entity("Wallet.Models.User", b =>

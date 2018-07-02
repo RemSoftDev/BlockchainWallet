@@ -113,6 +113,7 @@ namespace Wallet
                 app.UseHsts();
             }
 
+            DBInitializer.InitializeAsync(app.ApplicationServices).Wait();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
