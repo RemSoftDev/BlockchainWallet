@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wallet.BlockchainAPI.Model
 {
-    class TransactionInput
+    public class TransactionInput
     {
         public decimal Value { get; set; }
         public string What { get; set; }

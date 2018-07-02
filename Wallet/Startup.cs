@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Wallet.BlockchainAPI;
 using Wallet.Helpers;
 using Wallet.Models;
 
@@ -35,6 +36,7 @@ namespace Wallet
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
+            services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTSettings));
 

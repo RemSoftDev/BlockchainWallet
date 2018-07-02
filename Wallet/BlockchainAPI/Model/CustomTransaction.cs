@@ -7,7 +7,7 @@ using Nethereum.RPC.Eth.DTOs;
 
 namespace Wallet.BlockchainAPI.Model
 {
-    class CustomTransaction : Transaction
+    public class CustomTransaction : Transaction
     {
         public bool IsSuccess { get; set; }
 

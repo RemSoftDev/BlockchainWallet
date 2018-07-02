@@ -1,1 +1,19 @@
-<app-fetch-data></app-fetch-data>
+<div class="col-md-6 col-md-offset-3 inputForm">
+
+  <form #myForm="ngForm" novalidate (ngSubmit)="search(myForm)">
+
+    <div class="btn-toolbar">
+
+      <div class="input-group">
+        <input class="form-control searchField" name="searchString" placeholder="Wallet/ICO Address/Name" trim ngModel required />
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" [disabled]="myForm.invalid" class="btn btn-secondary">Search</button>
+      </div>
+
+    </div>
+
+  </form>
+</div>
+

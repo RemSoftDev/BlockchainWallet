@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Wallet.BlockchainAPI.Model
 {
-    class Token
+    public class Token
     {
         public string Name;
         public decimal Balance;

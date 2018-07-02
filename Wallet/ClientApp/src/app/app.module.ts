@@ -13,6 +13,9 @@ import { FooterMenuComponent } from './footer-menu/footer-menu.component';
 import { LoginComponent } from './Login/login.component';
 import { SigninComponent } from './sign-in/signin.component';
 import { AuthService } from './shared/services/auth.service';
+import { BlockchainService } from './shared/services/blockchain.service';
+import { WalletPageComponent } from './wallet-page/wallet-page.component';
+import { SpinnerComponent } from './spinner/spinner.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +25,9 @@ import { AuthService } from './shared/services/auth.service';
     FetchDataComponent,
     FooterMenuComponent,
     LoginComponent,
-    SigninComponent
+    SigninComponent,
+    WalletPageComponent,
+    SpinnerComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -30,11 +35,13 @@ import { AuthService } from './shared/services/auth.service';
     FormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
+      { path: 'search/:searchString', component: WalletPageComponent},
       { path: 'sign-in', component: SigninComponent },
       { path: 'log-in', component: LoginComponent },
     ])
   ],
   providers: [
+    BlockchainService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

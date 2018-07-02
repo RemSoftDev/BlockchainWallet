@@ -1,0 +1,36 @@
+.addStar {
+  cursor: pointer;
+  font-size: 20px;
+  margin-bottom: -5px;
+}
+
+.dropdownBtn {
+  width: 220px;
+}
+
+.dropdown-menu {
+  max-height: 400px;
+  overflow: auto;
+}
+
+.dropdown-menu li {
+  width: 200px;
+}
+
+.tableRow {
+  margin-top: 50px;
+}
+
+.table th {
+  background-color: lightgray;
+}
+
+.table-striped > tbody > tr:nth-child(n) > td,
+.table-striped > tbody > tr:nth-child(n) > th {
+  background-color: white;
+}
+
+.table-striped > tbody > tr:nth-child(2n) > td,
+.table-striped > tbody > tr:nth-child(2n) > th {
+  background-color: rgba(192,192,192,0.1);
+}

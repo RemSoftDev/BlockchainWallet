@@ -15,7 +15,7 @@ using Wallet.BlockchainAPI.Model;
 
 namespace Wallet.BlockchainAPI
 {
-    class BlockchainExplorer
+    public class BlockchainExplorer: IBlockchainExplorer
     {
         private static Web3 web3 = new Web3();
 
@@ -34,7 +34,6 @@ namespace Wallet.BlockchainAPI
         };
 
 
-
         public static List<Token> tokenContractsJson()
         {
             string ethTokens;
@@ -46,11 +45,10 @@ namespace Wallet.BlockchainAPI
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     ethTokens = reader.ReadToEnd();
-
                 }
             }
-            return JsonConvert.DeserializeObject<List<Token>>(ethTokens);
 
+            return JsonConvert.DeserializeObject<List<Token>>(ethTokens);
         }
 
 
@@ -77,15 +75,17 @@ namespace Wallet.BlockchainAPI
                                     TransactionHash = x.TransactionHash,
                                     From = x.From,
                                     To = x.To,
-                                    Date = DateTime.Now.ToUniversalTime() - new System.DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds((long)(block.Timestamp.Value)),
+                                    Date = DateTime.Now.ToUniversalTime() -
+                                           new System.DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                               (long) (block.Timestamp.Value)),
                                     TransferInfo = tInfo
                                 });
                             }
                         }
-
                     });
                 }
             }
+
             return result;
         }
 
@@ -111,7 +111,9 @@ namespace Wallet.BlockchainAPI
                                 TransactionHash = x.TransactionHash,
                                 From = x.From,
                                 To = x.To,
-                                Date = DateTime.Now.ToUniversalTime() - new System.DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds((long)(block.Timestamp.Value))
+                                Date = DateTime.Now.ToUniversalTime() -
+                                       new System.DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                           (long) (block.Timestamp.Value))
                             };
 
                             if (x.Value.Value == 0)
@@ -146,8 +148,8 @@ namespace Wallet.BlockchainAPI
             return new Model.TransactionInput()
             {
                 To = address,
-                Value = token != null? Web3.Convert.FromWei(value, token.DecimalPlaces): (decimal)value,
-                What = token?.Name??"Unknown"
+                Value = token != null ? Web3.Convert.FromWei(value, token.DecimalPlaces) : (decimal) value,
+                What = token?.Name ?? "Unknown"
             };
         }
 
@@ -156,10 +158,9 @@ namespace Wallet.BlockchainAPI
         /// </summary>
         /// <param name="account"></param>
         /// <returns></returns>
-        public static decimal BalanceETH(string account)
+        public Task<HexBigInteger> BalanceETH(string account)
         {
-            var currentBalance = web3.Eth.GetBalance.SendRequestAsync(account).Result;
-            return Web3.Convert.FromWei(currentBalance, 18);
+            return web3.Eth.GetBalance.SendRequestAsync(account);
         }
 
         /// <summary>

@@ -1,0 +1,76 @@
+<div *ngIf="!infoRequesting" class="row">
+  <app-spinner></app-spinner>
+</div>
+<div *ngIf="infoRequesting" class="row">
+  <div class="col-sm-4">
+    <h4>Wallet Address <span class="addStar glyphicon glyphicon-star-empty"></span></h4>
+    <p>{{searchString}}</p>
+  </div>
+
+  <div class="col-sm-3 col-sm-offset-5">
+    <h5>ETH : {{walletInfo.balance | number : '1.2-10'}} </h5>
+
+    <div class="dropdown">
+      <button class="dropdownBtn btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Tokens &nbsp;
+        <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li class="dropdown-item"><a href="#">HTML</a></li>
+        <li class="dropdown-item"><a href="#">CSS</a></li>
+        <li class="dropdown-item"><a href="#">JavaScript</a></li>
+        <li class="dropdown-item"><a href="#">HTML</a></li>
+        <li class="dropdown-item"><a href="#">CSS</a></li>
+        <li class="dropdown-item"><a href="#">JavaScript</a></li>
+        <li class="dropdown-item"><a href="#">HTML</a></li>
+        <li class="dropdown-item"><a href="#">CSS</a></li>
+        <li class="dropdown-item"><a href="#">JavaScript</a></li>
+        <li class="dropdown-item"><a href="#">JavaScript</a></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="row tableRow">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">TxHash</th>
+      <th scope="col">From</th>
+      <th scope="col">To</th>
+      <th scope="col">What</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Date/Time</th>
+      <th scope="col">Success</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>Jacob</td>
+      <td>Thornton</td>
+      <td>@fat</td>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td>Larry</td>
+      <td>the Bird</td>
+      <td>@twitter</td>
+      <td>Mark</td>
+      <td>Otto</td>
+      <td>@mdo</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
