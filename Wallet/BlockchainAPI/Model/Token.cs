@@ -13,7 +13,10 @@ namespace Wallet.BlockchainAPI.Model
         public decimal Balance;
         public int DecimalPlaces;
         public string Address;
-        
+      
+        public string Symbol;
+        public string Type;
+
         public Token(string name, decimal balance)
         {
             Name = name;
@@ -26,5 +29,21 @@ namespace Wallet.BlockchainAPI.Model
             Address = address;
             DecimalPlaces = decimalPlaces;
         }
+
+        public Token(string name, string address, int decimalPlaces, string types)
+        {
+            Name = name;
+            Address = address;
+            DecimalPlaces = decimalPlaces;
+            Type = types;
+        }
+        public Token()
+        {
+            Name = string.Empty;
+            Address = string.Empty;
+            DecimalPlaces = 0;
+            Type = string.Empty;
+        }
+
     }
 }
