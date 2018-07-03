@@ -36,6 +36,11 @@ namespace Wallet.Controllers
             if (!result.Succeeded)
                 return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
 
+            string confirmUrl =
+                GetEmailConfirmationUrl(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
+
+            await EmailHelper.SendEmailAsync(user.Email, "Email confirmation", EmailHelper.GetEmailConfirmationMessage(confirmUrl));
+
             return new OkResult();
         }
 
@@ -45,6 +50,11 @@ namespace Wallet.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            if (! await _userManager.IsEmailConfirmedAsync(await _userManager.FindByNameAsync(model.Email)))
+            {
+                return BadRequest(HttpErrorHandler.AddError("Failure", "Confirm your email", ModelState));
+            }
+
             var result = await GetClaimsIdentity(model.Email, model.Password);
             if (result == null)
                 return BadRequest(HttpErrorHandler.AddError("Failure", "Invalid username or password.", ModelState));
@@ -52,6 +62,43 @@ namespace Wallet.Controllers
                 new JsonSerializerSettings {Formatting = Formatting.Indented});
 
             return new OkObjectResult(jwt);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByNameAsync(model.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                return BadRequest(HttpErrorHandler.AddError("Failure", "Confirm your email", ModelState));
+            }
+
+            string resetUrl = GetPasswordResetUrl(user, await _userManager.GeneratePasswordResetTokenAsync(user));
+
+            await EmailHelper.SendEmailAsync(user.Email, "Reset Password", EmailHelper.GetResetPasswordMessage(resetUrl));
+
+            return new OkResult();
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            
+            var user = await _userManager.FindByNameAsync(model.Email);
+            if (user == null)
+                return BadRequest(HttpErrorHandler.AddError("Failure", "User not found", ModelState));
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (!result.Succeeded)
+                return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
+            
+            return new OkResult();
+            
         }
 
         private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)
@@ -72,6 +119,39 @@ namespace Wallet.Controllers
 
             // Credentials are invalid, or account doesn't exist
             return await Task.FromResult<ClaimsIdentity>(null);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+                return BadRequest();
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return BadRequest();
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+            if (result.Succeeded)
+            {
+                return new OkObjectResult("Email Comfirmed");
+            }
+            else
+            {
+                return BadRequest("Error");
+            }
+        }
+
+        private string GetPasswordResetUrl(User user, string code)
+        {
+            return Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+        }
+
+        private string GetEmailConfirmationUrl(User user, string code)
+        {
+            return Url.Action(
+                "ConfirmEmail",
+                "Account",
+                new { userId = user.Id, code = code },
+                protocol: HttpContext.Request.Scheme);
         }
     }
 }

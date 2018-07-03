@@ -24,7 +24,6 @@ export class LoginComponent implements OnInit {
       this.username = this.cookieService.get('username');
       this.password = this.cookieService.get('password');
       this.rememberme = this.cookieService.get('remember');
-      console.log(this.username);
     }
   }
 

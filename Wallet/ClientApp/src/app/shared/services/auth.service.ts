@@ -30,6 +30,30 @@ export class AuthService extends BaseService {
     this._authNavStatusSource.next(this.loggedIn);
     this.hostUrl = hostUrl;
   }
+  
+  resetPass(email, password, code) {
+    return this.http
+      .post(
+       this.hostUrl + this.baseUrl + '/ResetPassword',
+        JSON.stringify({ email, password, code }),
+        httpOptions)
+      .map(res => {
+        return true;
+      })
+      .catch(this.handleError);
+  }
+
+  forgotPass(email) {
+    return this.http
+      .post(
+        this.hostUrl + this.baseUrl + '/ForgotPassword',
+        JSON.stringify({ email }),
+        httpOptions)
+      .map(res => {
+        return true;
+      })
+      .catch(this.handleError);
+  }
 
   login(email, password) {
     return this.http
