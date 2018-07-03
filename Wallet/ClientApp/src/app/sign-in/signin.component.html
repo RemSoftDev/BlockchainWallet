@@ -19,7 +19,11 @@
     </div>
 
     <div class="form-group">
-      <button type="submit" [disabled]="myForm.invalid|| isRequesting" class="btn btn-primary">Register</button>
+      <re-captcha (captchaResponse)="handleCorrectCaptcha($event)" site_key="6LchAmIUAAAAALOwxPFiW0aW8ZzYGGnGAcqT2aXu"></re-captcha>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" [disabled]="myForm.invalid|| isRequesting || !validCaptcha" class="btn btn-primary">Register</button>
     </div>
     <div *ngIf="errors" class="alert alert-danger" role="alert">
       {{errors}}
