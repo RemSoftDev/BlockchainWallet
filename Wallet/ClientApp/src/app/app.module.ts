@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { ReCaptchaModule } from 'angular2-recaptcha';
+import { CookieService } from 'angular2-cookie/services/cookies.service';
 
 import { JwtInterceptor } from './jwt.interceptor';
 import { AppComponent } from './app.component';
@@ -43,6 +44,7 @@ import { SpinnerComponent } from './spinner/spinner.component';
     ])
   ],
   providers: [
+    CookieService,
     BlockchainService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,
