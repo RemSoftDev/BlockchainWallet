@@ -5,7 +5,7 @@
 }
 
 .dropdownBtn {
-  width: 220px;
+  width: 320px;
 }
 
 .dropdown-menu {
@@ -14,7 +14,7 @@
 }
 
 .dropdown-menu li {
-  width: 200px;
+  width: 320px;
 }
 
 .tableRow {
@@ -33,4 +33,30 @@
 .table-striped > tbody > tr:nth-child(2n) > td,
 .table-striped > tbody > tr:nth-child(2n) > th {
   background-color: rgba(192,192,192,0.1);
+}
+
+.tableData {
+  width: 150px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  padding: 5px !important;
+  text-overflow: ellipsis !important;
+}
+
+.tokenBalanceText {
+  font-size: 14px;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.tokenSymbol {
+  font-size: 14px;
+  margin-left: 10px;
+  display: inline-block;
+  width: 150px;
+}
+
+li:hover {
+  background-color: lightblue;
+  cursor: pointer
 }

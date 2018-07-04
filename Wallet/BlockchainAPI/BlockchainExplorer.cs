@@ -21,7 +21,6 @@ namespace Wallet.BlockchainAPI
     {
         private static Web3 web3 = new Web3();
 
-
         private static string abi =
             "[{\"constant\":false,\"inputs\":[{\"name\":\"spender\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"who\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"spender\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"extraData\",\"type\":\"bytes\"}],\"name\":\"approveAndCall\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}]\r\n";
 
@@ -54,7 +53,7 @@ namespace Wallet.BlockchainAPI
         }
 
 
-        public static List<CustomTransaction> GetTokenTransfersForAcc(string account, int searchInLastBlocksCount)
+        public List<CustomTransaction> GetTokenTransfersForAcc(string account, int searchInLastBlocksCount)
         {
             var result = new List<CustomTransaction>();
             var numb = web3.Eth.Blocks.GetBlockNumber.SendRequestAsync().Result;
@@ -69,20 +68,19 @@ namespace Wallet.BlockchainAPI
                     {
                         if (x.Input.StartsWith("0xa9059cbb") && x.Input.Length < 140)
                         {
-                            Model.TransactionInput tInfo = decodeInput(x.Input, string.Empty);
-                            if (string.Equals(tInfo.To, account, StringComparison.CurrentCultureIgnoreCase))
-                            {
-                                result.Add(new CustomTransaction()
-                                {
-                                    TransactionHash = x.TransactionHash,
-                                    From = x.From,
-                                    To = x.To,
-                                    Date = DateTime.Now.ToUniversalTime() -
-                                           new System.DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
-                                               (long) (block.Timestamp.Value)),
-                                    TransferInfo = tInfo
-                                });
-                            }
+                            //Model.TransactionInput tInfo = decodeInput(x.Input, string.Empty);
+                            //if (string.Equals(tInfo.To, account, StringComparison.CurrentCultureIgnoreCase))
+                            //{
+                            //    result.Add(new CustomTransaction()
+                            //    {
+                            //        TransactionHash = x.TransactionHash,
+                            //        From = x.From,
+                            //        To = x.To,
+                            //        Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                            //                   (long) (block.Timestamp.Value)),
+                            //        TransferInfo = tInfo
+                            //    });
+                            //}
                         }
                     });
                 }
@@ -91,15 +89,17 @@ namespace Wallet.BlockchainAPI
             return result;
         }
 
-        public static List<CustomTransaction> GetTransactons(string account, int searchInLastBlocksCount)
+        public async Task<HexBigInteger> GetLastAvailableBlockNumber()
+        {
+            return await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+        }
+
+        public async Task<List<CustomTransaction>> GetTransactions(string account, int blockNumber)
         {
             var result = new List<CustomTransaction>();
-            var numb = web3.Eth.Blocks.GetBlockNumber.SendRequestAsync().Result;
-            Console.WriteLine($"Last block is {numb.Value}");
-            for (var i = numb.Value - searchInLastBlocksCount; i <= numb.Value; i++)
+            try
             {
-                var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(i))
-                    .Result;
+                var block = await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
                 if (block != null && block.Transactions != null)
                 {
                     block.Transactions.ToList().ForEach(x =>
@@ -110,49 +110,26 @@ namespace Wallet.BlockchainAPI
                         {
                             CustomTransaction t = new CustomTransaction()
                             {
+                                Input = x.Input,
+                                IsSuccess = false,
                                 TransactionHash = x.TransactionHash,
                                 From = x.From,
                                 To = x.To,
-                                Date = DateTime.Now.ToUniversalTime() -
-                                       new System.DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
-                                           (long) (block.Timestamp.Value))
+                                What = "ETH",
+                                Value = x.Value,
+                                Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                           (long)(block.Timestamp.Value)),
+                                ContractAddress = isSender ? x.To : x.From
                             };
-
-                            if (x.Value.Value == 0)
-                            {
-                                t.TransferInfo = decodeInput(x.Input, isSender ? x.To : x.From);
-                            }
-                            else
-                            {
-                                t.DecimalValue = Web3.Convert.FromWei(x.Value.Value, 18);
-                            }
-
                             result.Add(t);
                         }
                     });
                 }
             }
-
-            return result;
-        }
-
-        private static Model.TransactionInput decodeInput(string input, string contractAddress)
-        {
-            HexBigIntegerBigEndianConvertor a = new HexBigIntegerBigEndianConvertor();
-            //cut off method name 
-            input = input.Substring(10);
-            //get value         
-            var value = a.ConvertFromHex(input.Substring(input.Length / 2));
-            // get address
-            var address = a.ConvertToHex(a.ConvertFromHex("0x" + input.Substring(0, input.Length / 2)));
-            var token = tokenContracts.FirstOrDefault(t =>
-                string.Equals(t.Address, contractAddress, StringComparison.CurrentCultureIgnoreCase));
-            return new Model.TransactionInput()
+            catch (Exception e)
             {
-                To = address,
-                Value = token != null ? Web3.Convert.FromWei(value, token.DecimalPlaces) : (decimal) value,
-                What = token?.Name ?? "Unknown"
-            };
+            }
+            return result;
         }
 
         /// <summary>
@@ -173,16 +150,30 @@ namespace Wallet.BlockchainAPI
         /// 
         public async Task<ERC20TokenViewModel> BalanceToken(ERC20Token token, string account)
         {
-            var cont = web3.Eth.GetContract(abi, token.Address);
-            var eth = cont.GetFunction("balanceOf");
-            var balance = await eth.CallAsync<BigInteger>(account);
-            return new ERC20TokenViewModel()
+            try
             {
-                Address = token.Address,
-                Balance = Web3.Convert.FromWei(balance, token.DecimalPlaces),
-                DecimalPlaces = token.DecimalPlaces,
-                Symbol = token.Symbol
-            };
+                var cont = web3.Eth.GetContract(abi, token.Address);
+                var eth = cont.GetFunction("balanceOf");
+                var balance = await eth.CallAsync<BigInteger>(account);
+                return new ERC20TokenViewModel()
+                {
+                    Address = token.Address,
+                    Balance = Web3.Convert.FromWei(balance, token.DecimalPlaces),
+                    DecimalPlaces = token.DecimalPlaces,
+                    Symbol = token.Symbol
+                };
+            }
+            catch (Exception e)
+            {
+                return new ERC20TokenViewModel()
+                {
+                    Address = token.Address,
+                    Balance = 0,
+                    DecimalPlaces = token.DecimalPlaces,
+                    Symbol = token.Symbol
+                };
+            }
+
         }
     }
 }

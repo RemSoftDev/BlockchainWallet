@@ -15,6 +15,10 @@ namespace Wallet.BlockchainAPI.Model
 
         public decimal DecimalValue { get; set; }
 
-        public TimeSpan Date { get; set; }
+        public DateTime Date { get; set; }
+
+        public string What { get; set; }
+
+        public string ContractAddress { get; set; }
     }
 }
