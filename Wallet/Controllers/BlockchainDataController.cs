@@ -13,6 +13,7 @@ using Wallet.BlockchainAPI;
 using Wallet.BlockchainAPI.Model;
 using Wallet.Models;
 using Wallet.ViewModels;
+using Nethereum.ABI;
 
 namespace Wallet.Controllers
 {
@@ -38,9 +39,16 @@ namespace Wallet.Controllers
             List<ERC20TokenViewModel> tokens = new List<ERC20TokenViewModel>();
 
             foreach (var token in dbContext.Erc20Tokens)
-            {
-                Task<ERC20TokenViewModel> task = _explorer.BalanceToken(token, accountAddress);
-                listtasks.Add(task);
+            { 
+                if (token.Address != accountAddress)//finish with module 5, check ico
+                {
+                    Task<ERC20TokenViewModel> task = _explorer.BalanceToken(token, accountAddress);
+                    listtasks.Add(task);
+                }
+                else
+                {
+                    break;
+                }
             }
 
             model.Balance = Web3.Convert.FromWei(await getBalance, 18);
@@ -92,8 +100,12 @@ namespace Wallet.Controllers
 
         private TransactionInput decodeInput(string input, string contractAddress)
         {
+
+
+            
+
             HexBigIntegerBigEndianConvertor a = new HexBigIntegerBigEndianConvertor();
-            //cut off method name 
+            //cut off method name (first 4 byte)
             input = input.Substring(10);
             //get value         
             var value = a.ConvertFromHex(input.Substring(input.Length / 2));
