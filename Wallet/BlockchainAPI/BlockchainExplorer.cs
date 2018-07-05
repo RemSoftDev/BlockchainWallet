@@ -78,7 +78,7 @@ namespace Wallet.BlockchainAPI
                 var block = await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
                 if (block != null && block.Transactions != null)
                 {
-                    block.Transactions.ToList().ForEach(x =>
+                    block.Transactions.ToList().ForEach(async x =>
                     {
                         bool isSender = string.Equals(x.From, account, StringComparison.CurrentCultureIgnoreCase);
                         if (string.Equals(x.To, account, StringComparison.CurrentCultureIgnoreCase) ||
@@ -87,7 +87,6 @@ namespace Wallet.BlockchainAPI
                             CustomTransaction t = new CustomTransaction()
                             {
                                 Input = x.Input,
-                                IsSuccess = true,
                                 TransactionHash = x.TransactionHash,
                                 From = x.From,
                                 To = x.To,
@@ -97,6 +96,16 @@ namespace Wallet.BlockchainAPI
                                            (long)(block.Timestamp.Value)),
                                 ContractAddress = isSender ? x.To : x.From
                             };
+                            var status = await web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(x.TransactionHash);
+                            bool isSuccess = true;
+                            if (status != null)
+                            {
+                                if (status.Status.Value == 0)
+                                {
+                                    isSuccess = false;
+                                }
+                            }
+                            t.IsSuccess = isSuccess;
                             result.Add(t);
                         }
                     });
