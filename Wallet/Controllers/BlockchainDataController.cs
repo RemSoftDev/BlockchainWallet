@@ -80,7 +80,7 @@ namespace Wallet.Controllers
             {
                 result.AddRange(listtask.Result);
             }
-
+            
             result.ForEach(t =>
             {
                 if (t.Value.Value == 0)
@@ -95,15 +95,11 @@ namespace Wallet.Controllers
                     t.DecimalValue = Web3.Convert.FromWei(t.Value.Value, 18);
                 }
             });
-            return result;
+            return result.OrderByDescending(t=>t.Date).ToList();
         }
 
         private TransactionInput decodeInput(string input, string contractAddress)
         {
-
-
-            
-
             HexBigIntegerBigEndianConvertor a = new HexBigIntegerBigEndianConvertor();
             //cut off method name (first 4 byte)
             input = input.Substring(10);

@@ -1,9 +1,18 @@
-<div *ngIf="!infoRequesting" class="row">
+<div *ngIf="showNotWind" class="notificationWindow">
+  <div class="closeDiv"><span (click)="closeNotificationWindow()" class="glyphicon glyphicon-remove"></span></div>
+  <div *ngIf="isLoged">
+    TODO
+  </div>
+  <div *ngIf="!isLoged">
+    Please login
+  </div>
+</div>
+<div *ngIf="!infoRequesting||!transactionRequesting" class="row">
   <app-spinner></app-spinner>
 </div>
 <div *ngIf="infoRequesting" class="row">
   <div class="col-sm-4">
-    <h4>Wallet Address <span class="addStar glyphicon glyphicon-star-empty"></span></h4>
+    <h4>Wallet Address <span (click)="showNotificationWindow()" class="addStar glyphicon glyphicon-star-empty"></span></h4>
     <p>{{searchString}}</p>
   </div>
 
@@ -23,7 +32,7 @@
   </div>
 </div>
 
-<div class="row tableRow">
+<div *ngIf="transactionRequesting" class="row tableRow">
   <table class="table table-striped">
     <thead>
     <tr>

@@ -8,17 +8,20 @@ import { CookieService } from 'angular2-cookie/services/cookies.service';
 
 import { JwtInterceptor } from './jwt.interceptor';
 import { AppComponent } from './app.component';
-import { NavMenuComponent } from './nav-menu/nav-menu.component';
-import { HomeComponent } from './home/home.component';
-import { FooterMenuComponent } from './footer-menu/footer-menu.component';
-import { LoginComponent } from './Login/login.component';
-import { SigninComponent } from './sign-in/signin.component';
+import { NavMenuComponent } from './components/nav-menu/nav-menu.component';
+import { HomeComponent } from './components/home/home.component';
+import { FooterMenuComponent } from './components/footer-menu/footer-menu.component';
+import { LoginComponent } from './components/Login/login.component';
+import { SigninComponent } from './components/sign-in/signin.component';
 import { AuthService } from './shared/services/auth.service';
 import { BlockchainService } from './shared/services/blockchain.service';
-import { WalletPageComponent } from './wallet-page/wallet-page.component';
-import { SpinnerComponent } from './spinner/spinner.component';
-import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { WalletPageComponent } from './components/wallet-page/wallet-page.component';
+import { SpinnerComponent } from './components/spinner/spinner.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { AboutComponent } from './components/about/about.component';
+import { ContactComponent } from './components/contact/contact.component';
+import { WatchlistComponent } from './components/watchlist/watchlist.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +34,10 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
     WalletPageComponent,
     SpinnerComponent,
     ForgotPasswordComponent,
-    ResetPasswordComponent
+    ResetPasswordComponent,
+    AboutComponent,
+    ContactComponent,
+    WatchlistComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -46,6 +52,9 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
       { path: 'Account/ResetPassword', component: ResetPasswordComponent },
       { path: 'api/Account/ResetPassword', component: ResetPasswordComponent },
       { path: 'log-in', component: LoginComponent },
+      { path: 'about', component: AboutComponent },
+      { path: 'contact', component: ContactComponent },
+      { path: 'watchlist', component: WatchlistComponent }
     ])
   ],
   providers: [

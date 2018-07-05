@@ -6,11 +6,11 @@
 
       <div class="col-md-4 col-md-offset-4">
         <h5>Blockchain Wallets Analytics</h5>
-        <a [routerLink]='["/log-in"]'>
+        <a [routerLink]='["/about"]'>
           About
         </a>
         &nbsp;
-        <a [routerLink]='["/log-in"]'>
+        <a [routerLink]='["/contact"]'>
           Contact
         </a>
       </div>
@@ -19,10 +19,10 @@
         <h5><dfn>Tips</dfn></h5>
         <ul class="list-unstyled">
           <li>
-            ETH <a [routerLink]='["/log-in"]'>{{ ethAddress }}</a>
+            <p>ETH : {{ ethAddress }}</p>
           </li>
           <li>
-            BTC <a [routerLink]='["/log-in"]'>{{ btcAddress }}</a>
+            <p>BTC : {{ btcAddress }}</p>
           </li>
         </ul>
       </div>

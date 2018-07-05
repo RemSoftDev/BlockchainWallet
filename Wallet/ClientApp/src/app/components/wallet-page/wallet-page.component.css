@@ -60,3 +60,18 @@ li:hover {
   background-color: lightblue;
   cursor: pointer
 }
+
+.notificationWindow {
+  background-color: white;
+  margin-top: 7%;
+  margin-left: 30%;
+  width: 400px;
+  height: 300px;
+  border: 1px solid black;
+  position: absolute
+}
+
+.closeDiv {
+  float: right;
+  cursor: pointer;
+}
