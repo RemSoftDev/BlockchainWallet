@@ -14,6 +14,7 @@ using Wallet.BlockchainAPI.Model;
 using Wallet.Models;
 using Wallet.ViewModels;
 using Nethereum.ABI;
+using Wallet.Helpers;
 
 namespace Wallet.Controllers
 {
@@ -30,7 +31,7 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<WalletInfoViewModel> GetWalletInfo(string accountAddress)
+        public async Task<IActionResult> GetWalletInfo(string accountAddress)
         {
             WalletInfoViewModel model = new WalletInfoViewModel();
             Task<HexBigInteger> getBalance = _explorer.BalanceETH(accountAddress);
@@ -51,54 +52,69 @@ namespace Wallet.Controllers
                 }
             }
 
-            model.Balance = Web3.Convert.FromWei(await getBalance, 18);
-
-            await Task.WhenAll(listtasks.ToArray());
-            foreach (var listtask in listtasks)
+            try
             {
-                tokens.Add(listtask.Result);
+                model.Balance = Web3.Convert.FromWei(await getBalance, 18);
+
+                await Task.WhenAll(listtasks.ToArray());
+                foreach (var listtask in listtasks)
+                {
+                    tokens.Add(listtask.Result);
+                }
+                model.Tokens = tokens.Where(x => x.Balance != 0).ToList();
             }
-            model.Tokens = tokens.Where(x => x.Balance != 0).ToList();
-            return model;
+            catch (Exception e)
+            {
+                return BadRequest(HttpErrorHandler.AddError("Failure", e.Message, ModelState));
+            }
+
+            return new OkObjectResult(model);
         }
 
         [HttpGet("[action]")]
-        public async Task<List<CustomTransaction>> GetTransactions(string accountAddress)
+        public async Task<IActionResult> GetTransactions(string accountAddress)
         {
-            var result = new List<CustomTransaction>();
-            var lastblockNumber = await _explorer.GetLastAvailableBlockNumber();
-            var listtasks = new List<Task<List<CustomTransaction>>>();
-            for (int i = (int)lastblockNumber.Value - 50; i <= lastblockNumber.Value; i++)
+            try
             {
-                Task<List<CustomTransaction>> task = _explorer.GetTransactions(accountAddress,i);
-                listtasks.Add(task);
-            }
-
-            await Task.WhenAll(listtasks.ToArray());
-
-            foreach (var listtask in listtasks)
-            {
-                result.AddRange(listtask.Result);
-            }
-            
-            result.ForEach(t =>
-            {
-                if (t.Value.Value == 0)
+                var result = new List<CustomTransaction>();
+                var lastblockNumber = await _explorer.GetLastAvailableBlockNumber();
+                var listtasks = new List<Task<List<CustomTransaction>>>();
+                for (int i = (int)lastblockNumber.Value - 50; i <= lastblockNumber.Value; i++)
                 {
-                    var decodedInput = decodeInput(t.Input, t.ContractAddress);
-                    t.To = decodedInput.To;
-                    t.What = decodedInput.What;
-                    t.DecimalValue = decodedInput.Value;
+                    Task<List<CustomTransaction>> task = _explorer.GetTransactions(accountAddress, i);
+                    listtasks.Add(task);
                 }
-                else
+
+                await Task.WhenAll(listtasks.ToArray());
+
+                foreach (var listtask in listtasks)
                 {
-                    t.DecimalValue = Web3.Convert.FromWei(t.Value.Value, 18);
+                    result.AddRange(listtask.Result);
                 }
-            });
-            return result.OrderByDescending(t=>t.Date).ToList();
+
+                result.ForEach(t =>
+                {
+                    if (t.Value.Value == 0)
+                    {
+                        var decodedInput = DecodeInput(t.Input, t.ContractAddress);
+                        t.To = decodedInput.To;
+                        t.What = decodedInput.What;
+                        t.DecimalValue = decodedInput.Value;
+                    }
+                    else
+                    {
+                        t.DecimalValue = Web3.Convert.FromWei(t.Value.Value, 18);
+                    }
+                });
+                return new OkObjectResult(result.OrderByDescending(t => t.Date).ToList());
+            }
+            catch (Exception e)
+            {
+                return BadRequest(HttpErrorHandler.AddError("Failure", e.Message, ModelState));
+            }
         }
 
-        private TransactionInput decodeInput(string input, string contractAddress)
+        private TransactionInput DecodeInput(string input, string contractAddress)
         {
             HexBigIntegerBigEndianConvertor a = new HexBigIntegerBigEndianConvertor();
             //cut off method name (first 4 byte)
@@ -117,6 +133,5 @@ namespace Wallet.Controllers
                 What = token?.Symbol ?? "Unknown"
             };
         }
-
     }
 }
