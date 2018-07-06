@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { ReCaptchaModule } from 'angular2-recaptcha';
-import { CookieService } from 'angular2-cookie/services/cookies.service';
+import { CookieModule } from 'ngx-cookie';
 
 import { JwtInterceptor } from './jwt.interceptor';
 import { AppComponent } from './app.component';
@@ -40,6 +40,7 @@ import { WatchlistComponent } from './components/watchlist/watchlist.component';
     WatchlistComponent
   ],
   imports: [
+    CookieModule.forRoot(),
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     ReCaptchaModule,
@@ -58,7 +59,6 @@ import { WatchlistComponent } from './components/watchlist/watchlist.component';
     ])
   ],
   providers: [
-    CookieService,
     BlockchainService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,
