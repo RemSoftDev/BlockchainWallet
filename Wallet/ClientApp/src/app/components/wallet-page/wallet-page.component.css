@@ -62,16 +62,40 @@ li:hover {
 }
 
 .notificationWindow {
+  z-index: 10;
   background-color: white;
   margin-top: 7%;
   margin-left: 30%;
   width: 400px;
-  height: 300px;
+  height:300px;
   border: 1px solid black;
-  position: absolute
+  position: absolute;
+  border-radius: 10px;
+
 }
 
 .closeDiv {
+  margin-top: 5px;
+  margin-right: -10px;
+  font-size: 17px;
   float: right;
   cursor: pointer;
+}
+
+.notificationInput {
+  margin-bottom: 10px !important;
+  font-size: 20px;
+}
+
+.notificationSmallInput {
+  width: 50px;
+}
+
+.notificationButton {
+  margin-top: 10px;
+  margin-left: 120px;
+}
+
+.dropdownInputField {
+  width: 30px !important;
 }
