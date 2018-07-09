@@ -18,7 +18,8 @@ namespace Wallet.Controllers
         private readonly IJwtFactory _jwtFactory;
         private readonly JWTSettings _jwtOptions;
 
-        public AccountController(UserManager<User> userManager, IJwtFactory jwtFactory, IOptions<JWTSettings> jwtOptions)
+        public AccountController(UserManager<User> userManager, IJwtFactory jwtFactory,
+            IOptions<JWTSettings> jwtOptions)
         {
             _userManager = userManager;
             _jwtFactory = jwtFactory;
@@ -26,20 +27,28 @@ namespace Wallet.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> Register([FromBody]RegistrationViewModel model)
+        public async Task<IActionResult> Register([FromBody] RegistrationViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            User user = new User() { UserName = model.Email, Email = model.Email };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-                return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
+            try
+            {
+                User user = new User() {UserName = model.Email, Email = model.Email};
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                    return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
 
-            string confirmUrl =
-                GetEmailConfirmationUrl(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
+                string confirmUrl =
+                    GetEmailConfirmationUrl(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
 
-            await EmailHelper.SendEmailAsync(user.Email, "Email confirmation", EmailHelper.GetEmailConfirmationMessage(confirmUrl));
+                await EmailHelper.SendEmailAsync(user.Email, "Email confirmation",
+                    EmailHelper.GetEmailConfirmationMessage(confirmUrl));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"En error occurred :{e.Message}");
+            }
 
             return new OkResult();
         }
@@ -50,18 +59,26 @@ namespace Wallet.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (! await _userManager.IsEmailConfirmedAsync(await _userManager.FindByNameAsync(model.Email)))
+            try
             {
-                return BadRequest(HttpErrorHandler.AddError("Failure", "Confirm your email", ModelState));
+                if (!await _userManager.IsEmailConfirmedAsync(await _userManager.FindByNameAsync(model.Email)))
+                {
+                    return BadRequest(HttpErrorHandler.AddError("Failure", "Confirm your email", ModelState));
+                }
+
+                var result = await GetClaimsIdentity(model.Email, model.Password);
+                if (result == null)
+                    return BadRequest(HttpErrorHandler.AddError("Failure", "Invalid username or password.",
+                        ModelState));
+                var jwt = await Tokens.GenerateJwt(result, _jwtFactory, model.Email, _jwtOptions,
+                    new JsonSerializerSettings {Formatting = Formatting.Indented});
+
+                return new OkObjectResult(jwt);
             }
-
-            var result = await GetClaimsIdentity(model.Email, model.Password);
-            if (result == null)
-                return BadRequest(HttpErrorHandler.AddError("Failure", "Invalid username or password.", ModelState));
-            var jwt = await Tokens.GenerateJwt(result, _jwtFactory, model.Email, _jwtOptions,
-                new JsonSerializerSettings {Formatting = Formatting.Indented});
-
-            return new OkObjectResult(jwt);
+            catch (Exception e)
+            {
+                return StatusCode(500, $"En error occurred :{e.Message}");
+            }
         }
 
         [HttpPost("[action]")]
@@ -70,17 +87,25 @@ namespace Wallet.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.FindByNameAsync(model.Email);
-            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            try
             {
-                return BadRequest(HttpErrorHandler.AddError("Failure", "Confirm your email", ModelState));
+                var user = await _userManager.FindByNameAsync(model.Email);
+                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+                {
+                    return BadRequest(HttpErrorHandler.AddError("Failure", "Confirm your email", ModelState));
+                }
+
+                string resetUrl = GetPasswordResetUrl(user, await _userManager.GeneratePasswordResetTokenAsync(user));
+
+                await EmailHelper.SendEmailAsync(user.Email, "Reset Password",
+                    EmailHelper.GetResetPasswordMessage(resetUrl));
+
+                return new OkResult();
             }
-
-            string resetUrl = GetPasswordResetUrl(user, await _userManager.GeneratePasswordResetTokenAsync(user));
-
-            await EmailHelper.SendEmailAsync(user.Email, "Reset Password", EmailHelper.GetResetPasswordMessage(resetUrl));
-
-            return new OkResult();
+            catch (Exception e)
+            {
+                return StatusCode(500, $"En error occurred :{e.Message}");
+            }
         }
 
         [HttpPost("[action]")]
@@ -88,17 +113,23 @@ namespace Wallet.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            
-            var user = await _userManager.FindByNameAsync(model.Email);
-            if (user == null)
-                return BadRequest(HttpErrorHandler.AddError("Failure", "User not found", ModelState));
 
-            var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
-            if (!result.Succeeded)
-                return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
-            
-            return new OkResult();
-            
+            try
+            {
+                var user = await _userManager.FindByNameAsync(model.Email);
+                if (user == null)
+                    return BadRequest(HttpErrorHandler.AddError("Failure", "User not found", ModelState));
+
+                var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+                if (!result.Succeeded)
+                    return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
+
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"En error occurred :{e.Message}");
+            }
         }
 
         private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)
@@ -142,7 +173,8 @@ namespace Wallet.Controllers
 
         private string GetPasswordResetUrl(User user, string code)
         {
-            return Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+            return Url.Action("ResetPassword", "Account", new {userId = user.Id, code = code},
+                protocol: HttpContext.Request.Scheme);
         }
 
         private string GetEmailConfirmationUrl(User user, string code)
@@ -150,7 +182,7 @@ namespace Wallet.Controllers
             return Url.Action(
                 "ConfirmEmail",
                 "Account",
-                new { userId = user.Id, code = code },
+                new {userId = user.Id, code = code},
                 protocol: HttpContext.Request.Scheme);
         }
     }

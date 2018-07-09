@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Wallet.BlockchainAPI;
 using Wallet.BlockchainAPI.Model;
 using Wallet.Models;
 
@@ -29,15 +30,9 @@ namespace Wallet
         {
             if (context.Erc20Tokens.Any())
                 return;
-            var tokens = getTokens();
+            var tokens = ERC20TokensData.GetTokens();
             context.Erc20Tokens.AddRange(tokens);
             await context.SaveChangesAsync();
-        }
-
-        public static List<ERC20Token> getTokens()
-        {
-            string ethTokens = System.IO.File.ReadAllText("./BlockchainAPI/ethTokens.json");
-            return JsonConvert.DeserializeObject<List<ERC20Token>>(ethTokens);
         }
     }
 }

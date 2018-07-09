@@ -10,7 +10,7 @@ namespace Wallet.Models
 
         public string Symbol { get; set; }
 
-        [JsonProperty(PropertyName = "decimal")]
+        [JsonProperty(PropertyName = "DecimalPlaces")]
         public int DecimalPlaces { get; set; }
 
         public string Type { get; set; }
