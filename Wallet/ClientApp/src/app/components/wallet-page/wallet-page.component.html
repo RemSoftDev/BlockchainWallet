@@ -84,6 +84,9 @@
 
 </div>
 
+<div *ngIf="errors" class="alert alert-danger" role="alert">
+  Opps, some error occurred. Try again
+</div>
 
 <div *ngIf="!infoRequesting||!transactionRequesting" class="row">
   <app-spinner></app-spinner>
@@ -130,9 +133,24 @@
     <tbody>
     <tr *ngFor="let trans of transactions">
       <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
-      <td title="{{trans.from}}">{{trans.from | slice : 0:20}}...</td>
-      <td title="{{trans.to}}">{{trans.to | slice : 0:20}}...</td>
-      <td title="{{trans.what}}">{{trans.what}}</td>
+      <td title="{{trans.from}}">
+        <a [routerLink]='["/search",trans.from]'>
+        {{trans.from | slice : 0:20}}...
+        </a>
+      </td>
+      <td title="{{trans.to}}">
+        <a [routerLink]='["/search",trans.to]'>
+          {{trans.to | slice : 0:20}}...
+        </a>       
+      </td>
+      <td *ngIf="trans.what=='ETH'" title="{{trans.what}}">
+        {{trans.what}}
+      </td>
+      <td *ngIf="trans.what!='ETH'" title="{{trans.what}}">
+        <a  [routerLink]='["/search",trans.contractAddress]'>
+          {{trans.what}}
+        </a> 
+      </td>
       <td title="{{trans.decimalValue}}">{{trans.decimalValue | number : '1.2-5'}}</td>
       <td title="{{trans.date }}">{{trans.date | date : 'short' }}</td>
       <td title="{{trans.isSuccess}}">{{trans.isSuccess}}</td>

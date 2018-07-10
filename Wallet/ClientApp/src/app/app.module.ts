@@ -47,7 +47,7 @@ import { WatchlistComponent } from './components/watchlist/watchlist.component';
     FormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'search/:searchString', component: WalletPageComponent},
+      { path: 'search/:searchString', component: WalletPageComponent, runGuardsAndResolvers: 'always'},
       { path: 'sign-in', component: SigninComponent },
       { path: 'forgot-password', component: ForgotPasswordComponent },
       { path: 'Account/ResetPassword', component: ResetPasswordComponent },
@@ -56,7 +56,8 @@ import { WatchlistComponent } from './components/watchlist/watchlist.component';
       { path: 'about', component: AboutComponent },
       { path: 'contact', component: ContactComponent },
       { path: 'watchlist', component: WatchlistComponent }
-    ])
+    ],
+      { onSameUrlNavigation: 'reload' })
   ],
   providers: [
     BlockchainService,

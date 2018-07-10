@@ -100,6 +100,7 @@ namespace Wallet.Controllers
                         t.To = decodedInput.To;
                         t.What = decodedInput.What;
                         t.DecimalValue = decodedInput.Value;
+                        t.ContractAddress = decodedInput.ContractAddress;
                     }
                     else
                     {
@@ -130,7 +131,8 @@ namespace Wallet.Controllers
             {
                 To = address,
                 Value = token != null ? Web3.Convert.FromWei(value, token.DecimalPlaces) : (decimal)value,
-                What = token?.Symbol ?? "Unknown"
+                What = token?.Symbol ?? "Unknown",
+                ContractAddress = token?.Address ?? "Unknown"
             };
         }
     }

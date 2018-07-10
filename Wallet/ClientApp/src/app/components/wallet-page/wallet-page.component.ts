@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, ActivatedRoute, NavigationEnd  } from '@angular/router';
 import { BlockchainService } from '../../shared/services/blockchain.service';
 import { WalletInfo } from "../../shared/models/walletInfo.interface";
 import { Transaction } from "../../shared/models/transaction.interface";
@@ -10,7 +10,7 @@ import { Transaction } from "../../shared/models/transaction.interface";
   templateUrl: './wallet-page.component.html',
   styleUrls: ['./wallet-page.component.css']
 })
-export class WalletPageComponent implements OnInit {
+export class WalletPageComponent implements OnInit, OnDestroy {
 
   isTokenSent: boolean = false;
   isNumberOfTokenSent: boolean = false;
@@ -23,8 +23,46 @@ export class WalletPageComponent implements OnInit {
   transactionRequesting: boolean;
   walletInfo: WalletInfo;
   transactions: Transaction[];
+  navigationSubscription;
+  errors;
 
-  constructor(private route: ActivatedRoute, private BCservice: BlockchainService) {}
+  constructor(private router: Router, private activatedRoute: ActivatedRoute, private BCservice: BlockchainService) {
+    this.navigationSubscription = this.router.events.subscribe((e: any) => {
+      if (e instanceof NavigationEnd) {
+        this.initialise();
+      }
+    });
+  }
+
+  initialise() {
+    this.infoRequesting = false;
+    this.errors = false;
+    this.transactionRequesting = false;
+
+    this.searchString = this.activatedRoute.snapshot.paramMap.get('searchString');
+
+    this.BCservice.getTransactions(this.searchString).subscribe(trans => {
+        this.transactionRequesting = true;
+        this.transactions = trans;
+      },
+      error => { console.log(error); this.errors = true});
+
+    this.BCservice.getWalletInfo(this.searchString).subscribe(info => {
+        this.infoRequesting = true;
+        this.walletInfo = info;
+      },
+      error => { console.log(error); this.errors = true});
+  }
+
+  ngOnInit() {
+    this.initialise();
+  }
+
+  ngOnDestroy() {
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
+    }
+  }
 
   setNotification(withNotification,
     whenTokenSent,
@@ -51,24 +89,6 @@ export class WalletPageComponent implements OnInit {
     console.log(whenTokenReceivedValue.value);
     console.log(whenNumberOfTokenReceivedValueNumber.value);
     console.log(whenNumberOfTokenReceivedValueToken.value);
-
-  }
-
-  ngOnInit() {
-
-    this.searchString = this.route.snapshot.paramMap.get('searchString');
-
-    this.BCservice.getTransactions(this.searchString).subscribe(trans => {
-        this.transactionRequesting = true;
-        this.transactions = trans;
-      },
-      error => console.log(error));
-
-    this.BCservice.getWalletInfo(this.searchString).subscribe(info => {
-        this.infoRequesting = true;
-        this.walletInfo = info;
-      },
-      error => console.log(error));
   }
 
   whenNumberOfTokenReceivedFunc() {

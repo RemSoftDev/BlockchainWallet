@@ -5,4 +5,5 @@ export interface Transaction {
   hash: string;
   isSucceess: boolean;
   to : string;
+  contractAddress: string;
 }
