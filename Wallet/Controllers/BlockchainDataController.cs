@@ -161,5 +161,36 @@ namespace Wallet.Controllers
                 };
             }
         }
+
+
+        //public async Task<List<UserWatchlist>> GetWatchList(User user)
+        //{
+        //    return dbContext.UserWatchlist.ToListAsync<UserWatchlist>;
+
+        //}
+        public void  DeleteFromWatchlist(int idwatchlist )
+        {
+            UserWatchlist wl = new UserWatchlist
+            {
+                Id = idwatchlist
+            };
+
+            dbContext.UserWatchlist.Attach(wl);
+            dbContext.UserWatchlist.Remove(wl);
+
+            dbContext.SaveChanges();
+
+        }
+        //public async Task<IActionResult> AddToWatchlist(string accountAddress)
+        //{
+
+        //}
+
+
+
+
+
+
+
     }
 }
