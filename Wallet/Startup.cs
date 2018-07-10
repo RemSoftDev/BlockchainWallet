@@ -34,6 +34,7 @@ namespace Wallet
         {
             services.AddDbContext<WalletDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("ProdConn")));
+                //options.UseSqlServer(Configuration.GetConnectionString("TestConn")));
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
