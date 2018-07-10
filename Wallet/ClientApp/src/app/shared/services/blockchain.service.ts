@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { WalletInfo } from '../models/walletInfo.interface';
-import { Transaction } from '../models/transaction.interface';
+import { TransactionsModel } from '../models/transactionsModel.interface';
 import { BaseService } from "./base.service";
 
 @Injectable()
@@ -25,7 +25,14 @@ export class BlockchainService extends BaseService {
   getTransactions(accountAddress: string) {
     const params = new HttpParams().set('accountAddress', accountAddress);
     return this.http
-      .get<Transaction[]>(this.hostUrl + this.baseUrl + '/GetTransactions', { params })
+      .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetTransactions', { params })
+      .catch(this.handleError);
+  }
+
+  getTransactionsByNumber(blockNumber,accountAddress: string) {
+    const params = new HttpParams().set("blockNumber", blockNumber).set('accountAddress', accountAddress);
+    return this.http
+      .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetTransactions', { params })
       .catch(this.handleError);
   }
 }

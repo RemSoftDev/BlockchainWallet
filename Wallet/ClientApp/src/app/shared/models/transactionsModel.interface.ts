@@ -1,4 +1,9 @@
-export interface Transaction {
+export interface TransactionsModel {
+  transactions: Transaction[];
+  blockNumber: number;
+}
+
+interface Transaction {
   date: Date;
   decimalValue: number;
   from: string;

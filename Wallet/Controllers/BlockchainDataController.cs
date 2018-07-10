@@ -72,21 +72,29 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTransactions(string accountAddress)
+        public async Task<IActionResult> GetTransactions(int? blockNumber, string accountAddress)
         {
             try
             {
-                var result = new List<CustomTransaction>();
-                var lastblockNumber = await _explorer.GetLastAvailableBlockNumber();
+                int searchBlockNumber;
+                if (blockNumber.HasValue)
+                {
+                    searchBlockNumber = blockNumber.Value;
+                }
+                else
+                {
+                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
+                }
+
                 var listtasks = new List<Task<List<CustomTransaction>>>();
-                for (int i = (int)lastblockNumber.Value - 50; i <= lastblockNumber.Value; i++)
+                for (int i = searchBlockNumber - 50; i <= searchBlockNumber; i++)
                 {
                     Task<List<CustomTransaction>> task = _explorer.GetTransactions(accountAddress, i);
                     listtasks.Add(task);
                 }
 
                 await Task.WhenAll(listtasks.ToArray());
-
+                var result = new List<CustomTransaction>();
                 foreach (var listtask in listtasks)
                 {
                     result.AddRange(listtask.Result);
@@ -97,17 +105,22 @@ namespace Wallet.Controllers
                     if (t.Value.Value == 0)
                     {
                         var decodedInput = DecodeInput(t.Input, t.ContractAddress);
-                        t.To = decodedInput.To;
-                        t.What = decodedInput.What;
-                        t.DecimalValue = decodedInput.Value;
-                        t.ContractAddress = decodedInput.ContractAddress;
+                        if (decodedInput.ContractAddress != string.Empty)
+                        {
+                            t.To = decodedInput.To;
+                            t.What = decodedInput.What;
+                            t.DecimalValue = decodedInput.Value;
+                            t.ContractAddress = decodedInput.ContractAddress;
+                        }
                     }
                     else
                     {
                         t.DecimalValue = Web3.Convert.FromWei(t.Value.Value, 18);
                     }
                 });
-                return new OkObjectResult(result.OrderByDescending(t => t.Date).ToList());
+                return new OkObjectResult(
+                    new TransactionsViewModel() { BlockNumber = searchBlockNumber, Transactions = result.OrderByDescending(t => t.Date).ToList() }
+                    );
             }
             catch (Exception e)
             {
@@ -117,23 +130,36 @@ namespace Wallet.Controllers
 
         private TransactionInput DecodeInput(string input, string contractAddress)
         {
-            HexBigIntegerBigEndianConvertor a = new HexBigIntegerBigEndianConvertor();
-            //cut off method name (first 4 byte)
-            input = input.Substring(10);
-            //get value         
-            var value = a.ConvertFromHex(input.Substring(input.Length / 2));
-            //get address
-            var address = a.ConvertToHex(a.ConvertFromHex("0x" + input.Substring(0, input.Length / 2)));
-
-            var token = dbContext.Erc20Tokens.FirstOrDefault(t =>
-                string.Equals(t.Address, contractAddress, StringComparison.CurrentCultureIgnoreCase));
-            return new TransactionInput()
+            try
             {
-                To = address,
-                Value = token != null ? Web3.Convert.FromWei(value, token.DecimalPlaces) : (decimal)value,
-                What = token?.Symbol ?? "Unknown",
-                ContractAddress = token?.Address ?? "Unknown"
-            };
+                HexBigIntegerBigEndianConvertor a = new HexBigIntegerBigEndianConvertor();
+                //cut off method name (first 4 byte)
+                input = input.Substring(10);
+                //get value         
+                var value = a.ConvertFromHex(input.Substring(input.Length / 2));
+                //get address
+                var address = a.ConvertToHex(a.ConvertFromHex("0x" + input.Substring(0, input.Length / 2)));
+
+                var token = dbContext.Erc20Tokens.FirstOrDefault(t =>
+                    string.Equals(t.Address, contractAddress, StringComparison.CurrentCultureIgnoreCase));
+                return new TransactionInput()
+                {
+                    To = address,
+                    Value = token != null ? Web3.Convert.FromWei(value, token.DecimalPlaces) : (decimal)value,
+                    What = token?.Symbol ?? "Unknown",
+                    ContractAddress = token?.Address ?? "Unknown"
+                };
+            }
+            catch (Exception e)
+            {
+                return new TransactionInput()
+                {
+                    To = string.Empty,
+                    Value = default(decimal),
+                    What = string.Empty,
+                    ContractAddress = string.Empty
+                };
+            }
         }
     }
 }

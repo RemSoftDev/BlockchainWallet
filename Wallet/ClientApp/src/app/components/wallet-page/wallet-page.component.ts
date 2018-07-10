@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd  } from '@angular/router';
 import { BlockchainService } from '../../shared/services/blockchain.service';
 import { WalletInfo } from "../../shared/models/walletInfo.interface";
-import { Transaction } from "../../shared/models/transaction.interface";
+import { TransactionsModel } from "../../shared/models/transactionsModel.interface";
 
 
 @Component({
@@ -22,7 +22,7 @@ export class WalletPageComponent implements OnInit, OnDestroy {
   infoRequesting: boolean;
   transactionRequesting: boolean;
   walletInfo: WalletInfo;
-  transactions: Transaction[];
+  transactionsModel: TransactionsModel;
   navigationSubscription;
   errors;
 
@@ -41,9 +41,9 @@ export class WalletPageComponent implements OnInit, OnDestroy {
 
     this.searchString = this.activatedRoute.snapshot.paramMap.get('searchString');
 
-    this.BCservice.getTransactions(this.searchString).subscribe(trans => {
+    this.BCservice.getTransactions(this.searchString).subscribe(model => {
         this.transactionRequesting = true;
-        this.transactions = trans;
+        this.transactionsModel = model;
       },
       error => { console.log(error); this.errors = true});
 
@@ -54,8 +54,16 @@ export class WalletPageComponent implements OnInit, OnDestroy {
       error => { console.log(error); this.errors = true});
   }
 
+  loadTransaction(blockNumber) {
+    this.BCservice.getTransactionsByNumber(blockNumber-50, this.searchString).subscribe(model => {
+        this.transactionRequesting = true;
+        this.transactionsModel.blockNumber = model.blockNumber;
+        this.transactionsModel.transactions = this.transactionsModel.transactions.concat(model.transactions);
+      },
+      error => { console.log(error); this.errors = true });
+  }
+
   ngOnInit() {
-    this.initialise();
   }
 
   ngOnDestroy() {

@@ -131,11 +131,11 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let trans of transactions">
+    <tr *ngFor="let trans of transactionsModel.transactions">
       <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
       <td title="{{trans.from}}">
         <a [routerLink]='["/search",trans.from]'>
-        {{trans.from | slice : 0:20}}...
+          {{trans.from | slice : 0:20}}...
         </a>
       </td>
       <td title="{{trans.to}}">
@@ -157,4 +157,7 @@
     </tr>
     </tbody>
   </table>
+  <div class="col-md-12 text-center">
+    <button (click)="loadTransaction(transactionsModel.blockNumber)" class="btn btn-primary">More</button>
+  </div>
 </div>
