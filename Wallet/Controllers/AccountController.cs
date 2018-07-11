@@ -67,6 +67,7 @@ namespace Wallet.Controllers
                 }
 
                 var result = await GetClaimsIdentity(model.Email, model.Password);
+
                 if (result == null)
                     return BadRequest(HttpErrorHandler.AddError("Failure", "Invalid username or password.",
                         ModelState));
@@ -138,15 +139,23 @@ namespace Wallet.Controllers
                 return await Task.FromResult<ClaimsIdentity>(null);
 
             // get the user to verifty
-            var userToVerify = await _userManager.FindByNameAsync(userName);
-
+            var userToVerify = await _userManager.FindByNameAsync(userName);       
             if (userToVerify == null) return await Task.FromResult<ClaimsIdentity>(null);
 
-            // check the credentials
-            if (await _userManager.CheckPasswordAsync(userToVerify, password))
+            if (await _userManager.IsInRoleAsync(userToVerify, "Admin"))
             {
-                return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id));
+                if (await _userManager.CheckPasswordAsync(userToVerify, password))
+                {
+                    return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id, true));
+                }
             }
+            else
+            {
+                if (await _userManager.CheckPasswordAsync(userToVerify, password))
+                {
+                    return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id, false));
+                }
+            }       
 
             // Credentials are invalid, or account doesn't exist
             return await Task.FromResult<ClaimsIdentity>(null);

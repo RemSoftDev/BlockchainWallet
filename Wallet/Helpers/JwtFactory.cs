@@ -18,15 +18,15 @@ namespace Wallet.Helpers
             ThrowIfInvalidOptions(_jwtOptions);
         }
 
-        public async Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity)
+        public async Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity, bool isAdmin)
         {
             var claims = new[]
-         {
+            {
                  new Claim(JwtRegisteredClaimNames.Sub, userName),
                  new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
                  new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
-                 identity.FindFirst(Helpers.Constants.Strings.JwtClaimIdentifiers.Rol),
-                 identity.FindFirst(Helpers.Constants.Strings.JwtClaimIdentifiers.Id)
+                 identity.FindFirst(GetClaimRole(isAdmin)),
+                 identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
              };
 
             // Create the JWT security token and encode it.
@@ -43,13 +43,20 @@ namespace Wallet.Helpers
             return encodedJwt;
         }
 
-        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id)
+        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id, bool isAdmin)
         {
             return new ClaimsIdentity(new GenericIdentity(userName, "Token"), new[]
             {
                 new Claim(Helpers.Constants.Strings.JwtClaimIdentifiers.Id, id),
-                new Claim(Helpers.Constants.Strings.JwtClaimIdentifiers.Rol, Helpers.Constants.Strings.JwtClaims.ApiAccess)
+                new Claim(GetClaimRole(isAdmin), Helpers.Constants.Strings.JwtClaims.ApiAccess)
             });
+        }
+
+        private static string GetClaimRole(bool isAdmin)
+        {
+            return isAdmin == true
+                ? Constants.Strings.JwtClaimIdentifiers.AdminRol
+                : Constants.Strings.JwtClaimIdentifiers.Rol;
         }
 
         /// <returns>Date converted to seconds since Unix epoch (Jan 1, 1970, midnight UTC).</returns>
