@@ -129,12 +129,12 @@ namespace Wallet.Controllers
             }
         }
 
-        //public async Task<List<UserWatchlist>> GetWatchList(User user)
-        //{
-        //    return dbContext.UserWatchlist.ToListAsync<UserWatchlist>;
+        public async Task<List<UserWatchlist>> GetWatchList(User user)
+        {
+            return  dbContext.UserWatchlist.ToList();
 
-        //}
-        public void  DeleteFromWatchlist(int idwatchlist )
+        }
+        public async Task DeleteFromWatchlist(int idwatchlist )
         {
             UserWatchlist wl = new UserWatchlist
             {
@@ -144,13 +144,19 @@ namespace Wallet.Controllers
             dbContext.UserWatchlist.Attach(wl);
             dbContext.UserWatchlist.Remove(wl);
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
         }
-        //public async Task<IActionResult> AddToWatchlist(string accountAddress)
-        //{
-
-        //}
+        public async Task AddToWatchlist(int action, string userid, string adress)
+        {
+            dbContext.UserWatchlist.Add(new UserWatchlist()
+            {
+                Action = action,
+                Adress = adress,
+                UserId = userid
+            });
+            await dbContext.SaveChangesAsync();
+        }
 
 
 
