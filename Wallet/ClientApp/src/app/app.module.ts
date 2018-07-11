@@ -49,11 +49,14 @@ import { WatchlistComponent } from './components/watchlist/watchlist.component';
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'search/:searchString', component: WalletPageComponent, runGuardsAndResolvers: 'always'},
-      { path: 'sign-in', component: SigninComponent },
+      { path: 'sign-in', component: SigninComponent }, 
       { path: 'forgot-password', component: ForgotPasswordComponent },
       { path: 'Account/ResetPassword', component: ResetPasswordComponent },
       { path: 'api/Account/ResetPassword', component: ResetPasswordComponent },
       { path: 'log-in', component: LoginComponent },
+      { path: 'api/Account/ConfirmEmail', component: LoginComponent },
+      { path: 'Account/ConfirmEmail', component: LoginComponent },
+
       { path: 'about', component: AboutComponent },
       { path: 'contact', component: ContactComponent },
       { path: 'watchlist', component: WatchlistComponent }

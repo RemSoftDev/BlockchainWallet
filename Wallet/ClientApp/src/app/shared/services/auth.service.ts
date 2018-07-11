@@ -43,6 +43,18 @@ export class AuthService extends BaseService {
       .catch(this.handleError);
   }
 
+  confirmEmail(userId, code) {
+    return this.http
+      .post(
+        this.hostUrl + this.baseUrl + '/ConfirmEmail',
+        JSON.stringify({ userId, code }),
+        httpOptions)
+      .map(res => {
+        return true;
+      })
+      .catch(this.handleError);
+  }
+
   forgotPass(email) {
     return this.http
       .post(

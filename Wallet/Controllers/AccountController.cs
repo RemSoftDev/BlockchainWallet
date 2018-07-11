@@ -161,18 +161,18 @@ namespace Wallet.Controllers
             return await Task.FromResult<ClaimsIdentity>(null);
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> ConfirmEmail([FromBody]ConfirmEmailViewModel model)
         {
-            if (userId == null || code == null)
+            if (model.UserId == null || model.Code == null)
                 return BadRequest();
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(model.UserId);
             if (user == null)
                 return BadRequest();
-            var result = await _userManager.ConfirmEmailAsync(user, code);
+            var result = await _userManager.ConfirmEmailAsync(user, model.Code);
             if (result.Succeeded)
             {
-                return new OkObjectResult("Email Comfirmed");
+                return new OkResult();
             }
             else
             {
