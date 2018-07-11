@@ -14,6 +14,7 @@ import { FooterMenuComponent } from './components/footer-menu/footer-menu.compon
 import { LoginComponent } from './components/Login/login.component';
 import { SigninComponent } from './components/sign-in/signin.component';
 import { AuthService } from './shared/services/auth.service';
+import { RedirectionService } from './shared/services/redirection.service';
 import { BlockchainService } from './shared/services/blockchain.service';
 import { WalletPageComponent } from './components/wallet-page/wallet-page.component';
 import { SpinnerComponent } from './components/spinner/spinner.component';
@@ -61,6 +62,7 @@ import { WatchlistComponent } from './components/watchlist/watchlist.component';
   ],
   providers: [
     BlockchainService,
+    RedirectionService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

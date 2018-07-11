@@ -158,6 +158,9 @@
     </tbody>
   </table>
   <div class="col-md-12 text-center">
+    <div *ngIf="moreTransactionRequesting" class="row">
+      <app-spinner></app-spinner>
+    </div>
     <button (click)="loadTransaction(transactionsModel.blockNumber)" class="btn btn-primary">More</button>
   </div>
 </div>

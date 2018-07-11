@@ -36,7 +36,7 @@ namespace Wallet.Controllers
             WalletInfoViewModel model = new WalletInfoViewModel();
             Task<HexBigInteger> getBalance = _explorer.BalanceETH(accountAddress);
 
-            var listtasks = new List<Task<ERC20TokenViewModel>>();
+            var tasks = new List<Task<ERC20TokenViewModel>>();
             List<ERC20TokenViewModel> tokens = new List<ERC20TokenViewModel>();
 
             foreach (var token in dbContext.Erc20Tokens)
@@ -44,7 +44,7 @@ namespace Wallet.Controllers
                 if (token.Address != accountAddress)//finish with module 5, check ico
                 {
                     Task<ERC20TokenViewModel> task = _explorer.BalanceToken(token, accountAddress);
-                    listtasks.Add(task);
+                    tasks.Add(task);
                 }
                 else
                 {
@@ -56,8 +56,8 @@ namespace Wallet.Controllers
             {
                 model.Balance = Web3.Convert.FromWei(await getBalance, 18);
 
-                await Task.WhenAll(listtasks.ToArray());
-                foreach (var listtask in listtasks)
+                await Task.WhenAll(tasks.ToArray());
+                foreach (var listtask in tasks)
                 {
                     tokens.Add(listtask.Result);
                 }
@@ -86,16 +86,17 @@ namespace Wallet.Controllers
                     searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
                 }
 
-                var listtasks = new List<Task<List<CustomTransaction>>>();
-                for (int i = searchBlockNumber - 50; i <= searchBlockNumber; i++)
+                var tasks = new List<Task<List<CustomTransaction>>>();
+                for (int i = searchBlockNumber - 100; i <= searchBlockNumber; i++)
                 {
                     Task<List<CustomTransaction>> task = _explorer.GetTransactions(accountAddress, i);
-                    listtasks.Add(task);
+                    tasks.Add(task);
                 }
 
-                await Task.WhenAll(listtasks.ToArray());
+                await Task.WhenAll(tasks.ToArray());
+
                 var result = new List<CustomTransaction>();
-                foreach (var listtask in listtasks)
+                foreach (var listtask in tasks)
                 {
                     result.AddRange(listtask.Result);
                 }
@@ -104,7 +105,7 @@ namespace Wallet.Controllers
                 {
                     if (t.Value.Value == 0)
                     {
-                        var decodedInput = DecodeInput(t.Input, t.ContractAddress);
+                        var decodedInput = InputDecoder.DecodeInput(t.Input, t.ContractAddress, dbContext);
                         if (decodedInput.ContractAddress != string.Empty)
                         {
                             t.To = decodedInput.To;
@@ -127,41 +128,6 @@ namespace Wallet.Controllers
                 return BadRequest(HttpErrorHandler.AddError("Failure", e.Message, ModelState));
             }
         }
-
-        private TransactionInput DecodeInput(string input, string contractAddress)
-        {
-            try
-            {
-                HexBigIntegerBigEndianConvertor a = new HexBigIntegerBigEndianConvertor();
-                //cut off method name (first 4 byte)
-                input = input.Substring(10);
-                //get value         
-                var value = a.ConvertFromHex(input.Substring(input.Length / 2));
-                //get address
-                var address = a.ConvertToHex(a.ConvertFromHex("0x" + input.Substring(0, input.Length / 2)));
-
-                var token = dbContext.Erc20Tokens.FirstOrDefault(t =>
-                    string.Equals(t.Address, contractAddress, StringComparison.CurrentCultureIgnoreCase));
-                return new TransactionInput()
-                {
-                    To = address,
-                    Value = token != null ? Web3.Convert.FromWei(value, token.DecimalPlaces) : (decimal)value,
-                    What = token?.Symbol ?? "Unknown",
-                    ContractAddress = token?.Address ?? "Unknown"
-                };
-            }
-            catch (Exception e)
-            {
-                return new TransactionInput()
-                {
-                    To = string.Empty,
-                    Value = default(decimal),
-                    What = string.Empty,
-                    ContractAddress = string.Empty
-                };
-            }
-        }
-
 
         //public async Task<List<UserWatchlist>> GetWatchList(User user)
         //{

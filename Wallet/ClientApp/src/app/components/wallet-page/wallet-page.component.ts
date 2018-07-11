@@ -24,6 +24,7 @@ export class WalletPageComponent implements OnInit, OnDestroy {
   walletInfo: WalletInfo;
   transactionsModel: TransactionsModel;
   navigationSubscription;
+  moreTransactionRequesting: boolean;
   errors;
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute, private BCservice: BlockchainService) {
@@ -55,8 +56,9 @@ export class WalletPageComponent implements OnInit, OnDestroy {
   }
 
   loadTransaction(blockNumber) {
-    this.BCservice.getTransactionsByNumber(blockNumber-50, this.searchString).subscribe(model => {
-        this.transactionRequesting = true;
+    this.moreTransactionRequesting = true;
+    this.BCservice.getTransactionsByNumber(blockNumber-100, this.searchString).subscribe(model => {
+        this.moreTransactionRequesting = false;
         this.transactionsModel.blockNumber = model.blockNumber;
         this.transactionsModel.transactions = this.transactionsModel.transactions.concat(model.transactions);
       },

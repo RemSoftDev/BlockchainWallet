@@ -4,9 +4,14 @@
       <a class='navbar-brand' [routerLink]='["/"]'>Blowaud.com <br/><p>Blockchain Wallets Audit</p></a>
     </div>
     <ul *ngIf="status" class="nav navbar-nav navbar-right">
-      <li [routerLinkActive]='["link-active"]'>
+      <li *ngIf="!isWatchlistPage" [routerLinkActive]='["link-active"]'>
         <a [routerLink]='["/watchlist"]'>
           <span class="glyphicon glyphicon-user"></span> Watchlist
+        </a>
+      </li>
+      <li *ngIf="isWatchlistPage" [routerLinkActive]='["link-active"]'>
+        <a [routerLink]='["/"]'>
+          <span class="glyphicon glyphicon-home"></span> Home
         </a>
       </li>
       <li [routerLinkActive]='["link-active"]'>
