@@ -79,6 +79,7 @@ namespace Wallet
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("ApiUser", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess));
+                options.AddPolicy("ApiAdmin", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.AdminRol, Constants.Strings.JwtClaims.ApiAccess));
             });
 
             var builder = services.AddIdentityCore<User>(o =>

@@ -42,6 +42,7 @@
     <None Remove="ClientApp\src\app\shared\services\base.service.ts" />
     <None Remove="ClientApp\src\app\shared\services\blockchain.service.ts" />
     <None Remove="ClientApp\src\app\components\sign-in\signin.component.ts" />
+    <None Remove="ClientApp\src\app\shared\services\pageData.service.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +51,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\components\login\login.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\shared\services\pageData.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\auth.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\base.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\blockchain.service.ts" />

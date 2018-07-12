@@ -14,6 +14,7 @@ export class NavMenuComponent implements OnInit, OnDestroy {
   isWatchlistPage: boolean;
   subscription: Subscription;
   pagesubscription: Subscription;
+  isAdmin:boolean;
 
   constructor(private authService: AuthService, private redirectionService: RedirectionService ) { }
 
@@ -21,8 +22,20 @@ export class NavMenuComponent implements OnInit, OnDestroy {
     this.authService.logout();
   }
 
+  checkUserRole() {
+    if (localStorage.getItem('userRoles') === "ApiAdmin") {
+      this.isAdmin = true;
+    } else {
+      this.isAdmin = false;
+    };
+  }
+
   ngOnInit() {
-    this.subscription = this.authService.authNavStatus$.subscribe(status => this.status = status);
+    this.subscription = this.authService.authNavStatus$.subscribe(status => {
+        this.status = status;
+        this.checkUserRole();
+      }
+    );
     this.pagesubscription =
       this.redirectionService.redirectionhNavStatus$.subscribe(redirected => this.isWatchlistPage = redirected);
   }

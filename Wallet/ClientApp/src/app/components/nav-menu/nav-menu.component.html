@@ -3,7 +3,13 @@
     <div class='navbar-header'>
       <a class='navbar-brand' [routerLink]='["/"]'>Blowaud.com <br/><p>Blockchain Wallets Audit</p></a>
     </div>
+
     <ul *ngIf="status" class="nav navbar-nav navbar-right">
+      <li *ngIf="isAdmin" [routerLinkActive]='["link-active"]'>
+        <a [routerLink]='["/admin-panel"]'>
+          <span class="glyphicon glyphicon-wrench"></span> Manage
+        </a>
+      </li>
       <li *ngIf="!isWatchlistPage" [routerLinkActive]='["link-active"]'>
         <a [routerLink]='["/watchlist"]'>
           <span class="glyphicon glyphicon-user"></span> Watchlist
@@ -20,6 +26,7 @@
         </a>
       </li>
     </ul>
+
     <ul *ngIf="!status" class="nav navbar-nav navbar-right">
       <li [routerLinkActive]='["link-active"]'>
         <a [routerLink]='["/sign-in"]'>
@@ -32,6 +39,7 @@
         </a>
       </li>
     </ul>
+
   </div>
   <hr/>
 </nav>

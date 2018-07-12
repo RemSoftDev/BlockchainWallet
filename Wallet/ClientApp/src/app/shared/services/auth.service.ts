@@ -75,6 +75,7 @@ export class AuthService extends BaseService {
         httpOptions)
       .map(res => {
         localStorage.setItem('access_token', JSON.parse(JSON.stringify(res)).access_token);
+        localStorage.setItem('userRoles', JSON.parse(JSON.stringify(res)).roles);
         this.loggedIn = true;
         this._authNavStatusSource.next(true);
         return true;
@@ -96,6 +97,7 @@ export class AuthService extends BaseService {
 
   logout() {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('userRoles');
     this.loggedIn = false;
     this._authNavStatusSource.next(false);
   }
