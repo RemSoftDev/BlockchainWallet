@@ -95,6 +95,8 @@ namespace Wallet
             });
             builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);
             builder.AddEntityFrameworkStores<WalletDbContext>().AddDefaultTokenProviders();
+            builder.AddRoleValidator<RoleValidator<IdentityRole>>();
+            builder.AddRoleManager<RoleManager<IdentityRole>>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the Angular files will be served from this directory
