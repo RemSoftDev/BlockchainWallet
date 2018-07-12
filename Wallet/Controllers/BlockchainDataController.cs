@@ -129,6 +129,8 @@ namespace Wallet.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("api/WatchlistData")]
         public async Task<List<UserWatchlist>> GetWatchList(User user)
         {
             return  dbContext.UserWatchlist.ToList();
