@@ -65,6 +65,11 @@ namespace Wallet.BlockchainAPI
             return result;
         }
 
+        public Task<string> GetCode(string address)
+        {
+            return web3.Eth.GetCode.SendRequestAsync(address);
+        }
+
         public async Task<HexBigInteger> GetLastAvailableBlockNumber()
         {
             return await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();

@@ -1,0 +1,153 @@
+
+<div *ngIf="showNotWind" class="notificationWindow container-fluid">
+  <div class="row">
+    <div class="col-md-4 col-md-offset-8">
+      <div class="closeDiv">
+        <span (click)="closeNotificationWindow()" class="glyphicon glyphicon-remove"></span>
+      </div>
+    </div>
+  </div>
+  <div class="row text-center">
+
+    <div class="col-md-4 col-md-offset-4">
+      <h4>Notifications</h4>
+    </div>
+
+  </div>
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+
+      <form>
+
+        <div class="form-check">
+          <input #withNotification class="form-check-input notificationInput" checked="true" type="checkbox" (change)="withNotifications()">
+          Without notifications
+        </div>
+
+        <div class="form-check">
+          <input #whenNumberOfTokenSent (change)="whenNumberOfTokenSentFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          When
+          <input #whenNumberOfTokenSentValue class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>
+          was sent
+        </div>
+
+        <div class="form-check">
+          <input #whenNumberOfTokenReceived (change)="whenNumberOfTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          When
+          <input #whenNumberOfTokenReceivedValue class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+          were received by <br/>
+          <input #whenNumberOfTokenReceivedAddress class="notificationBigInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+        </div>
+
+        <div class="form-group">
+          <button (click)="setNotification(withNotification,whenNumberOfTokenSent,whenNumberOfTokenReceived,whenNumberOfTokenSentValue,
+                  whenNumberOfTokenReceivedValue,whenNumberOfTokenReceivedAddress)"
+                  type="submit" [disabled]="isRequesting" class="notificationButton btn btn-primary">
+            Submit
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<div *ngIf="errors" class="alert alert-danger" role="alert">
+  Opps, some error occurred. Try again
+</div>
+
+<div *ngIf="!infoRequesting||!transactionRequesting" class="row">
+  <app-spinner></app-spinner>
+</div>
+
+<div *ngIf="infoRequesting" class="row">
+  <div class="col-sm-4">
+    <div class="divInfo">
+      <h4 class="addressString">Smart Contract Address <span (click)="showNotificationWindow()" class="addStar glyphicon glyphicon-star-empty"></span></h4>
+      <div>
+        <p>Name</p>
+        <p class="info">test</p>
+      </div>
+      <div>
+        <p>Created</p>
+        <p class="info">test</p>
+      </div>
+      <div>
+        <p>Quantity</p>
+        <p class="info">test</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-3 col-sm-offset-4 rightSideBlock">
+    <div class="divInfo">
+      <h5>{{searchString}}</h5>
+      <div>
+        <p>Wallets</p>
+        <p class="info">test</p>
+      </div>
+      <div>
+        <p>Transactions</p>
+        <p class="info">test</p>
+      </div>
+      <div>
+        <a>Website link</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ul class="nav nav-tabs">
+  <li [ngClass]="transactionTabClass" (click)="loadTransactions()"><a>Transactions</a></li>
+  <li [ngClass]="walletsTabClass" (click)="loadWallets()"><a>Wallets</a></li>
+</ul>
+
+<div *ngIf="transactionRequesting" class="row tableRow">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">TxHash</th>
+      <th scope="col">From</th>
+      <th scope="col">To</th>
+      <th scope="col">What</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Date/Time</th>
+      <th scope="col">Success</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let trans of transactionsModel.transactions">
+      <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
+      <td title="{{trans.from}}">
+        <a [routerLink]='["/search",trans.from]'>
+          {{trans.from | slice : 0:20}}...
+        </a>
+      </td>
+      <td title="{{trans.to}}">
+        <a [routerLink]='["/search",trans.to]'>
+          {{trans.to | slice : 0:20}}...
+        </a>
+      </td>
+      <td *ngIf="trans.what=='ETH'" title="{{trans.what}}">
+        {{trans.what}}
+      </td>
+      <td *ngIf="trans.what!='ETH'" title="{{trans.what}}">
+        <a [routerLink]='["/search",trans.contractAddress]'>
+          {{trans.what}}
+        </a>
+      </td>
+      <td title="{{trans.decimalValue}}">{{trans.decimalValue | number : '1.2-5'}}</td>
+      <td title="{{trans.date }}">{{trans.date | date : 'short' }}</td>
+      <td title="{{trans.isSuccess}}">{{trans.isSuccess}}</td>
+    </tr>
+    </tbody>
+  </table>
+  <div class="col-md-12 text-center">
+    <div *ngIf="moreTransactionRequesting" class="row">
+      <app-spinner></app-spinner>
+    </div>
+    <button (click)="loadTransaction(transactionsModel.blockNumber)" class="btn btn-primary">More</button>
+  </div>
+</div>

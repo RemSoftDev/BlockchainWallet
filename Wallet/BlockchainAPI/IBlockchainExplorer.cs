@@ -13,5 +13,6 @@ namespace Wallet.BlockchainAPI
         Task<ERC20TokenViewModel> BalanceToken(ERC20Token token, string account);
         Task<List<CustomTransaction>> GetTransactions(string account, int searchInLastBlocksCount);
         Task<HexBigInteger> GetLastAvailableBlockNumber();
+        Task<string> GetCode(string address);
     }
 }

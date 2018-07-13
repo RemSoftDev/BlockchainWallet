@@ -1,0 +1,57 @@
+.addStar {
+  cursor: pointer;
+  font-size: 20px;
+  margin-bottom: -5px;
+}
+
+.rightSideBlock {
+  padding-top: 10px;
+}
+
+.divInfo div p {
+  width: 70px;
+  display: inline-block;
+}
+
+.info {
+  margin-left: 50px;
+}
+
+.notificationWindow {
+  z-index: 10;
+  background-color: white;
+  margin-top: 7%;
+  margin-left: 30%;
+  width: 400px;
+  height: 250px;
+  border: 1px solid black;
+  position: absolute;
+  border-radius: 10px;
+}
+
+.closeDiv {
+  margin-top: 5px;
+  margin-right: -10px;
+  font-size: 17px;
+  float: right;
+  cursor: pointer;
+}
+
+.notificationButton {
+  margin-top: 10px;
+  margin-left: 120px;
+}
+
+.notificationInput {
+  margin-bottom: 10px !important;
+  font-size: 20px;
+}
+
+.notificationSmallInput {
+  width: 100px;
+}
+
+.notificationBigInput {
+  margin-left: 15px;
+  width: 250px;
+}

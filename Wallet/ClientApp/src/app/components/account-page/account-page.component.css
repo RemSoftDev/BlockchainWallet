@@ -1,0 +1,101 @@
+.addStar {
+  cursor: pointer;
+  font-size: 20px;
+  margin-bottom: -5px;
+}
+
+.dropdownBtn {
+  width: 320px;
+}
+
+.dropdown-menu {
+  max-height: 400px;
+  overflow: auto;
+}
+
+  .dropdown-menu li {
+    width: 320px;
+  }
+
+.tableRow {
+  margin-top: 50px;
+}
+
+.table th {
+  background-color: lightgray;
+}
+
+.table-striped > tbody > tr:nth-child(n) > td,
+.table-striped > tbody > tr:nth-child(n) > th {
+  background-color: white;
+}
+
+.table-striped > tbody > tr:nth-child(2n) > td,
+.table-striped > tbody > tr:nth-child(2n) > th {
+  background-color: rgba(192,192,192,0.1);
+}
+
+.tableData {
+  width: 150px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  padding: 5px !important;
+  text-overflow: ellipsis !important;
+}
+
+.tokenBalanceText {
+  font-size: 14px;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.tokenSymbol {
+  margin-top: 9px;
+  font-size: 14px;
+  margin-left: 10px;
+  display: inline-block;
+  width: 150px;
+}
+
+li:hover {
+  background-color: lightblue;
+  cursor: pointer
+}
+
+.notificationWindow {
+  z-index: 10;
+  background-color: white;
+  margin-top: 7%;
+  margin-left: 30%;
+  width: 400px;
+  height: 300px;
+  border: 1px solid black;
+  position: absolute;
+  border-radius: 10px;
+}
+
+.closeDiv {
+  margin-top: 5px;
+  margin-right: -10px;
+  font-size: 17px;
+  float: right;
+  cursor: pointer;
+}
+
+.notificationInput {
+  margin-bottom: 10px !important;
+  font-size: 20px;
+}
+
+.notificationSmallInput {
+  width: 50px;
+}
+
+.notificationButton {
+  margin-top: 10px;
+  margin-left: 120px;
+}
+
+.dropdownInputField {
+  width: 30px !important;
+}

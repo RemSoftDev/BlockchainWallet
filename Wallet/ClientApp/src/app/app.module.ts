@@ -20,6 +20,8 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
 import { AboutComponent } from './components/about/about.component';
 import { ContactComponent } from './components/contact/contact.component';
 import { WatchlistComponent } from './components/watchlist/watchlist.component';
+import { ContractPageComponent } from './components/contract-page/contract-page.component';
+import { AccountPageComponent } from './components/account-page/account-page.component';
 
 import { AuthService } from './shared/services/auth.service';
 import { RedirectionService } from './shared/services/redirection.service';
@@ -44,7 +46,9 @@ import { AuthUserGuardService } from './shared/services/auth-user-guard.service'
     AboutComponent,
     ContactComponent,
     WatchlistComponent,
-    AdminPanelComponent
+    AdminPanelComponent,
+    ContractPageComponent,
+    AccountPageComponent
   ],
   imports: [
     CookieModule.forRoot(),
@@ -54,7 +58,9 @@ import { AuthUserGuardService } from './shared/services/auth-user-guard.service'
     FormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'search/:searchString', component: WalletPageComponent, runGuardsAndResolvers: 'always'},
+      { path: 'search/:searchString', component: WalletPageComponent, runGuardsAndResolvers: 'always' },
+      { path: 'search/contract/:searchString', component: ContractPageComponent, runGuardsAndResolvers: 'always' },
+      { path: 'search/account/:searchString', component: AccountPageComponent, runGuardsAndResolvers: 'always' },
       { path: 'sign-in', component: SigninComponent }, 
       { path: 'forgot-password', component: ForgotPasswordComponent },
       { path: 'Account/ResetPassword', component: ResetPasswordComponent },

@@ -15,6 +15,13 @@ export class BlockchainService extends BaseService {
     this.hostUrl = hostUrl;
   }
 
+  checkAddress(address: string) {
+    const params = new HttpParams().set('address', address);
+    return this.http
+      .get(this.hostUrl + this.baseUrl + '/IsContract', { params })
+      .catch(this.handleError);
+  }
+
   getWalletInfo(accountAddress: string) {
     const params = new HttpParams().set('accountAddress', accountAddress);
     return this.http

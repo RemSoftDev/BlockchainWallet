@@ -72,6 +72,22 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
+        public async Task<IActionResult> IsContract(string address)
+        {  
+            try
+            {
+                string result =  await _explorer.GetCode(address);
+               
+                return new OkObjectResult(result != Constants.Strings.WalletCode.AccountCode);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+        }
+
+        [HttpGet("[action]")]
         public async Task<IActionResult> GetTransactions(int? blockNumber, string accountAddress)
         {
             try

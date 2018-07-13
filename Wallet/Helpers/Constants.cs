@@ -14,6 +14,11 @@
             {
                 public const string ApiAccess = "api_access";
             }
+
+            public static class WalletCode
+            {
+                public const string AccountCode = "0x";
+            }
         }
     }
 }
