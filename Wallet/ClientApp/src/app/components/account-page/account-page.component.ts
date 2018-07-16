@@ -6,7 +6,7 @@ import { TransactionsModel } from "../../shared/models/transactionsModel.interfa
 
 @Component({
   selector: 'app-account-page',
-  templateUrl: './account-page.component.html'
+  templateUrl: './account-page.component.html',
   styleUrls: ['./account-page.component.css']
 })
 export class AccountPageComponent implements OnInit, OnDestroy {
@@ -46,7 +46,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
       },
       error => {
         console.log(error);
-        this.errors = true
+        this.errors = true;
       });
 
     this.BCservice.getWalletInfo(this.searchString).subscribe(info => {
@@ -55,7 +55,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
       },
       error => {
         console.log(error);
-        this.errors = true
+        this.errors = true;
       });
   }
 

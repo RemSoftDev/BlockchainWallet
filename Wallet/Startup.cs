@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Wallet.BlockchainAPI;
 using Wallet.Helpers;
 using Wallet.Models;
+using Wallet.Notifications;
 
 namespace Wallet
 {
@@ -38,6 +40,7 @@ namespace Wallet
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
+            services.AddSingleton<UserInfoInMemory>();
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTSettings));
 
@@ -97,6 +100,9 @@ namespace Wallet
             builder.AddEntityFrameworkStores<WalletDbContext>().AddDefaultTokenProviders();
             builder.AddRoleValidator<RoleValidator<IdentityRole>>();
             builder.AddRoleManager<RoleManager<IdentityRole>>();
+
+            services.AddSignalR();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the Angular files will be served from this directory
@@ -124,6 +130,12 @@ namespace Wallet
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
             app.UseAuthentication();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<NotifyHub>("/notify");
+            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

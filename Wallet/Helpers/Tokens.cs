@@ -30,7 +30,9 @@ namespace Wallet.Helpers
                 id = identity.Claims.Single(c => c.Type == "id").Value,
                 access_token = accessToken,
                 expires_in = (int)jwtOptions.ValidFor.TotalSeconds,
-                roles = roles
+                roles = roles,
+                userName = userName
+
             };
 
             return JsonConvert.SerializeObject(response, serializerSettings);

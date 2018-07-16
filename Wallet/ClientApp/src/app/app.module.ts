@@ -5,6 +5,8 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { ReCaptchaModule } from 'angular2-recaptcha';
 import { CookieModule } from 'ngx-cookie';
+import { SimpleNotificationsModule } from 'angular2-notifications';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { JwtInterceptor } from './jwt.interceptor';
 import { AppComponent } from './app.component';
@@ -53,6 +55,7 @@ import { AuthUserGuardService } from './shared/services/auth-user-guard.service'
   imports: [
     CookieModule.forRoot(),
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
+    BrowserAnimationsModule,
     HttpClientModule,
     ReCaptchaModule,
     FormsModule,
@@ -73,7 +76,8 @@ import { AuthUserGuardService } from './shared/services/auth-user-guard.service'
       { path: 'contact', component: ContactComponent },
       { path: 'watchlist', component: WatchlistComponent, canActivate: [AuthUserGuardService] }
     ],
-      { onSameUrlNavigation: 'reload' })
+      { onSameUrlNavigation: 'reload' }),
+     SimpleNotificationsModule.forRoot()
   ],
   providers: [
     AuthAdminGuardService,

@@ -10,6 +10,8 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 })
 export class WalletPageComponent implements OnInit{
 
+  errors;
+
   constructor(private BCservice: BlockchainService, private router: Router, private activatedRoute: ActivatedRoute,) { }
 
   ngOnInit() {
@@ -20,7 +22,7 @@ export class WalletPageComponent implements OnInit{
       } else {
         this.router.navigate(['/search/account',address]);
       }
-    });
+    }, error => this.errors = true);
   }
 
 }

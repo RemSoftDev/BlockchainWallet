@@ -7,6 +7,9 @@ import { BaseService } from "./base.service";
 import { Observable } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/Rx';
 
+import SignalR = require("@aspnet/signalr/dist/esm/index");
+import { NotificationsService } from 'angular2-notifications';
+
 import 'rxjs/add/operator/map';
 
 const httpOptions = {
@@ -23,12 +26,16 @@ export class AuthService extends BaseService {
   private _authNavStatusSource = new BehaviorSubject<boolean>(false);
   authNavStatus$ = this._authNavStatusSource.asObservable();
   private loggedIn = false;
+  connection;
 
-  constructor(private http: HttpClient, @Inject('BASE_URL') hostUrl: string) {
+  constructor(private http: HttpClient, @Inject('BASE_URL') hostUrl: string, private _service: NotificationsService) {
     super();
     this.loggedIn = !!localStorage.getItem('access_token');
     this._authNavStatusSource.next(this.loggedIn);
     this.hostUrl = hostUrl;
+    this.connection = new SignalR.HubConnectionBuilder()
+      .withUrl('/notify')
+      .build();
   }
   
   resetPass(email, password, code) {
@@ -76,11 +83,40 @@ export class AuthService extends BaseService {
       .map(res => {
         localStorage.setItem('access_token', JSON.parse(JSON.stringify(res)).access_token);
         localStorage.setItem('userRoles', JSON.parse(JSON.stringify(res)).roles);
+        localStorage.setItem('userName', JSON.parse(JSON.stringify(res)).userName);
         this.loggedIn = true;
         this._authNavStatusSource.next(true);
+        this.subscribuToNotifications();
         return true;
       })
       .catch(this.handleError);
+  }
+
+  unSubscribuFromNotifications() {
+    this.connection.invoke('Leave', localStorage.getItem('userName'));
+  }
+
+  subscribuToNotifications() {
+    this.connection.start()
+      .then(() => {
+        console.log('Connected');
+        this.connection.invoke('Join', localStorage.getItem('userName'));
+      });
+
+    this.connection.on('Left', (data) => {
+      console.log(data);
+    });
+
+    this.connection.on('Message', (title:string, payload: string) => {
+      this._service.info(title,
+        payload,
+        {
+          timeOut: 2000,
+          showProgressBar: true,
+          pauseOnHover: true,
+          clickToClose: true
+        });
+    });
   }
 
   signIn(email, password, passwordConfirm) {
@@ -96,8 +132,10 @@ export class AuthService extends BaseService {
   }
 
   logout() {
+    this.unSubscribuFromNotifications();
     localStorage.removeItem('access_token');
     localStorage.removeItem('userRoles');
+    localStorage.removeItem('userName');    
     this.loggedIn = false;
     this._authNavStatusSource.next(false);
   }
