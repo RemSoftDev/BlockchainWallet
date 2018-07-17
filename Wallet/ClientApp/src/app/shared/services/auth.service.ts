@@ -111,8 +111,8 @@ export class AuthService extends BaseService {
       console.log(data);
     });
 
-    this.connection.on('Message', (title:string, payload: string) => {
-      this._service.info(title,
+    this.connection.on('Message', (payload: string) => {
+      this._service.info('Notification',
         payload,
         {
           timeOut: 2000,

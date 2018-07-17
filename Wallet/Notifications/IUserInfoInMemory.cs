@@ -1,9 +1,11 @@
-﻿namespace Wallet.Notifications
+﻿using System.Collections.Concurrent;
+
+namespace Wallet.Notifications
 {
     public interface IUserInfoInMemory
     {
         bool AddUpdate(string name, string connectionId);
         void Remove(string name);
-        UserInfo GetUserInfo(string username);
+        ConcurrentDictionary<string, UserInfo> _onlineUsers { get; set; }
     }
 }

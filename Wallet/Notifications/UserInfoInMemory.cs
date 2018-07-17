@@ -5,7 +5,7 @@ namespace Wallet.Notifications
 {
     public class UserInfoInMemory : IUserInfoInMemory
     {
-        private ConcurrentDictionary<string, UserInfo> _onlineUsers { get; set; } =
+        public ConcurrentDictionary<string, UserInfo> _onlineUsers { get; set; } =
             new ConcurrentDictionary<string, UserInfo>();
 
         public bool AddUpdate(string name, string connectionId)
@@ -27,13 +27,6 @@ namespace Wallet.Notifications
         {
             UserInfo userInfo;
             _onlineUsers.TryRemove(name, out userInfo);
-        }
-
-        public UserInfo GetUserInfo(string username)
-        {
-            UserInfo user;
-            _onlineUsers.TryGetValue(username, out user);
-            return user;
         }
     }
 }
