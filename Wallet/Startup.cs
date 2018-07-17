@@ -40,7 +40,8 @@ namespace Wallet
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
-            services.AddSingleton<UserInfoInMemory>();
+            services.AddSingleton<IUserInfoInMemory,UserInfoInMemory>();
+            services.AddHostedService<NitificationService>();
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTSettings));
 

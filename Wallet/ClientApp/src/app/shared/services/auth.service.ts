@@ -7,7 +7,7 @@ import { BaseService } from "./base.service";
 import { Observable } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/Rx';
 
-import SignalR = require("@aspnet/signalr/dist/esm/index");
+import { HubConnectionBuilder }  from '@aspnet/signalr';
 import { NotificationsService } from 'angular2-notifications';
 
 import 'rxjs/add/operator/map';
@@ -33,7 +33,7 @@ export class AuthService extends BaseService {
     this.loggedIn = !!localStorage.getItem('access_token');
     this._authNavStatusSource.next(this.loggedIn);
     this.hostUrl = hostUrl;
-    this.connection = new SignalR.HubConnectionBuilder()
+    this.connection = new HubConnectionBuilder()
       .withUrl('/notify')
       .build();
   }
