@@ -28,5 +28,12 @@ namespace Wallet.Notifications
             UserInfo userInfo;
             _onlineUsers.TryRemove(name, out userInfo);
         }
+
+        public UserInfo GetUserInfo(string username)
+        {
+            UserInfo user;
+            _onlineUsers.TryGetValue(username, out user);
+            return user;
+        }
     }
 }

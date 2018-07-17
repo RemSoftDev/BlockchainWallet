@@ -5,9 +5,9 @@ namespace Wallet.Notifications
 {
     public class NotifyHub: Hub
     {
-        private UserInfoInMemory _userInfoInMemory;
+        private IUserInfoInMemory _userInfoInMemory;
 
-        public NotifyHub(UserInfoInMemory userInfoInMemory)
+        public NotifyHub(IUserInfoInMemory userInfoInMemory)
         {
             _userInfoInMemory = userInfoInMemory;
         }

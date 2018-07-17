@@ -28,7 +28,8 @@ namespace Wallet.Notifications
 
         private void DoWork(object state)
         {
-            _hubContext.Clients.All.SendAsync("", "");
+            _hubContext.Clients.Clients(_userInfo.GetUserInfo("")?.ConnectionId)
+                .SendAsync("Message", "testTitle", "test payload");
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

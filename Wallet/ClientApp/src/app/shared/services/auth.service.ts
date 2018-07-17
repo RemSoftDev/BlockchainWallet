@@ -33,9 +33,6 @@ export class AuthService extends BaseService {
     this.loggedIn = !!localStorage.getItem('access_token');
     this._authNavStatusSource.next(this.loggedIn);
     this.hostUrl = hostUrl;
-    this.connection = new HubConnectionBuilder()
-      .withUrl('/notify')
-      .build();
   }
   
   resetPass(email, password, code) {
@@ -93,10 +90,17 @@ export class AuthService extends BaseService {
   }
 
   unSubscribuFromNotifications() {
-    this.connection.invoke('Leave', localStorage.getItem('userName'));
+    this.connection.invoke('Leave', localStorage.getItem('userName')).then(() => {
+      this.connection.stop();
+    });    
   }
 
   subscribuToNotifications() {
+
+    this.connection = new HubConnectionBuilder()
+      .withUrl('/notify')
+      .build();
+
     this.connection.start()
       .then(() => {
         console.log('Connected');
