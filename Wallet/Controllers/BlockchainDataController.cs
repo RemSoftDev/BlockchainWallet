@@ -145,6 +145,14 @@ namespace Wallet.Controllers
             }
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSmartContractInfo(string contractAddress)
+        {
+            var contract =  await dbContext.SmartContracts.FirstOrDefaultAsync(c =>
+                c.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+            return new OkObjectResult(contract);
+        }
+
         public async Task<List<UserWatchlist>> GetWatchList(User user)
         {
             return  dbContext.UserWatchlist.ToList();
@@ -173,12 +181,5 @@ namespace Wallet.Controllers
             });
             await dbContext.SaveChangesAsync();
         }
-
-
-
-
-
-
-
     }
 }

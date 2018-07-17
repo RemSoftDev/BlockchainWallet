@@ -93,7 +93,8 @@ li:hover {
 
 .notificationButton {
   margin-top: 10px;
-  margin-left: 120px;
+  margin-left: 100px;
+  width: 100px;
 }
 
 .dropdownInputField {

@@ -28,7 +28,33 @@ namespace Wallet
                 await InsertTokens(db);
                 await InsertPageElements(db);
                 await InsertUser(db, userManager, roleManager);
+                await InsertSmartContacts(db);
             }
+        }
+
+        private static async Task InsertSmartContacts(WalletDbContext context)
+        {
+            if (context.SmartContracts.Any())
+                return;
+            var data = new List<SmartContract>()
+            {
+                new SmartContract()
+                {
+                    Address = "0xD0a4b8946Cb52f0661273bfbC6fD0E0C75Fc6433",
+                    CreatedDate = new DateTime(2017, 11, 6),
+                    WebSiteLink = "https://stormtoken.com/",
+                    Name = "Storm (STORM)"
+                },
+                new SmartContract()
+                {
+                    Address = "0xf230b790E05390FC8295F4d3F60332c93BEd42e2",
+                    CreatedDate = new DateTime(2017, 8, 28),
+                    WebSiteLink = "https://tron.network/",
+                    Name = "Tronix (TRX)"
+                }
+            };
+            context.SmartContracts.AddRange(data);
+            await context.SaveChangesAsync();
         }
 
         private static async Task InsertUser(WalletDbContext context, UserManager<User> userManager,

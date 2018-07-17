@@ -8,6 +8,7 @@ namespace Wallet.Models
         public DbSet<ERC20Token> Erc20Tokens { get; set; }
         public DbSet<UserWatchlist> UserWatchlist { get; set; }
         public DbSet<PageData> PageData { get; set; }
+        public DbSet<SmartContract> SmartContracts { get; set; }
 
         public WalletDbContext(DbContextOptions<WalletDbContext> options)
             : base(options)

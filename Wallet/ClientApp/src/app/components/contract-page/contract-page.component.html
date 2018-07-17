@@ -27,16 +27,16 @@
         <div class="form-check">
           <input #whenNumberOfTokenSent (change)="whenNumberOfTokenSentFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
           When
-          <input #whenNumberOfTokenSentValue class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>
+          <input #whenNumberOfTokenSentValue placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>
           was sent
         </div>
 
         <div class="form-check">
           <input #whenNumberOfTokenReceived (change)="whenNumberOfTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
           When
-          <input #whenNumberOfTokenReceivedValue class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+          <input #whenNumberOfTokenReceivedValue placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
           were received by <br/>
-          <input #whenNumberOfTokenReceivedAddress class="notificationBigInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+          <input #whenNumberOfTokenReceivedAddress placeholder="wallet or smart contract address" class="notificationBigInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
         </div>
 
         <div class="form-group">
@@ -67,44 +67,65 @@
       <h4 class="addressString">Smart Contract Address <span (click)="showNotificationWindow()" class="addStar glyphicon glyphicon-star-empty"></span></h4>
       <div>
         <p>Name</p>
-        <p class="info">test</p>
+        <p class="info">{{smartContractInfo.name}}</p>
       </div>
       <div>
         <p>Created</p>
-        <p class="info">test</p>
+        <p class="info">{{smartContractInfo.createdDate | date : 'shortDate'}}</p>
       </div>
       <div>
         <p>Quantity</p>
-        <p class="info">test</p>
+        <p class="info">{{smartContractInfo.quantity}}</p>
       </div>
     </div>
   </div>
 
-  <div class="col-sm-3 col-sm-offset-4 rightSideBlock">
+  <div class="col-sm-4 col-sm-offset-4 rightSideBlock">
     <div class="divInfo">
       <h5>{{searchString}}</h5>
       <div>
         <p>Wallets</p>
-        <p class="info">test</p>
+        <p class="info">{{smartContractInfo.walletsCount}}</p>
       </div>
       <div>
         <p>Transactions</p>
-        <p class="info">test</p>
+        <p class="info">{{smartContractInfo.transactionsCount}}</p>
       </div>
       <div>
-        <a>Website link</a>
+        <a target="_blank" href="{{smartContractInfo.webSiteLink}}">{{smartContractInfo.webSiteLink}}</a>
       </div>
     </div>
   </div>
 </div>
 
+<div *ngIf="walletsTabIsActive" novalidate class="row">
+  <div class="col-md-12">
+    <h3>Sort by date, time</h3>
 
-<ul class="nav nav-tabs">
-  <li [ngClass]="transactionTabClass" (click)="loadTransactions()"><a>Transactions</a></li>
-  <li [ngClass]="walletsTabClass" (click)="loadWallets()"><a>Wallets</a></li>
-</ul>
+    <form class="form-inline" #myForm="ngForm" (ngSubmit)="sortByDateTime(myForm)">
+      <div class="form-group">
+        <label for="dateFrom">From:</label>
+        <input placeholder="date" class="form-control" name="dateFrom" ngModel required>
+        <input placeholder="time" class="form-control" name="timeFrom" ngModel required>
+      </div>
+      <div class="form-group">
+        <label for="dateTo">To:</label>
+        <input placeholder="date" class="form-control" name="dateTo" ngModel required>
+        <input placeholder="time" class="form-control" name="timeTo" ngModel required>
+      </div>
+      <button [disabled]="myForm.invalid" type="submit" class="btn btn-default">Sort</button>
+    </form>
+  </div>
+</div>
 
-<div *ngIf="transactionRequesting" class="row tableRow">
+<div class="row tabsRow">
+  <ul class="nav nav-tabs">
+    <li [ngClass]="transactionTabClass" class="tab" (click)="loadTransactions()"><a>Transactions</a></li>
+    <li [ngClass]="walletsTabClass" class="tab" (click)="loadWallets()"><a>Wallets</a></li>
+  </ul>
+</div>
+
+<div *ngIf="!transactionRequesting" class="row tableRow">
   <table class="table table-striped">
     <thead>
     <tr>

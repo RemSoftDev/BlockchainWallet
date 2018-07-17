@@ -40,7 +40,7 @@
         <div class="form-check">
           <input #whenNumberOfTokenSent (change)="whenNumberOfTokenSentFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
           When
-          <input #whenNumberOfTokenSentValueNumber class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>
+          <input #whenNumberOfTokenSentValueNumber placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>
           of
           <select #whenNumberOfTokenSentValueToken [disabled]=!isWithNotifications||!isNumberOfTokenSent>
             <option *ngFor="let token of walletInfo.tokens" value="token.symbol">{{token.symbol | slice : 0:5}}</option>
@@ -60,7 +60,7 @@
         <div class="form-check">
           <input #whenNumberOfTokenReceived (change)="whenNumberOfTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
           When
-          <input #whenNumberOfTokenReceivedValueNumber class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+          <input #whenNumberOfTokenReceivedValueNumber placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
           of
           <select #whenNumberOfTokenReceivedValueToken [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
             <option *ngFor="let token of walletInfo.tokens" value="token.symbol">{{token.symbol | slice : 0:5}}</option>

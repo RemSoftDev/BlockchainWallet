@@ -4,6 +4,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { WalletInfo } from '../models/walletInfo.interface';
 import { TransactionsModel } from '../models/transactionsModel.interface';
 import { BaseService } from "./base.service";
+import { SmartContractInfo } from '../models/smartContractInfo.interface';
+
 
 @Injectable()
 export class BlockchainService extends BaseService {
@@ -26,6 +28,13 @@ export class BlockchainService extends BaseService {
     const params = new HttpParams().set('accountAddress', accountAddress);
     return this.http
       .get<WalletInfo>(this.hostUrl + this.baseUrl + '/GetWalletInfo', { params })
+      .catch(this.handleError);
+  }
+
+  getSmartContractInfo(contractAddress: string) {
+    const params = new HttpParams().set('contractAddress', contractAddress);
+    return this.http
+      .get<SmartContractInfo>(this.hostUrl + this.baseUrl + '/GetSmartContractInfo', { params })
       .catch(this.handleError);
   }
 

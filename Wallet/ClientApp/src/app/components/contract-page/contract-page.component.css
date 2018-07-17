@@ -15,6 +15,7 @@
 
 .info {
   margin-left: 50px;
+  width: 150px !important;
 }
 
 .notificationWindow {
@@ -39,7 +40,8 @@
 
 .notificationButton {
   margin-top: 10px;
-  margin-left: 120px;
+  margin-left: 100px;
+  width: 100px;
 }
 
 .notificationInput {
@@ -54,4 +56,12 @@
 .notificationBigInput {
   margin-left: 15px;
   width: 250px;
+}
+
+.tab {
+  cursor: pointer;
+}
+
+.tabsRow {
+  margin-top: 20px;
 }
