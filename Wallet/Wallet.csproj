@@ -38,8 +38,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\app\components\admin-token\admin-token.component.ts" />
     <None Remove="ClientApp\src\app\components\login\login.component.ts" />
+    <None Remove="ClientApp\src\app\shared\models\tokenModel.ts" />
     <None Remove="ClientApp\src\app\shared\models\watchlistModel.ts" />
+    <None Remove="ClientApp\src\app\shared\services\adminToken.service.ts" />
     <None Remove="ClientApp\src\app\shared\services\auth.service.ts" />
     <None Remove="ClientApp\src\app\shared\services\base.service.ts" />
     <None Remove="ClientApp\src\app\shared\services\blockchain.service.ts" />
@@ -54,8 +57,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\components\admin-token\admin-token.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\components\login\login.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\shared\models\tokenModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\watchlistModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\shared\services\adminToken.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\notifications.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\pageData.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\auth.service.ts" />
