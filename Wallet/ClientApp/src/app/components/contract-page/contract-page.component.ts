@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { BlockchainService } from '../../shared/services/blockchain.service';
+import { WatchlistService } from '../../shared/services/watchlist.service';
+import { WatchlistModel } from "../../shared/models/watchlistModel";
 import { SmartContractInfo } from "../../shared/models/smartContractInfo.interface";
 import { NgForm } from '@angular/forms';
 import { TransactionsModel } from "../../shared/models/transactionsModel.interface";
@@ -13,8 +15,8 @@ import { TransactionsModel } from "../../shared/models/transactionsModel.interfa
 export class ContractPageComponent implements OnInit, OnDestroy {
 
   smartContractInfo: SmartContractInfo;
-  infoRequesting: boolean = false;
-  transactionRequesting: boolean = true;
+  infoRequesting: boolean = true;
+  transactionRequesting: boolean = false;
   showNotWind: boolean;
   isWithNotifications: boolean = false;
   isNumberOfTokenSent: boolean = false;
@@ -26,7 +28,8 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   errors: boolean;
   walletsTabIsActive: boolean = false;
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute, private BCservice: BlockchainService) {
+  constructor(private router: Router, private activatedRoute: ActivatedRoute,
+    private BCservice: BlockchainService, private watchlistService: WatchlistService) {
     this.navigationSubscription = this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
         this.initialise();
@@ -74,6 +77,15 @@ export class ContractPageComponent implements OnInit, OnDestroy {
     console.log(whenNumberOfTokenSentValue.value);
     console.log(whenNumberOfTokenReceivedValue.value);
     console.log(whenNumberOfTokenReceivedAddress.value);
+
+    let model = new WatchlistModel(localStorage.getItem('userName'),this.searchString, true);
+ 
+    this.watchlistService.addToWatchList(model).subscribe(data => {
+      this.closeNotificationWindow();
+      alert("Added");
+    },
+    error => this.errors = error);
+
   }
 
   withNotifications() {

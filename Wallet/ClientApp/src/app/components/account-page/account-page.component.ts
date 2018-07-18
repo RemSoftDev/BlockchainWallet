@@ -3,6 +3,8 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { BlockchainService } from '../../shared/services/blockchain.service';
 import { WalletInfo } from "../../shared/models/walletInfo.interface";
 import { TransactionsModel } from "../../shared/models/transactionsModel.interface";
+import { WatchlistService } from '../../shared/services/watchlist.service';
+import { WatchlistModel } from "../../shared/models/watchlistModel";
 
 @Component({
   selector: 'app-account-page',
@@ -25,7 +27,8 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   moreTransactionRequesting: boolean;
   errors;
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute, private BCservice: BlockchainService) {
+  constructor(private router: Router, private activatedRoute: ActivatedRoute,
+    private BCservice: BlockchainService, private watchlistService: WatchlistService) {
     this.navigationSubscription = this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
         this.initialise();
@@ -106,6 +109,14 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     console.log(whenTokenReceivedValue.value);
     console.log(whenNumberOfTokenReceivedValueNumber.value);
     console.log(whenNumberOfTokenReceivedValueToken.value);
+
+    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false);
+
+    this.watchlistService.addToWatchList(model).subscribe(data => {
+        this.closeNotificationWindow();
+        alert("Added");
+      },
+      error => this.errors = error);
   }
 
   whenNumberOfTokenReceivedFunc() {

@@ -1,22 +1,20 @@
-<h1>Watchlist page</h1>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th scope="col">Id</th>
-      <th scope="col">Adress</th>
-      <th scope="col">Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let wl of watchlismod">
-      <td>{{ wl.id }}</td>
-      <td>{{ wl.adress }}</td>
-      <td>{{ wl.action }}</td>
-      <td>
-        delete
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    <table *ngIf="requested" class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">Wallets</th>
+        <th scope="col">Smart Contracts</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let entry of watchList">
+        <td class="tableRow">{{ entry.account.address }}</td>
+        <td class="tableRow">{{ entry.contract.address }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-<p *ngFor="let us of users">{{us.name}} </p>
+

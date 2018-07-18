@@ -153,33 +153,5 @@ namespace Wallet.Controllers
             return new OkObjectResult(contract);
         }
 
-        public async Task<List<UserWatchlist>> GetWatchList(User user)
-        {
-            return  dbContext.UserWatchlist.ToList();
-
-        }
-        public async Task DeleteFromWatchlist(int idwatchlist )
-        {
-            UserWatchlist wl = new UserWatchlist
-            {
-                Id = idwatchlist
-            };
-
-            dbContext.UserWatchlist.Attach(wl);
-            dbContext.UserWatchlist.Remove(wl);
-
-            await dbContext.SaveChangesAsync();
-
-        }
-        public async Task AddToWatchlist(int action, string userid, string adress)
-        {
-            dbContext.UserWatchlist.Add(new UserWatchlist()
-            {
-                Action = action,
-                Adress = adress,
-                UserId = userid
-            });
-            await dbContext.SaveChangesAsync();
-        }
     }
 }

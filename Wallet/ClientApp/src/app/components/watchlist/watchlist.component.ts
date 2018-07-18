@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RedirectionService } from '../../shared/services/redirection.service';
 import { WatchlistService } from '../../shared/services/watchlist.service';
-import { WatchlistModel } from '../../shared/models/watchlist.interface';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 
 
@@ -10,23 +9,27 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
   templateUrl: './watchlist.component.html',
   styleUrls: ['./watchlist.component.css']
 })
+export class WatchlistComponent implements OnInit, OnDestroy {
 
+  errors;
+  watchList;
+  requested = false;
+  fakeArray:any[];
 
+  constructor(private redirectionService: RedirectionService, private wlService: WatchlistService) {}
 
-export class WatchlistComponent {
-  //users = [
-  //  { name: 'qw1' },
-  //  { name: 'qw2' }
-  //]
-  watchlismod: WatchlistModel[];
-  constructor(private router: Router, private activatedRoute: ActivatedRoute, private WLservice: WatchlistService) {
-
-    this.WLservice.getWatchlistInfo('0').subscribe(model => {
-      this.watchlismod = model
-    })
-
-
+  ngOnInit() {
+    this.redirectionService.toWatchlistPage();
+    this.wlService.getWatchlistInfo(localStorage.getItem('userName')).subscribe(data => {
+      this.watchList = data;
+      this.requested = true;
+      },
+      error => this.errors = error);
   }
 
+  ngOnDestroy() {
+    this.redirectionService.fromWatchListPage();
+  }
 
 }
+
