@@ -5,8 +5,6 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { ReCaptchaModule } from 'angular2-recaptcha';
 import { CookieModule } from 'ngx-cookie';
-import { SimpleNotificationsModule } from 'angular2-notifications';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { JwtInterceptor } from './jwt.interceptor';
 import { AppComponent } from './app.component';
@@ -33,6 +31,7 @@ import { AdminPanelComponent } from './components/admin-panel/admin-panel.compon
 import { AuthAdminGuardService } from './shared/services/auth-admin-guard.service';
 import { AuthUserGuardService } from './shared/services/auth-user-guard.service';
 import { WatchlistService } from './shared/services/watchlist.service';
+import { NotificationsService } from './shared/services/notifications.service';
 
 @NgModule({
   declarations: [
@@ -56,7 +55,6 @@ import { WatchlistService } from './shared/services/watchlist.service';
   imports: [
     CookieModule.forRoot(),
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
-    BrowserAnimationsModule,
     HttpClientModule,
     ReCaptchaModule,
     FormsModule,
@@ -77,8 +75,7 @@ import { WatchlistService } from './shared/services/watchlist.service';
       { path: 'contact', component: ContactComponent },
       { path: 'watchlist', component: WatchlistComponent, canActivate: [AuthUserGuardService] }
     ],
-      { onSameUrlNavigation: 'reload' }),
-     SimpleNotificationsModule.forRoot()
+      { onSameUrlNavigation: 'reload' })
   ],
   providers: [
     AuthAdminGuardService,
@@ -87,6 +84,7 @@ import { WatchlistService } from './shared/services/watchlist.service';
     RedirectionService,
     PageDataService,
     WatchlistService,
+    NotificationsService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

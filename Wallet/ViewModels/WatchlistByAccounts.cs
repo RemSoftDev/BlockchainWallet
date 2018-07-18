@@ -4,7 +4,7 @@ namespace Wallet.ViewModels
 {
     public class WatchlistByAccounts
     {
-        public UserWatchlist Account { get; set; }
-        public UserWatchlist Contract { get; set; }
+        public UserWatchListViewModel Account { get; set; }
+        public UserWatchListViewModel Contract { get; set; }
     }
 }

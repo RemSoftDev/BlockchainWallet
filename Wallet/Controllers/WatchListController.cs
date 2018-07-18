@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Wallet.Helpers;
 using Wallet.Models;
 using Wallet.ViewModels;
 
@@ -15,12 +16,12 @@ namespace Wallet.Controllers
     public class WatchListController : Controller
     {
         private readonly UserManager<User> _userManager;
-        private WalletDbContext dbContext;
+        private WalletDbContext _dbContext;
 
         public WatchListController(UserManager<User> userManager, WalletDbContext context)
         {
             _userManager = userManager;
-            this.dbContext = context;
+            _dbContext = context;
         }
 
         [HttpGet("[action]")]
@@ -28,10 +29,10 @@ namespace Wallet.Controllers
         {
             try
             {
-                var data = await dbContext.UserWatchlist
+                var data = await _dbContext.UserWatchlist
                     .Where(w => w.UserEmail.Equals(userEmail, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
 
-                var result = OrganizeData(data);
+                var result = WatchlistHelper.OrganizeData(data);
 
                 return new ObjectResult(result);
             }
@@ -49,10 +50,10 @@ namespace Wallet.Controllers
                 Id = idwatchlist
             };
 
-            dbContext.UserWatchlist.Attach(wl);
-            dbContext.UserWatchlist.Remove(wl);
+            _dbContext.UserWatchlist.Attach(wl);
+            _dbContext.UserWatchlist.Remove(wl);
 
-            await dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
         }
 
@@ -64,13 +65,13 @@ namespace Wallet.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                dbContext.UserWatchlist.Add(new UserWatchlist()
+                _dbContext.UserWatchlist.Add(new UserWatchlist()
                 {
                     Address = model.Address,
                     UserEmail = model.UserEmail,
                     IsContract = model.IsContract
                 });
-                await dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
 
                 return new OkResult();
             }
@@ -78,52 +79,6 @@ namespace Wallet.Controllers
             {
                 return StatusCode(500, $"En error occurred :{e.Message}");
             }       
-        }
-
-        public List<WatchlistByAccounts> OrganizeData(List<UserWatchlist> data)
-        {
-            var result = new List<WatchlistByAccounts>();
-            var accounts = new List<UserWatchlist>();
-            var contracts = new List<UserWatchlist>();
-
-            foreach (var entry in data)
-            {
-                if (entry.IsContract)
-                {
-                    contracts.Add(entry);
-                }
-                else
-                {
-                    accounts.Add(entry);
-                }
-            }
-
-            int length = contracts.Count >= accounts.Count ? contracts.Count : accounts.Count;
-            if (contracts.Count > accounts.Count)
-            {
-                for (int i = 0; i < length - accounts.Count; i++)
-                {
-                    accounts.Add(new UserWatchlist() { Address = String.Empty, UserEmail = String.Empty });
-                }
-            }
-            else
-            {
-                for (int i = 0; i < length - contracts.Count; i++)
-                {
-                    contracts.Add(new UserWatchlist() { Address = String.Empty, UserEmail = String.Empty });
-                }
-            }
-
-            for (int i = 0; i < length; i++)
-            {
-                result.Add(new WatchlistByAccounts()
-                {
-                    Contract = contracts[i],
-                    Account = accounts[i]
-                });
-            }
-
-            return result;
         }
     }
 }

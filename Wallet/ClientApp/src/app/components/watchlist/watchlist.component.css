@@ -5,3 +5,12 @@
 table {
   width: 100%;
 }
+
+.dot {
+  height: 15px;
+  width: 15px;
+  background-color: red;
+  border-radius: 50%;
+  margin-right: 15px;
+  float: right;
+}

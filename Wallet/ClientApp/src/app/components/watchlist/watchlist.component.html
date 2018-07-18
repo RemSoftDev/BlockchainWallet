@@ -9,8 +9,8 @@
       </thead>
       <tbody>
       <tr *ngFor="let entry of watchList">
-        <td class="tableRow">{{ entry.account.address }}</td>
-        <td class="tableRow">{{ entry.contract.address }}</td>
+        <td class="tableRow">{{ entry.account.address }} <span *ngIf="entry.account.isNotificated" class="dot"></span></td>
+        <td class="tableRow">{{ entry.contract.address }} <span *ngIf="entry.contract.isNotificated" class="dot"></span></td>
       </tr>
       </tbody>
     </table>

@@ -7,9 +7,6 @@ import { BaseService } from "./base.service";
 import { Observable } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/Rx';
 
-import { HubConnectionBuilder }  from '@aspnet/signalr';
-import { NotificationsService } from 'angular2-notifications';
-
 import 'rxjs/add/operator/map';
 
 const httpOptions = {
@@ -26,9 +23,8 @@ export class AuthService extends BaseService {
   private _authNavStatusSource = new BehaviorSubject<boolean>(false);
   authNavStatus$ = this._authNavStatusSource.asObservable();
   private loggedIn = false;
-  connection;
 
-  constructor(private http: HttpClient, @Inject('BASE_URL') hostUrl: string, private _service: NotificationsService) {
+  constructor(private http: HttpClient, @Inject('BASE_URL') hostUrl: string) {
     super();
     this.loggedIn = !!localStorage.getItem('access_token');
     this._authNavStatusSource.next(this.loggedIn);
@@ -83,44 +79,9 @@ export class AuthService extends BaseService {
         localStorage.setItem('userName', JSON.parse(JSON.stringify(res)).userName);
         this.loggedIn = true;
         this._authNavStatusSource.next(true);
-        this.subscribuToNotifications();
         return true;
       })
       .catch(this.handleError);
-  }
-
-  unSubscribuFromNotifications() {
-    this.connection.invoke('Leave', localStorage.getItem('userName')).then(() => {
-      this.connection.stop();
-    });    
-  }
-
-  subscribuToNotifications() {
-
-    this.connection = new HubConnectionBuilder()
-      .withUrl('/notify')
-      .build();
-
-    this.connection.start()
-      .then(() => {
-        console.log('Connected');
-        this.connection.invoke('Join', localStorage.getItem('userName'));
-      });
-
-    this.connection.on('Left', (data) => {
-      console.log(data);
-    });
-
-    this.connection.on('Message', (payload: string) => {
-      this._service.info('Notification',
-        payload,
-        {
-          timeOut: 2000,
-          showProgressBar: true,
-          pauseOnHover: true,
-          clickToClose: true
-        });
-    });
   }
 
   signIn(email, password, passwordConfirm) {
@@ -136,7 +97,6 @@ export class AuthService extends BaseService {
   }
 
   logout() {
-    this.unSubscribuFromNotifications();
     localStorage.removeItem('access_token');
     localStorage.removeItem('userRoles');
     localStorage.removeItem('userName');    
