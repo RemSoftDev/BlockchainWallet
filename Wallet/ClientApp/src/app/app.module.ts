@@ -32,6 +32,7 @@ import { PageDataService } from './shared/services/pageData.service';
 import { AdminPanelComponent } from './components/admin-panel/admin-panel.component';
 import { AuthAdminGuardService } from './shared/services/auth-admin-guard.service';
 import { AuthUserGuardService } from './shared/services/auth-user-guard.service';
+import { WatchlistService } from './shared/services/watchlist.service';
 
 @NgModule({
   declarations: [
@@ -85,6 +86,7 @@ import { AuthUserGuardService } from './shared/services/auth-user-guard.service'
     BlockchainService,
     RedirectionService,
     PageDataService,
+    WatchlistService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

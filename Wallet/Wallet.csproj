@@ -39,11 +39,13 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\app\components\login\login.component.ts" />
+    <None Remove="ClientApp\src\app\shared\models\watchlist.interface.ts" />
     <None Remove="ClientApp\src\app\shared\services\auth.service.ts" />
     <None Remove="ClientApp\src\app\shared\services\base.service.ts" />
     <None Remove="ClientApp\src\app\shared\services\blockchain.service.ts" />
     <None Remove="ClientApp\src\app\components\sign-in\signin.component.ts" />
     <None Remove="ClientApp\src\app\shared\services\pageData.service.ts" />
+    <None Remove="ClientApp\src\app\shared\services\watchlist.service.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,11 +54,13 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\components\login\login.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\shared\models\watchlist.interface.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\pageData.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\auth.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\base.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\services\blockchain.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\components\sign-in\signin.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\shared\services\watchlist.service.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
