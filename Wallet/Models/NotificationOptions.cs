@@ -9,27 +9,29 @@ namespace Wallet.Models
 
         public bool IsWithoutNotifications { get; set; }
 
-        public bool WhenTokenIsSent { get; set; }
+        public bool WhenTokenOrEtherIsSent { get; set; }
 
-        public string TokenSentName { get; set; }
+        public string TokenOrEtherSentName { get; set; }
 
         public bool WhenAnythingWasSent { get; set; }
 
-        public bool WhenNumberOfTokenWasSent { get; set; }
+        public bool WhenNumberOfTokenOrEtherWasSent { get; set; }
 
-        public int NumberOfTokenThatWasSent { get; set; }
+        public int NumberOfTokenOrEtherThatWasSentFrom { get; set; }
 
-        public string NumberOfTokenWasSentName { get; set; }
+        public int NumberOfTokenOrEtherThatWasSentTo { get; set; }
 
-        public bool WhenTokenIsReceived { get; set; }
+        public string NumberOfTokenOrEtherWasSentName { get; set; }
 
-        public string TokenReceivedName { get; set; }
+        public bool WhenTokenOrEtherIsReceived { get; set; }
 
-        public bool WhenNumberOfTokenWasReceived { get; set; }
+        public string TokenOrEtherReceivedName { get; set; }
 
-        public int NumberOfTokenWasReceived { get; set; }
+        public bool WhenNumberOfTokenOrEtherWasReceived { get; set; }
 
-        public string TokenWasReceivedName { get; set; }
+        public int NumberOfTokenOrEtherWasReceived { get; set; }
+
+        public string TokenOrEtherWasReceivedName { get; set; }
 
         public bool WhenNumberOfContractTokenWasSent { get; set; }
 

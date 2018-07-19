@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wallet.Models;
 
 namespace Wallet.Migrations
 {
     [DbContext(typeof(WalletDbContext))]
-    partial class WalletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180719120636_AddNotificationOptions3")]
+    partial class AddNotificationOptions3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,21 +162,21 @@ namespace Wallet.Migrations
 
                     b.Property<int>("NumberOfContractTokenWasSent");
 
-                    b.Property<int>("NumberOfTokenOrEtherThatWasSentFrom");
+                    b.Property<int>("NumberOfTokenThatWasSentFrom");
 
-                    b.Property<int>("NumberOfTokenOrEtherThatWasSentTo");
+                    b.Property<int>("NumberOfTokenThatWasSentTo");
 
-                    b.Property<int>("NumberOfTokenOrEtherWasReceived");
-
-                    b.Property<string>("NumberOfTokenOrEtherWasSentName");
+                    b.Property<int>("NumberOfTokenWasReceived");
 
                     b.Property<int>("NumberOfTokenWasReceivedByAddress");
 
-                    b.Property<string>("TokenOrEtherReceivedName");
+                    b.Property<string>("NumberOfTokenWasSentName");
 
-                    b.Property<string>("TokenOrEtherSentName");
+                    b.Property<string>("TokenReceivedName");
 
-                    b.Property<string>("TokenOrEtherWasReceivedName");
+                    b.Property<string>("TokenSentName");
+
+                    b.Property<string>("TokenWasReceivedName");
 
                     b.Property<int>("UserWatchlistId");
 
@@ -184,13 +186,13 @@ namespace Wallet.Migrations
 
                     b.Property<bool>("WhenNumberOfContractWasReceivedByAddress");
 
-                    b.Property<bool>("WhenNumberOfTokenOrEtherWasReceived");
+                    b.Property<bool>("WhenNumberOfTokenWasReceived");
 
-                    b.Property<bool>("WhenNumberOfTokenOrEtherWasSent");
+                    b.Property<bool>("WhenNumberOfTokenWasSent");
 
-                    b.Property<bool>("WhenTokenOrEtherIsReceived");
+                    b.Property<bool>("WhenTokenIsReceived");
 
-                    b.Property<bool>("WhenTokenOrEtherIsSent");
+                    b.Property<bool>("WhenTokenIsSent");
 
                     b.HasKey("Id");
 

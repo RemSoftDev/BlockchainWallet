@@ -20,13 +20,6 @@ export class NotificationsService {
     });    
   }
 
-  playSound() {
-    let audio = new Audio();
-    audio.src = "../../../assets/notification.mp3";
-    audio.load();
-    audio.play();
-  }
-
   subscribuToNotifications() {
 
     this.connection = new HubConnectionBuilder()
@@ -45,7 +38,6 @@ export class NotificationsService {
 
     this.connection.on('Message', (payload: string) => {
       this.receivedData = payload;
-      this.playSound();
       this._receivingStatusSource.next(true);    
     });
   }

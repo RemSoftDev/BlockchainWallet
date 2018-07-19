@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Nethereum.RPC.Eth.DTOs;
 using Wallet.BlockchainAPI;
 using Wallet.Helpers;
 using Wallet.Models;
-using Wallet.ViewModels;
 
 namespace Wallet.Notifications
 {
@@ -52,22 +52,34 @@ namespace Wallet.Notifications
                         if (_lastCheckedBlockNumber == 0)
                             _lastCheckedBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
 
-                        if ((int)(await _explorer.GetLastAvailableBlockNumber()).Value > _lastCheckedBlockNumber)
+                        if ((int)(await _explorer.GetLastAvailableBlockNumber()).Value >= _lastCheckedBlockNumber)
                         {
-                            foreach (var user in _userInfo._onlineUsers)
+                            Transaction[] transactions = {};
+                            if (_userInfo.onlineUsers.Count > 0)
+                                transactions = await GetLastBlockTransactions();
+
+                            foreach (var user in _userInfo.onlineUsers)
                             {
                                 var data = await dbContext.UserWatchlist
-                                    .Where(w => w.UserEmail.Equals(user.Value.UserName, StringComparison.CurrentCultureIgnoreCase)).ToListAsync();
+                                    .Where(w => w.UserEmail.Equals(user.Value.UserName,
+                                        StringComparison.CurrentCultureIgnoreCase)).Include(w => w.NotificationOptions)
+                                    .ToListAsync();
+
+                                var ids = GetIdNotificatedAddresses(transactions, data);
 
                                 var result = WatchlistHelper.OrganizeData(data);
-
-                                for (int i = 0; i < result.Count; i++)
+                                
+                                result.ForEach(e =>
                                 {
-                                    if (_lastCheckedBlockNumber%2==0)
+                                    if (ids.Any(i=>i == e.Account.Id))
                                     {
-                                        result[i].Contract.IsNotificated = true;
+                                        e.Account.IsNotificated = true;
                                     }
-                                }
+                                    if (ids.Any(i => i == e.Contract.Id))
+                                    {
+                                        e.Contract.IsNotificated = true;
+                                    }
+                                });
 
                                 await _hubContext.Clients.Clients(user.Value.ConnectionId)
                                     .SendAsync("Message", result);
@@ -75,14 +87,6 @@ namespace Wallet.Notifications
 
                             _lastCheckedBlockNumber++;
                         }
-                        //else
-                        //{
-                        //    foreach (var user in _userInfo._onlineUsers)
-                        //    {
-                        //        await _hubContext.Clients.Clients(user.Value.ConnectionId)
-                        //            .SendAsync("Message", $"{(int)(await _explorer.GetLastAvailableBlockNumber()).Value} !!> {_lastCheckedBlockNumber}");
-                        //    }
-                        //}
                     }
                 }
                 catch (Exception e)
@@ -90,6 +94,69 @@ namespace Wallet.Notifications
                     await _hubContext.Clients.All.SendAsync("Message", "Error");
                 }
             });
+        }
+
+        public List<int> GetIdNotificatedAddresses(Transaction[] transactions, List<UserWatchlist> data)
+        {
+            var result = new List<int>();
+
+            foreach (var watchListLine in data)
+            {
+                if (!watchListLine.NotificationOptions.IsWithoutNotifications)
+                {
+                    if (watchListLine.NotificationOptions.WhenAnythingWasSent)
+                    {
+                        if (transactions.ToList().Any(t => t.From.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))||
+                            transactions.ToList().Any(t => t.Input.StartsWith(Constants.Strings.TransactionType.Transfer)))
+                        {
+                            result.Add(watchListLine.Id);
+                            continue;
+                        }
+                    }
+                    if (watchListLine.NotificationOptions.WhenTokenOrEtherIsSent)
+                    {
+                        if (transactions.ToList().Any(t=>t.Input.StartsWith(Constants.Strings.TransactionType.Transfer)))
+                        {
+                            result.Add(watchListLine.Id);
+                            continue;                          
+                        }
+                    }
+                    if (watchListLine.NotificationOptions.WhenNumberOfTokenOrEtherWasSent)
+                    {
+
+                    }
+                    if (watchListLine.NotificationOptions.WhenTokenOrEtherIsReceived)
+                    {
+
+                    }
+                    if (watchListLine.NotificationOptions.WhenNumberOfTokenOrEtherWasReceived)
+                    {
+
+                    }
+                    if (watchListLine.NotificationOptions.WhenNumberOfContractTokenWasSent)
+                    {
+
+                    }
+                    if (watchListLine.NotificationOptions.WhenNumberOfContractWasReceivedByAddress)
+                    {
+
+                    }
+                }
+            }
+            return result;
+        }
+
+        public async Task<Transaction[]> GetLastBlockTransactions()
+        {
+            try
+            {
+                return (await _explorer.GetBlockByNumber(_lastCheckedBlockNumber)).Transactions;
+
+            }
+            catch (Exception e)
+            {
+                return new Transaction[]{};
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

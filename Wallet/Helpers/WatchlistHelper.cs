@@ -17,11 +17,11 @@ namespace Wallet.Helpers
             {
                 if (entry.IsContract)
                 {
-                    contracts.Add(new UserWatchListViewModel() { Address = entry.Address, UserEmail = entry.UserEmail });
+                    contracts.Add(new UserWatchListViewModel() { Address = entry.Address, UserEmail = entry.UserEmail, Id = entry.Id});
                 }
                 else
                 {
-                    accounts.Add(new UserWatchListViewModel() { Address = entry.Address, UserEmail = entry.UserEmail });
+                    accounts.Add(new UserWatchListViewModel() { Address = entry.Address, UserEmail = entry.UserEmail, Id = entry.Id });
                 }
             }
 

@@ -6,6 +6,6 @@ namespace Wallet.Notifications
     {
         bool AddUpdate(string name, string connectionId);
         void Remove(string name);
-        ConcurrentDictionary<string, UserInfo> _onlineUsers { get; set; }
+        ConcurrentDictionary<string, UserInfo> onlineUsers { get; set; }
     }
 }

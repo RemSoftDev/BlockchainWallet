@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
+using Nethereum.RPC.Eth.DTOs;
 using Wallet.BlockchainAPI.Model;
 using Wallet.Models;
 using Wallet.ViewModels;
@@ -14,5 +15,6 @@ namespace Wallet.BlockchainAPI
         Task<List<CustomTransaction>> GetTransactions(string account, int searchInLastBlocksCount);
         Task<HexBigInteger> GetLastAvailableBlockNumber();
         Task<string> GetCode(string address);
+        Task<BlockWithTransactions> GetBlockByNumber(int blockNumber);
     }
 }

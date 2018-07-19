@@ -5,6 +5,8 @@ namespace Wallet.ViewModels
 {
     public class UserWatchListViewModel
     {
+        public int Id { get; set; }
+
         [Required]
         [DataType(DataType.EmailAddress)]
         public string UserEmail { get; set; }

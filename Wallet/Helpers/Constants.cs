@@ -19,6 +19,11 @@
             {
                 public const string AccountCode = "0x";
             }
+
+            public static class TransactionType
+            {
+                public const string Transfer = "0xa9059cbb";
+            }
         }
     }
 }

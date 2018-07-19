@@ -92,7 +92,8 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     whenTokenReceived,
     whenNumberOfTokenReceived,
     whenTokenSentValue,
-    whenNumberOfTokenSentValueNumber,
+    whenNumberOfTokenSentValueNumberFrom,
+    whenNumberOfTokenSentValueNumberTo,
     whenNumberOfTokenSentValueToken,
     whenTokenReceivedValue,
     whenNumberOfTokenReceivedValueNumber,
@@ -103,20 +104,22 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     if (withNotification.checked) {
       notifOptions.isWithoutNotifications = true;
     } else {
-      notifOptions.whenTokenIsSent = whenTokenSent.checked;
-      notifOptions.tokenSentName = whenTokenSentValue.value;
+      notifOptions.whenTokenOrEtherIsSent = whenTokenSent.checked;
+      notifOptions.tokenOrEtherSentName = whenTokenSentValue.value;
       notifOptions.whenAnythingWasSent = whenAnythingSent.checked;
-      notifOptions.whenNumberOfTokenWasSent = whenNumberOfTokenSent.checked;
-      if (whenNumberOfTokenSentValueNumber.value)
-        notifOptions.numberOfTokenThatWasSent = whenNumberOfTokenSentValueNumber.value;
-      notifOptions.numberOfTokenWasSentName = whenNumberOfTokenSentValueToken.value;
-      notifOptions.whenTokenIsReceived = whenTokenReceived.checked;
-      notifOptions.tokenReceivedName = whenTokenReceivedValue.value;
-      notifOptions.whenNumberOfTokenWasReceived = whenNumberOfTokenReceived.checked;
+      notifOptions.whenNumberOfTokenOrEtherWasSent = whenNumberOfTokenSent.checked;
+      if (whenNumberOfTokenSentValueNumberFrom.value)
+        notifOptions.numberOfTokenOrEtherThatWasSentFrom = whenNumberOfTokenSentValueNumberFrom.value;
+      if (whenNumberOfTokenSentValueNumberTo.value)
+        notifOptions.numberOfTokenOrEtherThatWasSentTo = whenNumberOfTokenSentValueNumberTo.value;
+      notifOptions.numberOfTokenOrEtherWasSentName = whenNumberOfTokenSentValueToken.value;
+      notifOptions.whenTokenOrEtherIsReceived = whenTokenReceived.checked;
+      notifOptions.tokenOrEtherReceivedName = whenTokenReceivedValue.value;
+      notifOptions.whenNumberOfTokenOrEtherWasReceived = whenNumberOfTokenReceived.checked;
       if (whenNumberOfTokenReceivedValueNumber.value)
-        notifOptions.numberOfTokenWasReceived = whenNumberOfTokenReceivedValueNumber.value;
+        notifOptions.numberOfTokenOrEtherWasReceived = whenNumberOfTokenReceivedValueNumber.value;
      
-      notifOptions.tokenWasReceivedName = whenNumberOfTokenReceivedValueToken.value;
+      notifOptions.tokenOrEtherWasReceivedName = whenNumberOfTokenReceivedValueToken.value;
     }
 
     let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false, notifOptions);

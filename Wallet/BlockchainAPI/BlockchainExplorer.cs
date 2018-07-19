@@ -75,6 +75,11 @@ namespace Wallet.BlockchainAPI
             return await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
         }
 
+        public Task<BlockWithTransactions> GetBlockByNumber(int blockNumber)
+        {
+            return web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
+        }
+
         public async Task<List<CustomTransaction>> GetTransactions(string account, int blockNumber)
         {
             var result = new List<CustomTransaction>();

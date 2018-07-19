@@ -39,8 +39,29 @@ export class WatchlistComponent implements OnInit, OnDestroy {
     this.redirectionService.fromWatchListPage();
   }
 
+  playSound() {
+    let audio = new Audio();
+    audio.src = "../../assets/notification.mp3";
+    audio.load();
+    audio.play();
+  }
+
   getNitificatedData() {
+    console.log(this.notifService.getData());
     this.watchList = this.notifService.getData();
+    if (this.shouldMakeSound())
+      this.playSound();
+  }
+
+  shouldMakeSound() {
+    if (this.watchList) {
+      for (let entry of this.watchList) {
+        if (entry.account.isNotificated || entry.contract.isNotificated) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 
   getWatchlist() {

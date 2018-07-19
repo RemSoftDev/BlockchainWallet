@@ -5,12 +5,12 @@ namespace Wallet.Notifications
 {
     public class UserInfoInMemory : IUserInfoInMemory
     {
-        public ConcurrentDictionary<string, UserInfo> _onlineUsers { get; set; } =
+        public ConcurrentDictionary<string, UserInfo> onlineUsers { get; set; } =
             new ConcurrentDictionary<string, UserInfo>();
 
         public bool AddUpdate(string name, string connectionId)
         {
-            var userAlreadyExists = _onlineUsers.ContainsKey(name);
+            var userAlreadyExists = onlineUsers.ContainsKey(name);
 
             var userInfo = new UserInfo
             {
@@ -18,7 +18,7 @@ namespace Wallet.Notifications
                 ConnectionId = connectionId
             };
 
-            _onlineUsers.AddOrUpdate(name, userInfo, (key, value) => userInfo);
+            onlineUsers.AddOrUpdate(name, userInfo, (key, value) => userInfo);
 
             return userAlreadyExists;
         }
@@ -26,7 +26,7 @@ namespace Wallet.Notifications
         public void Remove(string name)
         {
             UserInfo userInfo;
-            _onlineUsers.TryRemove(name, out userInfo);
+            onlineUsers.TryRemove(name, out userInfo);
         }
     }
 }

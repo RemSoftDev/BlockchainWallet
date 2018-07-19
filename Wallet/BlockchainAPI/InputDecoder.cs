@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection.Metadata;
+using Microsoft.AspNetCore.WebSockets.Internal;
 using Nethereum.Hex.HexConvertors;
 using Nethereum.Web3;
 using Wallet.BlockchainAPI.Model;
 using Wallet.Models;
+using Wallet.Helpers;
 
 namespace Wallet.BlockchainAPI
 {
@@ -11,7 +14,7 @@ namespace Wallet.BlockchainAPI
     {
         public static TransactionInput DecodeInput(string input, string contractAddress, WalletDbContext dbContext)
         {
-            if (input.StartsWith("0xa9059cbb"))
+            if (input.StartsWith(Helpers.Constants.Strings.TransactionType.Transfer))
             {
                 HexBigIntegerBigEndianConvertor hexConverter = new HexBigIntegerBigEndianConvertor();
                 //cut off method name (first 4 byte)
