@@ -14,7 +14,7 @@ using Wallet.ViewModels;
 
 namespace Wallet.Notifications
 {
-    public class NitificationService : IHostedService, IDisposable
+    public class NotificationService : IHostedService, IDisposable
     {
         private readonly IServiceScopeFactory scopeFactory;
         private IBlockchainExplorer _explorer;
@@ -23,7 +23,7 @@ namespace Wallet.Notifications
         private Timer _timer;
         private int _lastCheckedBlockNumber;
 
-        public NitificationService(IHubContext<NotifyHub> hubContext, IUserInfoInMemory userInfo,
+        public NotificationService(IHubContext<NotifyHub> hubContext, IUserInfoInMemory userInfo,
             IBlockchainExplorer explorer, IServiceScopeFactory scopeFactory)
         {
             _explorer = explorer;

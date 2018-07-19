@@ -20,6 +20,6 @@ namespace Wallet.Models
         [Required]
         public bool IsContract { get; set; }
 
-        public int Action { get; set; }
+        public NotificationOptions NotificationOptions { get; set; }
     }
 }

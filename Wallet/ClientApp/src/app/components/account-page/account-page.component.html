@@ -27,7 +27,7 @@
           <input #whenTokenSent (change)="whenTokenSentFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
           When
           <select #whenTokenSentValue [disabled]=!isWithNotifications||!isTokenSent>
-            <option class="dropdownInputField" *ngFor="let token of walletInfo.tokens" value="token.symbol">{{token.symbol | slice : 0:5}}</option>
+            <option class="dropdownInputField" *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
           </select>
           is sent
         </div>
@@ -43,7 +43,7 @@
           <input #whenNumberOfTokenSentValueNumber placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>
           of
           <select #whenNumberOfTokenSentValueToken [disabled]=!isWithNotifications||!isNumberOfTokenSent>
-            <option *ngFor="let token of walletInfo.tokens" value="token.symbol">{{token.symbol | slice : 0:5}}</option>
+            <option *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
           </select>
           was sent
         </div>
@@ -52,7 +52,7 @@
           <input #whenTokenReceived (change)="whenTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
           When
           <select #whenTokenReceivedValue [disabled]=!isWithNotifications||!isTokenReceived>
-            <option *ngFor="let token of walletInfo.tokens" value="token.symbol">{{token.symbol | slice : 0:5}}</option>
+            <option *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
           </select>
           is received
         </div>
@@ -63,7 +63,7 @@
           <input #whenNumberOfTokenReceivedValueNumber placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
           of
           <select #whenNumberOfTokenReceivedValueToken [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
-            <option *ngFor="let token of walletInfo.tokens" value="token.symbol">{{token.symbol | slice : 0:5}}</option>
+            <option *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
           </select>
           was received
         </div>

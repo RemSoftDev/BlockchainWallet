@@ -3,6 +3,7 @@ import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { BlockchainService } from '../../shared/services/blockchain.service';
 import { WatchlistService } from '../../shared/services/watchlist.service';
 import { WatchlistModel } from "../../shared/models/watchlistModel";
+import { NotificationOptions } from "../../shared/models/watchlistModel";
 import { SmartContractInfo } from "../../shared/models/smartContractInfo.interface";
 import { NgForm } from '@angular/forms';
 import { TransactionsModel } from "../../shared/models/transactionsModel.interface";
@@ -71,14 +72,21 @@ export class ContractPageComponent implements OnInit, OnDestroy {
     whenNumberOfTokenReceivedValue,
     whenNumberOfTokenReceivedAddress) {
 
-    console.log(withNotification.checked);
-    console.log(whenNumberOfTokenSent.checked);
-    console.log(whenNumberOfTokenReceived.checked);
-    console.log(whenNumberOfTokenSentValue.value);
-    console.log(whenNumberOfTokenReceivedValue.value);
-    console.log(whenNumberOfTokenReceivedAddress.value);
+    let notifOptions = new NotificationOptions();
 
-    let model = new WatchlistModel(localStorage.getItem('userName'),this.searchString, true);
+    if (withNotification.checked) {
+      notifOptions.isWithoutNotifications = true;
+    } else {
+      notifOptions.whenNumberOfContractTokenWasSent = true;
+      if (whenNumberOfTokenSentValue.value)
+        notifOptions.numberOfContractTokenWasSent = whenNumberOfTokenSentValue.value;
+      notifOptions.whenNumberOfContractWasReceivedByAddress = whenNumberOfTokenReceived.checked;
+      if (whenNumberOfTokenReceivedValue.value)
+        notifOptions.numberOfTokenWasReceivedByAddress = whenNumberOfTokenReceivedValue.value;
+      notifOptions.addressThatReceivedNumberOfToken = whenNumberOfTokenReceivedAddress.value;
+    }
+
+    let model = new WatchlistModel(localStorage.getItem('userName'),this.searchString, true,notifOptions);
  
     this.watchlistService.addToWatchList(model).subscribe(data => {
       this.closeNotificationWindow();

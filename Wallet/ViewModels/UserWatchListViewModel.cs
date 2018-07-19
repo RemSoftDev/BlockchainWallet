@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Wallet.Models;
 
 namespace Wallet.ViewModels
 {
@@ -13,6 +14,8 @@ namespace Wallet.ViewModels
 
         [Required]
         public bool IsContract { get; set; }
+
+        public NotificationOptions NotificationOptions { get; set; }
 
         public bool IsNotificated { get; set; }
 

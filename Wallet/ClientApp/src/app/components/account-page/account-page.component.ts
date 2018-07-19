@@ -4,6 +4,7 @@ import { BlockchainService } from '../../shared/services/blockchain.service';
 import { WalletInfo } from "../../shared/models/walletInfo.interface";
 import { TransactionsModel } from "../../shared/models/transactionsModel.interface";
 import { WatchlistService } from '../../shared/services/watchlist.service';
+import { NotificationOptions } from "../../shared/models/watchlistModel";
 import { WatchlistModel } from "../../shared/models/watchlistModel";
 
 @Component({
@@ -97,20 +98,28 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     whenNumberOfTokenReceivedValueNumber,
     whenNumberOfTokenReceivedValueToken) {
 
-    console.log(withNotification.checked);
-    console.log(whenTokenSent.checked);
-    console.log(whenAnythingSent.checked);
-    console.log(whenNumberOfTokenSent.checked);
-    console.log(whenTokenReceived.checked);
-    console.log(whenNumberOfTokenReceived.checked);
-    console.log(whenTokenSentValue.value);
-    console.log(whenNumberOfTokenSentValueNumber.value);
-    console.log(whenNumberOfTokenSentValueToken.value);
-    console.log(whenTokenReceivedValue.value);
-    console.log(whenNumberOfTokenReceivedValueNumber.value);
-    console.log(whenNumberOfTokenReceivedValueToken.value);
+    let notifOptions = new NotificationOptions();
 
-    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false);
+    if (withNotification.checked) {
+      notifOptions.isWithoutNotifications = true;
+    } else {
+      notifOptions.whenTokenIsSent = whenTokenSent.checked;
+      notifOptions.tokenSentName = whenTokenSentValue.value;
+      notifOptions.whenAnythingWasSent = whenAnythingSent.checked;
+      notifOptions.whenNumberOfTokenWasSent = whenNumberOfTokenSent.checked;
+      if (whenNumberOfTokenSentValueNumber.value)
+        notifOptions.numberOfTokenThatWasSent = whenNumberOfTokenSentValueNumber.value;
+      notifOptions.numberOfTokenWasSentName = whenNumberOfTokenSentValueToken.value;
+      notifOptions.whenTokenIsReceived = whenTokenReceived.checked;
+      notifOptions.tokenReceivedName = whenTokenReceivedValue.value;
+      notifOptions.whenNumberOfTokenWasReceived = whenNumberOfTokenReceived.checked;
+      if (whenNumberOfTokenReceivedValueNumber.value)
+        notifOptions.numberOfTokenWasReceived = whenNumberOfTokenReceivedValueNumber.value;
+     
+      notifOptions.tokenWasReceivedName = whenNumberOfTokenReceivedValueToken.value;
+    }
+
+    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false, notifOptions);
 
     this.watchlistService.addToWatchList(model).subscribe(data => {
         this.closeNotificationWindow();
