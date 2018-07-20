@@ -45,5 +45,38 @@ namespace Wallet.BlockchainAPI
                 };
             }
         }
+
+        public static TransactionInput GetTokenCountAndAddressFromInput(string input, int decimalPlaces)
+        {
+            if (input.StartsWith(Helpers.Constants.Strings.TransactionType.Transfer))
+            {
+                HexBigIntegerBigEndianConvertor hexConverter = new HexBigIntegerBigEndianConvertor();
+                //cut off method name (first 4 byte)
+                input = input.Substring(10);
+                //get value         
+                var value = hexConverter.ConvertFromHex(input.Substring(input.Length / 2));
+                //get address
+                var address = hexConverter.ConvertToHex(hexConverter.ConvertFromHex("0x" + input.Substring(0, input.Length / 2)));
+
+                return new TransactionInput()
+                {
+                    To = address,
+                    Value = Web3.Convert.FromWei(value, decimalPlaces),
+                    What = string.Empty,
+                    ContractAddress = string.Empty
+                };
+
+            }
+            else
+            {
+                return new TransactionInput()
+                {
+                    To = string.Empty,
+                    Value = default(decimal),
+                    What = string.Empty,
+                    ContractAddress = string.Empty
+                };
+            }
+        }
     }
 }
