@@ -32,6 +32,7 @@ import { AuthAdminGuardService } from './shared/services/auth-admin-guard.servic
 import { AuthUserGuardService } from './shared/services/auth-user-guard.service';
 import { WatchlistService } from './shared/services/watchlist.service';
 import { NotificationsService } from './shared/services/notifications.service';
+import { SortingWatchlistPipe } from './pipe/sort-watchlist';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { NotificationsService } from './shared/services/notifications.service';
     WatchlistComponent,
     AdminPanelComponent,
     ContractPageComponent,
-    AccountPageComponent
+    AccountPageComponent,
+    SortingWatchlistPipe
   ],
   imports: [
     CookieModule.forRoot(),

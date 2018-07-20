@@ -71,6 +71,9 @@ export class WatchlistComponent implements OnInit, OnDestroy {
       },
       error => this.errors = error);
   }
+  sortTable(prop: string) {   
+    return false; // do not reload
+  }
 
 }
 

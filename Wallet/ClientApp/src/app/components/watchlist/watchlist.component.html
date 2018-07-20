@@ -3,8 +3,8 @@
     <table *ngIf="requested" class="table table-striped">
       <thead>
       <tr>
-        <th scope="col">Wallets</th>
-        <th scope="col">Smart Contracts</th>
+        <th scope="col"> <a href (click)="sortTable('account')">Wallets</a> </th>
+        <th scope="col"> <a href (click)="sortTable('contract')">Smart Contracts</a> </th>
       </tr>
       </thead>
       <tbody>
