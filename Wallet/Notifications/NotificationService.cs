@@ -102,7 +102,7 @@ namespace Wallet.Notifications
             return (transactions?.Any(t =>
             {
                 if ((t.From?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false) && 
-                    (t.Input?.Equals("0x", StringComparison.CurrentCultureIgnoreCase)??false))
+                    (t.Input?.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase)??false))
                 {
                     return true;
                 }
@@ -143,7 +143,7 @@ namespace Wallet.Notifications
             return (transactions?.Any(t =>
             {
                 if ((t.From?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false) &&
-                    (t.Input?.Equals("0x", StringComparison.CurrentCultureIgnoreCase) ?? false))
+                    (t.Input?.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase) ?? false))
                 {
                     if (Web3.Convert.FromWei(t.Value.Value, 18) >= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentFrom&&
                         Web3.Convert.FromWei(t.Value.Value, 18) <= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentTo)
@@ -185,7 +185,7 @@ namespace Wallet.Notifications
             return (transactions?.Any(t =>
             {
                 if ((t.To?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false) &&
-                    (t.Input?.Equals("0x", StringComparison.CurrentCultureIgnoreCase) ?? false))
+                    (t.Input?.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase) ?? false))
                 {
                     return true;
                 }
@@ -214,7 +214,7 @@ namespace Wallet.Notifications
             return (transactions?.Any(t =>
             {
                 if ((t.To?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false) &&
-                    (t.Input?.Equals("0x", StringComparison.CurrentCultureIgnoreCase) ?? false))
+                    (t.Input?.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase) ?? false))
                 {
                     if (Web3.Convert.FromWei(t.Value.Value, 18) == watchListLine.NotificationOptions.NumberOfTokenOrEtherWasReceived)
                     {
@@ -240,6 +240,44 @@ namespace Wallet.Notifications
                     return true;
                 }
 
+                return false;
+            }) ?? false);
+        }
+
+        private bool CheckNumberOfContractTokenWasSent(List<Transaction> transactions, UserWatchlist watchListLine)
+        {
+            return (transactions?.Any(t =>
+            {
+                if (t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    var decPlaces = GetTokenDecimalPlaces(t.To);
+                    var value = Web3.Convert.FromWei(InputDecoder.GetTokenCountAndAddressFromInput(t.Input).Value, decPlaces);
+
+                    if (value == watchListLine.NotificationOptions.NumberOfContractTokenWasSent)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }) ?? false);
+        }
+
+        private bool CheckNumberOfContractTokenWasReceivedByAddress(List<Transaction> transactions, UserWatchlist watchListLine)
+        {
+            return (transactions?.Any(t =>
+            {
+                if (t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input);
+                    var decPlaces = GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName);
+                    var value = Web3.Convert.FromWei(receiver.Value, decPlaces);
+
+                    if (value == watchListLine.NotificationOptions.NumberOfTokenWasReceivedByAddress &&
+                        receiver.To.Equals(watchListLine.NotificationOptions.AddressThatReceivedNumberOfToken,StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
                 return false;
             }) ?? false);
         }
@@ -349,11 +387,19 @@ namespace Wallet.Notifications
                     }
                     if (watchListLine.NotificationOptions.WhenNumberOfContractTokenWasSent)
                     {
-
+                        if (CheckNumberOfContractTokenWasSent(transactions, watchListLine))
+                        {
+                            result.Add(watchListLine.Id);
+                            continue;
+                        }
                     }
                     if (watchListLine.NotificationOptions.WhenNumberOfContractWasReceivedByAddress)
                     {
-
+                        if (CheckNumberOfContractTokenWasReceivedByAddress(transactions, watchListLine))
+                        {
+                            result.Add(watchListLine.Id);
+                            continue;
+                        }
                     }
                 }
             }
