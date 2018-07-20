@@ -117,24 +117,6 @@ namespace Wallet.Controllers
                     result.AddRange(listtask.Result);
                 }
 
-                result.ForEach(t =>
-                {
-                    if (t.Value.Value == 0)
-                    {
-                        var decodedInput = InputDecoder.DecodeInput(t.Input, t.ContractAddress, dbContext);
-                        if (decodedInput.ContractAddress != string.Empty)
-                        {
-                            t.To = decodedInput.To;
-                            t.What = decodedInput.What;
-                            t.DecimalValue = decodedInput.Value;
-                            t.ContractAddress = decodedInput.ContractAddress;
-                        }
-                    }
-                    else
-                    {
-                        t.DecimalValue = Web3.Convert.FromWei(t.Value.Value, 18);
-                    }
-                });
                 return new OkObjectResult(
                     new TransactionsViewModel() { BlockNumber = searchBlockNumber, Transactions = result.OrderByDescending(t => t.Date).ToList() }
                     );

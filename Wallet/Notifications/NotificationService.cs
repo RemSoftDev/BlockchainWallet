@@ -17,7 +17,7 @@ namespace Wallet.Notifications
 {
     public class NotificationService : IHostedService, IDisposable
     {
-        private readonly IServiceScopeFactory scopeFactory;
+        private readonly IServiceScopeFactory _scopeFactory;
         private IBlockchainExplorer _explorer;
         private IHubContext<NotifyHub> _hubContext;
         private IUserInfoInMemory _userInfo;
@@ -30,7 +30,7 @@ namespace Wallet.Notifications
             _explorer = explorer;
             _hubContext = hubContext;
             _userInfo = userInfo;
-            this.scopeFactory = scopeFactory;
+            _scopeFactory = scopeFactory;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ namespace Wallet.Notifications
             {
                 try
                 {
-                    using (var scope = scopeFactory.CreateScope())
+                    using (var scope = _scopeFactory.CreateScope())
                     {
                         var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
                         if (_lastCheckedBlockNumber == 0)
@@ -166,7 +166,8 @@ namespace Wallet.Notifications
                          StringComparison.CurrentCultureIgnoreCase) ?? false) &&
                     (t.From?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false))
                 {
-                    var value = InputDecoder.GetTokenCountAndAddressFromInput(t.Input, GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName)).Value;
+                    var decPlaces = GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName);
+                    var value = Web3.Convert.FromWei(InputDecoder.GetTokenCountAndAddressFromInput(t.Input).Value, decPlaces);
                     if (value >= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentFrom &&
                         value <= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentTo)
                     {
@@ -197,7 +198,7 @@ namespace Wallet.Notifications
         {
             return (transactions?.Any(t =>
             {
-                var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input, GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName)).To;
+                var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input).To;
 
                 if (receiver.Equals(watchListLine.Address,StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -229,10 +230,12 @@ namespace Wallet.Notifications
         {
             return (transactions?.Any(t =>
             {
-                var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input, GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName));
+                var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input);
+                var decPlaces = GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName);
+                var value = Web3.Convert.FromWei(receiver.Value, decPlaces);
 
                 if (receiver.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase)&&
-                    receiver.Value == watchListLine.NotificationOptions.NumberOfTokenOrEtherWasReceived)
+                    value == watchListLine.NotificationOptions.NumberOfTokenOrEtherWasReceived)
                 {
                     return true;
                 }
@@ -243,7 +246,7 @@ namespace Wallet.Notifications
 
         private int GetTokenDecimalPlaces(string address)
         {
-            using (var scope = scopeFactory.CreateScope())
+            using (var scope = _scopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
 

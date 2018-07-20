@@ -11,58 +11,23 @@ using System.Numerics;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Wallet.BlockchainAPI.Model;
+using Wallet.Helpers;
 using Wallet.Models;
 using Wallet.ViewModels;
 
 namespace Wallet.BlockchainAPI
 {
-    public class BlockchainExplorer: IBlockchainExplorer
+    public class BlockchainExplorer : IBlockchainExplorer
     {
+        private readonly IServiceScopeFactory _scopeFactory;
         private Web3 web3;
 
-        public BlockchainExplorer()
+        public BlockchainExplorer(IServiceScopeFactory scopeFactory)
         {
             web3 = new Web3();
-        }
-
-        private string abi =
-            "[{\"constant\":false,\"inputs\":[{\"name\":\"spender\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"who\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"spender\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"extraData\",\"type\":\"bytes\"}],\"name\":\"approveAndCall\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}]\r\n";
-
-        public List<CustomTransaction> GetTokenTransfersForAcc(string account, int searchInLastBlocksCount)
-        {
-            var result = new List<CustomTransaction>();
-            var numb = web3.Eth.Blocks.GetBlockNumber.SendRequestAsync().Result;
-            Console.WriteLine($"Last block is {numb.Value}");
-            for (var i = numb.Value - searchInLastBlocksCount; i <= numb.Value; i++)
-            {
-                var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(i))
-                    .Result;
-                if (block != null && block.Transactions != null)
-                {
-                    block.Transactions.ToList().ForEach(x =>
-                    {
-                        if (x.Input.StartsWith("0xa9059cbb") && x.Input.Length < 140)
-                        {
-                            //Model.TransactionInput tInfo = decodeInput(x.Input, string.Empty);
-                            //if (string.Equals(tInfo.To, account, StringComparison.CurrentCultureIgnoreCase))
-                            //{
-                            //    result.Add(new CustomTransaction()
-                            //    {
-                            //        TransactionHash = x.TransactionHash,
-                            //        From = x.From,
-                            //        To = x.To,
-                            //        Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
-                            //                   (long) (block.Timestamp.Value)),
-                            //        TransferInfo = tInfo
-                            //    });
-                            //}
-                        }
-                    });
-                }
-            }
-
-            return result;
+            _scopeFactory = scopeFactory;
         }
 
         public Task<string> GetCode(string address)
@@ -80,51 +45,117 @@ namespace Wallet.BlockchainAPI
             return web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
         }
 
-        public async Task<List<CustomTransaction>> GetTransactions(string account, int blockNumber)
+        private async Task<List<CustomTransaction>> GetTransactionByAddress(string accountAddress,
+            List<Transaction> transactions, BigInteger timestamp)
         {
             var result = new List<CustomTransaction>();
+
+            foreach (var t in transactions)
+            {
+                if (t.Input.Equals(Constants.Strings.TransactionType.Usual,
+                    StringComparison.CurrentCultureIgnoreCase))
+                {
+                    if (t.From.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase) ||
+                        t.To.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        var status =
+                            await web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(t.TransactionHash);
+                        bool isSuccess = true;
+                        if (status != null)
+                        {
+                            if (status.Status.Value == 0)
+                            {
+                                isSuccess = false;
+                            }
+                        }
+
+                        result.Add(new CustomTransaction()
+                        {
+                            TransactionHash = t.TransactionHash,
+                            From = t.From,
+                            To = t.To,
+                            What = "ETH",
+                            IsSuccess = isSuccess,
+                            DecimalValue = Web3.Convert.FromWei(t.Value.Value, 18),
+                            Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                (long)(timestamp))
+                        });
+                    }
+                } //get token transfer
+                else if (t.Input.StartsWith(Constants.Strings.TransactionType.Transfer))
+                {
+                    using (var scope = _scopeFactory.CreateScope())
+                    {
+                        var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
+                        var status =
+                            await web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(t.TransactionHash);
+                        bool isSuccess = true;
+                        if (status != null)
+                        {
+                            if (status.Status.Value == 0)
+                            {
+                                isSuccess = false;
+                            }
+                        }
+
+                        var decodedInput = InputDecoder.DecodeTransferInput(t.Input);
+
+                        if (t.From.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            var token = dbContext.Erc20Tokens.FirstOrDefault(tok =>
+                                tok.Address.Equals(t.To, StringComparison.CurrentCultureIgnoreCase));
+
+                            result.Add(new CustomTransaction()
+                            {
+                                TransactionHash = t.TransactionHash,
+                                From = t.From,
+                                To = decodedInput.To,
+                                What = token?.Symbol ?? "Unknown",
+                                IsSuccess = isSuccess,
+                                ContractAddress = t.To,
+                                DecimalValue = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18),
+                                Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                    (long)(timestamp))
+                            });
+                        }
+                        else if (decodedInput.To.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            var token = dbContext.Erc20Tokens.FirstOrDefault(tok =>
+                                tok.Address.Equals(t.To, StringComparison.CurrentCultureIgnoreCase));
+
+                            result.Add(new CustomTransaction()
+                            {
+                                TransactionHash = t.TransactionHash,
+                                From = t.From,
+                                To = decodedInput.To,
+                                What = token?.Symbol ?? "Unknown",
+                                IsSuccess = isSuccess,
+                                ContractAddress = t.To,
+                                DecimalValue = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18),
+                                Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                    (long)(timestamp))
+                            });
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<List<CustomTransaction>> GetTransactions(string account, int blockNumber)
+        {
             try
             {
-                var block = await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
-                if (block != null && block.Transactions != null)
-                {
-                    block.Transactions.ToList().ForEach(async x =>
-                    {
-                        bool isSender = string.Equals(x.From, account, StringComparison.CurrentCultureIgnoreCase);
-                        if (string.Equals(x.To, account, StringComparison.CurrentCultureIgnoreCase) ||
-                            isSender)
-                        {
-                            CustomTransaction t = new CustomTransaction()
-                            {
-                                Input = x.Input,
-                                TransactionHash = x.TransactionHash,
-                                From = x.From,
-                                To = x.To,
-                                What = "ETH",
-                                Value = x.Value,
-                                Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
-                                           (long)(block.Timestamp.Value)),
-                                ContractAddress = isSender ? x.To : x.From
-                            };
-                            var status = await web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(x.TransactionHash);
-                            bool isSuccess = true;
-                            if (status != null)
-                            {
-                                if (status.Status.Value == 0)
-                                {
-                                    isSuccess = false;
-                                }
-                            }
-                            t.IsSuccess = isSuccess;
-                            result.Add(t);
-                        }
-                    });
-                }
+                var block = (await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
+                    new HexBigInteger(blockNumber)));
+
+                return await GetTransactionByAddress(account, block.Transactions.ToList(), block.Timestamp.Value);
             }
             catch (Exception e)
             {
+                return new List<CustomTransaction>();
             }
-            return result;
         }
 
         /// <summary>
@@ -147,7 +178,7 @@ namespace Wallet.BlockchainAPI
         {
             try
             {
-                var cont = web3.Eth.GetContract(abi, token.Address);
+                var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, token.Address);
                 var eth = cont.GetFunction("balanceOf");
                 var balance = await eth.CallAsync<BigInteger>(account);
                 return new ERC20TokenViewModel()
@@ -168,7 +199,6 @@ namespace Wallet.BlockchainAPI
                     Symbol = token.Symbol
                 };
             }
-
         }
     }
 }

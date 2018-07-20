@@ -4,11 +4,12 @@ export interface TransactionsModel {
 }
 
 interface Transaction {
-  date: Date;
-  decimalValue: number;
-  from: string;
   hash: string;
+  from: string;
+  to: string;
+  what: string;
+  decimalValue: number;
+  date: Date;
   isSucceess: boolean;
-  to : string;
-  contractAddress: string;
+  contractAddress:string;
 }
