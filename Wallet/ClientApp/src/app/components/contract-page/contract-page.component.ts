@@ -4,7 +4,7 @@ import { BlockchainService } from '../../shared/services/blockchain.service';
 import { WatchlistService } from '../../shared/services/watchlist.service';
 import { WatchlistModel } from "../../shared/models/watchlistModel";
 import { NotificationOptions } from "../../shared/models/watchlistModel";
-import { SmartContractInfo } from "../../shared/models/smartContractInfo.interface";
+import { TokenModel } from "../../shared/models/tokenModel";
 import { NgForm } from '@angular/forms';
 import { TransactionsModel } from "../../shared/models/transactionsModel.interface";
 
@@ -15,8 +15,12 @@ import { TransactionsModel } from "../../shared/models/transactionsModel.interfa
 })
 export class ContractPageComponent implements OnInit, OnDestroy {
 
-  smartContractInfo: SmartContractInfo;
-  infoRequesting: boolean = true;
+  smartContractInfo: TokenModel;
+  isTransactionsOpen: boolean = true;
+  isWalletsOpen: boolean = false;
+  transactionsModel: TransactionsModel;
+  infoRequesting: boolean = false;
+  moreTransactionRequesting:boolean = false;
   transactionRequesting: boolean = false;
   showNotWind: boolean;
   isWithNotifications: boolean = false;
@@ -27,7 +31,6 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   navigationSubscription;
   searchString: string;
   errors: boolean;
-  walletsTabIsActive: boolean = false;
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute,
     private BCservice: BlockchainService, private watchlistService: WatchlistService) {
@@ -40,6 +43,7 @@ export class ContractPageComponent implements OnInit, OnDestroy {
 
   initialise() {
     this.infoRequesting = false;
+    this.transactionRequesting = false;
     this.errors = false;
     this.searchString = this.activatedRoute.snapshot.paramMap.get('searchString');
 
@@ -51,16 +55,40 @@ export class ContractPageComponent implements OnInit, OnDestroy {
         console.log(error);
         this.errors = true;
       });
+
+    this.BCservice.getSmartContractTransactions(this.searchString).subscribe(transact => {
+        this.transactionRequesting = true;
+        this.transactionsModel = transact;
+      },
+      error => {
+        console.log(error);
+        this.errors = true;
+      });
   }
 
-  loadTransactions() {
-    this.walletsTabIsActive = false;
+  loadTransaction(blockNumber) {
+    this.moreTransactionRequesting = true;
+    this.BCservice.getSmartContractTransactionsByNumber(blockNumber - 100, this.searchString).subscribe(model => {
+        this.moreTransactionRequesting = false;
+        this.transactionsModel.blockNumber = model.blockNumber;
+        this.transactionsModel.transactions = this.transactionsModel.transactions.concat(model.transactions);
+      },
+      error => {
+        console.log(error);
+        this.errors = true;
+      });
+  }
+
+  SwitchToTransactions() {
+    this.isWalletsOpen = false;
+    this.isTransactionsOpen = true;
     this.transactionTabClass = 'active';
     this.walletsTabClass = '';
   }
 
-  loadWallets() {
-    this.walletsTabIsActive = true;
+  SwitchToWallets() {
+    this.isWalletsOpen = true;
+    this.isTransactionsOpen = false;
     this.walletsTabClass = 'active';
     this.transactionTabClass = '';
   }

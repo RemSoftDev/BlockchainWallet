@@ -35,7 +35,7 @@
           <input #whenNumberOfTokenReceived (change)="whenNumberOfTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
           When
           <input #whenNumberOfTokenReceivedValue placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
-          were received by <br/>
+          were received by <br />
           <input #whenNumberOfTokenReceivedAddress placeholder="wallet or smart contract address" class="notificationBigInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
         </div>
 
@@ -67,7 +67,7 @@
       <h4 class="addressString">Smart Contract Address <span (click)="showNotificationWindow()" class="addStar glyphicon glyphicon-star-empty"></span></h4>
       <div>
         <p>Name</p>
-        <p class="info">{{smartContractInfo.name}}</p>
+        <p class="info">{{smartContractInfo.name}} ({{smartContractInfo.symbol}})</p>
       </div>
       <div>
         <p>Created</p>
@@ -75,7 +75,7 @@
       </div>
       <div>
         <p>Quantity</p>
-        <p class="info">{{smartContractInfo.quantity}}</p>
+        <p class="info">{{smartContractInfo.quantity | number : '1.2-10'}}</p>
       </div>
     </div>
   </div>
@@ -98,7 +98,7 @@
   </div>
 </div>
 
-<div *ngIf="walletsTabIsActive" novalidate class="row">
+<div *ngIf="isWalletsOpen" novalidate class="row">
   <div class="col-md-12">
     <h3>Sort by date, time</h3>
 
@@ -118,51 +118,42 @@
   </div>
 </div>
 
-<div class="row tabsRow">
+<div *ngIf="transactionRequesting" class="row tabsRow">
   <ul class="nav nav-tabs">
-    <li [ngClass]="transactionTabClass" class="tab" (click)="loadTransactions()"><a>Transactions</a></li>
-    <li [ngClass]="walletsTabClass" class="tab" (click)="loadWallets()"><a>Wallets</a></li>
+    <li [ngClass]="transactionTabClass" class="tab" (click)="SwitchToTransactions()"><a>Transactions</a></li>
+    <li [ngClass]="walletsTabClass" class="tab" (click)="SwitchToWallets()"><a>Wallets</a></li>
   </ul>
 </div>
 
-<div *ngIf="!transactionRequesting" class="row tableRow">
+<div *ngIf="transactionRequesting && isTransactionsOpen" class="row tableRow">
   <table class="table table-striped">
     <thead>
-    <tr>
-      <th scope="col">TxHash</th>
-      <th scope="col">From</th>
-      <th scope="col">To</th>
-      <th scope="col">What</th>
-      <th scope="col">Quantity</th>
-      <th scope="col">Date/Time</th>
-      <th scope="col">Success</th>
-    </tr>
+      <tr>
+        <th scope="col">TxHash</th>
+        <th scope="col">From</th>
+        <th scope="col">To</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Date/Time</th>
+        <th scope="col">Success</th>
+      </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let trans of transactionsModel.transactions">
-      <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
-      <td title="{{trans.from}}">
-        <a [routerLink]='["/search",trans.from]'>
-          {{trans.from | slice : 0:20}}...
-        </a>
-      </td>
-      <td title="{{trans.to}}">
-        <a [routerLink]='["/search",trans.to]'>
-          {{trans.to | slice : 0:20}}...
-        </a>
-      </td>
-      <td *ngIf="trans.what=='ETH'" title="{{trans.what}}">
-        {{trans.what}}
-      </td>
-      <td *ngIf="trans.what!='ETH'" title="{{trans.what}}">
-        <a [routerLink]='["/search",trans.contractAddress]'>
-          {{trans.what}}
-        </a>
-      </td>
-      <td title="{{trans.decimalValue}}">{{trans.decimalValue | number : '1.2-5'}}</td>
-      <td title="{{trans.date }}">{{trans.date | date : 'short' }}</td>
-      <td title="{{trans.isSuccess}}">{{trans.isSuccess}}</td>
-    </tr>
+      <tr *ngFor="let trans of transactionsModel.transactions">
+        <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
+        <td title="{{trans.from}}">
+          <a [routerLink]='["/search",trans.from]'>
+            {{trans.from | slice : 0:20}}...
+          </a>
+        </td>
+        <td title="{{trans.to}}">
+          <a [routerLink]='["/search",trans.to]'>
+            {{trans.to | slice : 0:20}}...
+          </a>
+        </td>
+        <td title="{{trans.decimalValue}}">{{trans.decimalValue | number : '1.2-5'}}</td>
+        <td title="{{trans.date }}">{{trans.date | date : 'short' }}</td>
+        <td title="{{trans.isSuccess}}">{{trans.isSuccess}}</td>
+      </tr>
     </tbody>
   </table>
   <div class="col-md-12 text-center">
@@ -172,3 +163,47 @@
     <button (click)="loadTransaction(transactionsModel.blockNumber)" class="btn btn-primary">More</button>
   </div>
 </div>
+
+<div *ngIf="transactionRequesting && isWalletsOpen" class="row tableRow">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th rowspan="2" scope="col"><p class="walletsTableTh">Wallet <br /> Address </p> </th>
+      <th rowspan="2" scope="col"><p class="walletsTableTh">Quantity</p></th>
+      <th rowspan="2" scope="col"><p class="walletsTableTh">Tokens Sent</p></th>
+      <th rowspan="2" scope="col"><p class="walletsTableTh">Tokens Received</p></th>
+      <th colspan="3" scope="col">Transactions Number</th>
+    </tr>
+    <tr>
+      <th scope="col">General</th>
+      <th scope="col">Sent</th>
+      <th scope="col">Received</th>
+    </tr>
+    </thead>
+    <tbody>
+      <!--<tr *ngFor="let trans of transactionsModel.transactions">
+        <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
+        <td title="{{trans.from}}">
+          <a [routerLink]='["/search",trans.from]'>
+            {{trans.from | slice : 0:20}}...
+          </a>
+        </td>
+        <td title="{{trans.to}}">
+          <a [routerLink]='["/search",trans.to]'>
+            {{trans.to | slice : 0:20}}...
+          </a>
+        </td>
+        <td title="{{trans.decimalValue}}">{{trans.decimalValue | number : '1.2-5'}}</td>
+        <td title="{{trans.date }}">{{trans.date | date : 'short' }}</td>
+        <td title="{{trans.isSuccess}}">{{trans.isSuccess}}</td>
+      </tr>-->
+    </tbody>
+  </table>
+  <div class="col-md-12 text-center">
+    <div *ngIf="moreTransactionRequesting" class="row">
+      <app-spinner></app-spinner>
+    </div>
+    <button (click)="loadTransaction(transactionsModel.blockNumber)" class="btn btn-primary">More</button>
+  </div>
+</div>
+

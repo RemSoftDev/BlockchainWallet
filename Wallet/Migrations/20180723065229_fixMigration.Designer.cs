@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wallet.Models;
 
 namespace Wallet.Migrations
 {
     [DbContext(typeof(WalletDbContext))]
-    partial class WalletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180723065229_fixMigration")]
+    partial class fixMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -137,25 +139,18 @@ namespace Wallet.Migrations
 
                     b.Property<string>("Address");
 
-                    b.Property<DateTime?>("CreatedDate");
-
                     b.Property<int>("DecimalPlaces");
 
-                    b.Property<string>("Name");
-
-                    b.Property<decimal>("Quantity");
+                    b.Property<int>("SmartContractId");
 
                     b.Property<string>("Symbol");
 
-                    b.Property<int>("TransactionsCount");
-
                     b.Property<string>("Type");
 
-                    b.Property<int>("WalletsCount");
-
-                    b.Property<string>("WebSiteLink");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("SmartContractId")
+                        .IsUnique();
 
                     b.ToTable("Erc20Tokens");
                 });
@@ -225,6 +220,29 @@ namespace Wallet.Migrations
                     b.HasKey("PageDataId");
 
                     b.ToTable("PageData");
+                });
+
+            modelBuilder.Entity("Wallet.Models.SmartContract", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("Quantity");
+
+                    b.Property<int>("TransactionsCount");
+
+                    b.Property<int>("WalletsCount");
+
+                    b.Property<string>("WebSiteLink");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SmartContracts");
                 });
 
             modelBuilder.Entity("Wallet.Models.User", b =>
@@ -339,6 +357,14 @@ namespace Wallet.Migrations
                     b.HasOne("Wallet.Models.User")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Wallet.Models.ERC20Token", b =>
+                {
+                    b.HasOne("Wallet.Models.SmartContract", "SmartContract")
+                        .WithOne("Token")
+                        .HasForeignKey("Wallet.Models.ERC20Token", "SmartContractId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

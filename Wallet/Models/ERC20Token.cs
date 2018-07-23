@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Wallet.Models
 {
@@ -14,5 +15,17 @@ namespace Wallet.Models
         public int DecimalPlaces { get; set; }
 
         public string Type { get; set; }
+
+        public string Name { get; set; }
+
+        public DateTime? CreatedDate { get; set; }
+
+        public string WebSiteLink { get; set; }
+
+        public decimal Quantity { get; set; }
+
+        public int TransactionsCount { get; set; }
+
+        public int WalletsCount { get; set; }
     }
 }

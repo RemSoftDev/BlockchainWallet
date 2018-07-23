@@ -3,6 +3,12 @@ export class TokenModel {
   symbol: string;
   decimalplaces: number;
   types: string;
+  name: string;
+  createdDate: Date;
+  webSiteLink: string;
+  quantity: number;
+  transactionsCount: number;
+  walletsCount: number;
 
 
   constructor(address: string, symbol: string, decimalplaces: number, types: string) {

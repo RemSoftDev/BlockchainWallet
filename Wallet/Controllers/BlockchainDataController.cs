@@ -130,10 +130,60 @@ namespace Wallet.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetSmartContractInfo(string contractAddress)
         {
-            var contract =  await dbContext.SmartContracts.FirstOrDefaultAsync(c =>
-                c.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
-            return new OkObjectResult(contract);
+            try
+            {
+                var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
+                    t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+
+                token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
+                    token.DecimalPlaces);
+
+                return new OkObjectResult(token);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSmartContractTransactions(int? blockNumber, string accountAddress)
+        {
+            try
+            {
+                int searchBlockNumber;
+                if (blockNumber.HasValue)
+                {
+                    searchBlockNumber = blockNumber.Value;
+                }
+                else
+                {
+                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
+                }
+
+                var tasks = new List<Task<List<CustomTransaction>>>();
+                for (int i = searchBlockNumber - 100; i <= searchBlockNumber; i++)
+                {
+                    Task<List<CustomTransaction>> task = _explorer.GetSmartContractTransactions(accountAddress, i);
+                    tasks.Add(task);
+                }
+
+                await Task.WhenAll(tasks.ToArray());
+
+                var result = new List<CustomTransaction>();
+                foreach (var listtask in tasks)
+                {
+                    result.AddRange(listtask.Result);
+                }
+
+                return new OkObjectResult(
+                    new TransactionsViewModel() { BlockNumber = searchBlockNumber, Transactions = result.OrderByDescending(t => t.Date).ToList() }
+                );
+            }
+            catch (Exception e)
+            {
+                return BadRequest(HttpErrorHandler.AddError("Failure", e.Message, ModelState));
+            }
+        }
     }
 }

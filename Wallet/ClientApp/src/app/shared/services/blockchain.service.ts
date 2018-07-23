@@ -4,7 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { WalletInfo } from '../models/walletInfo.interface';
 import { TransactionsModel } from '../models/transactionsModel.interface';
 import { BaseService } from "./base.service";
-import { SmartContractInfo } from '../models/smartContractInfo.interface';
+import { TokenModel } from '../models/tokenModel';
 
 
 @Injectable()
@@ -34,7 +34,21 @@ export class BlockchainService extends BaseService {
   getSmartContractInfo(contractAddress: string) {
     const params = new HttpParams().set('contractAddress', contractAddress);
     return this.http
-      .get<SmartContractInfo>(this.hostUrl + this.baseUrl + '/GetSmartContractInfo', { params })
+      .get<TokenModel>(this.hostUrl + this.baseUrl + '/GetSmartContractInfo', { params })
+      .catch(this.handleError);
+  }
+
+  getSmartContractTransactions(accountAddress: string) {
+    const params = new HttpParams().set('accountAddress', accountAddress);
+    return this.http
+      .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetSmartContractTransactions', { params })
+      .catch(this.handleError);
+  }
+
+  getSmartContractTransactionsByNumber(blockNumber, accountAddress: string) {
+    const params = new HttpParams().set("blockNumber", blockNumber).set('accountAddress', accountAddress);
+    return this.http
+      .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetSmartContractTransactions', { params })
       .catch(this.handleError);
   }
 

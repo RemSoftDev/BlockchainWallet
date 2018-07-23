@@ -143,6 +143,57 @@ namespace Wallet.BlockchainAPI
             return result;
         }
 
+        private async Task<List<CustomTransaction>> GetSmartContractTransactionByAddress(string accountAddress,
+            List<Transaction> transactions, BigInteger timestamp)
+        {
+            var result = new List<CustomTransaction>();
+
+            foreach (var t in transactions)
+            {
+                if (t.Input.StartsWith(Constants.Strings.TransactionType.Transfer))
+                {
+                    using (var scope = _scopeFactory.CreateScope())
+                    {
+                        var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
+
+                        var decodedInput = InputDecoder.DecodeTransferInput(t.Input);
+
+                        if (t.To.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            var status =
+                                await web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(t.TransactionHash);
+                            bool isSuccess = true;
+                            if (status != null)
+                            {
+                                if (status.Status.Value == 0)
+                                {
+                                    isSuccess = false;
+                                }
+                            }
+
+                            var token = dbContext.Erc20Tokens.FirstOrDefault(tok =>
+                                tok.Address.Equals(t.To, StringComparison.CurrentCultureIgnoreCase));
+
+                            result.Add(new CustomTransaction()
+                            {
+                                TransactionHash = t.TransactionHash,
+                                From = t.From,
+                                To = decodedInput.To,
+                                What = token?.Symbol ?? "Unknown",
+                                IsSuccess = isSuccess,
+                                ContractAddress = t.To,
+                                DecimalValue = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18),
+                                Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                    (long)(timestamp))
+                            });
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public async Task<List<CustomTransaction>> GetTransactions(string account, int blockNumber)
         {
             try
@@ -156,6 +207,28 @@ namespace Wallet.BlockchainAPI
             {
                 return new List<CustomTransaction>();
             }
+        }
+
+        public async Task<List<CustomTransaction>> GetSmartContractTransactions(string account, int blockNumber)
+        {
+            try
+            {
+                var block = (await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
+                    new HexBigInteger(blockNumber)));
+
+                return await GetSmartContractTransactionByAddress(account, block.Transactions.ToList(), block.Timestamp.Value);
+            }
+            catch (Exception e)
+            {
+                return new List<CustomTransaction>();
+            }
+        }
+
+        public Task<BigInteger> GetTokenTotalSupply(string contractAddress)
+        {
+            var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contractAddress);
+            var eth = cont.GetFunction("totalSupply");
+            return eth.CallAsync<BigInteger>();
         }
 
         /// <summary>
