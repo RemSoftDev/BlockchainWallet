@@ -3,7 +3,7 @@ import { RedirectionService } from '../../shared/services/redirection.service';
 import { WatchlistService } from '../../shared/services/watchlist.service';
 import { NotificationsService } from '../../shared/services/notifications.service';
 import { Subscription } from 'rxjs/Subscription';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router} from '@angular/router';
 
 
 @Component({
@@ -19,7 +19,7 @@ export class WatchlistComponent implements OnInit, OnDestroy {
   requested = false;
   fakeArray:any[];
 
-  constructor(private redirectionService: RedirectionService, private wlService: WatchlistService,
+  constructor(private redirectionService: RedirectionService, private router: Router, private wlService: WatchlistService,
     private notifService: NotificationsService) { }
 
   ngOnInit() {
@@ -37,6 +37,14 @@ export class WatchlistComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     this.notifService.unSubscribuFromNotifications();
     this.redirectionService.fromWatchListPage();
+  }
+
+  goToAddress(address) {
+    this.router.navigate(['/search/account', address]);
+  }
+
+  goToContract(address) {
+    this.router.navigate(['/search/contract', address]);
   }
 
   playSound() {

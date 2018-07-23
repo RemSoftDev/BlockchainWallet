@@ -1,5 +1,11 @@
 .tableRow {
   width: 50%;
+  cursor: pointer;
+  color: -webkit-link;
+}
+
+.tableRow:hover {
+  text-decoration: underline;
 }
 
 table {
