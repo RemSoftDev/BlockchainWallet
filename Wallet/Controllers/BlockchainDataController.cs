@@ -16,6 +16,7 @@ using Wallet.ViewModels;
 using Nethereum.ABI;
 using Wallet.Helpers;
 
+
 namespace Wallet.Controllers
 {
     [Route("api/[controller]")]
@@ -70,6 +71,53 @@ namespace Wallet.Controllers
 
             return new OkObjectResult(model);
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetTokenByName(string tokenName)
+        {
+            try
+            {
+                var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
+                    t.Name.Contains(tokenName.Trim(), StringComparison.CurrentCultureIgnoreCase));
+
+                token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
+                    token.DecimalPlaces);
+
+                return new OkObjectResult(token);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetTokenByParameters(string tokenParams)
+        {
+            int res;           
+
+            try
+            {
+                List<ERC20Token> token = null;
+                bool isDecimal = Int32.TryParse(tokenParams, out res);
+                if (res != 0 )
+                {
+                    //token= await dbContext.Erc20Tokens.FindAsync( (pr => pr.DecimalPlaces == res) );
+                    //token = await dbContext.Erc20Tokens.FindAsync((pr => pr.DecimalPlaces == res));
+                }
+                //выгружать пользователю список всего, где встретилось значение???
+
+
+                return new OkObjectResult(token);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
+
 
         [HttpGet("[action]")]
         public async Task<IActionResult> IsContract(string address)
@@ -136,7 +184,7 @@ namespace Wallet.Controllers
                     t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
 
                 token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
-                    token.DecimalPlaces);
+                    token.DecimalPlaces);                
 
                 return new OkObjectResult(token);
             }
@@ -160,6 +208,11 @@ namespace Wallet.Controllers
                 {
                     searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
                 }
+                //check by time updates && update db count of transaction "v.	Quantity of transactions"
+
+                //uniq count of wallet "iv.	Quantity of wallets "
+
+                //iii.	Quantity "sold count"???
 
                 var tasks = new List<Task<List<CustomTransaction>>>();
                 for (int i = searchBlockNumber - 100; i <= searchBlockNumber; i++)
