@@ -193,12 +193,24 @@ namespace Wallet.Controllers
 
                 Task<ContractHoldersAndTransactionsModel> getHoldersAndTransactions = Task.Run(async() =>
                 { //add datetime for erc20 && update only 3 minutes left
-                    var tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
                     var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
                        t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
-                    token.TransactionsCount = tmp.TransactionsCount;
-                    token.WalletsCount = tmp.HoldersCount;
-                    await dbContext.SaveChangesAsync();
+
+                    ContractHoldersAndTransactionsModel tmp;
+                    //if ( ((TimeSpan)(DateTime.Now - token.UpdDate)).Minutes >10 )
+                    //{
+                        tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
+                        token.TransactionsCount = tmp.TransactionsCount;
+                        token.WalletsCount = tmp.HoldersCount;
+                        token.UpdDate = DateTime.Now;
+                        await dbContext.SaveChangesAsync();
+                    //}
+                    //else
+                    //{
+                    //    tmp = new ContractHoldersAndTransactionsModel();
+                    //    tmp.HoldersCount = token.WalletsCount;
+                    //    tmp.TransactionsCount = token.TransactionsCount;
+                    //}
                     return tmp;
                 });
 

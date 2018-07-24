@@ -27,5 +27,7 @@ namespace Wallet.Models
         public int TransactionsCount { get; set; }
 
         public int WalletsCount { get; set; }
+
+        public DateTime? UpdDate { get; set; }
     }
 }
