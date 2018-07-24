@@ -189,9 +189,17 @@ namespace Wallet.Controllers
                     return token;
                 });
 
+
+
                 Task<ContractHoldersAndTransactionsModel> getHoldersAndTransactions = Task.Run(async() =>
-                {
-                    return await Parser.GetContractHoldersAndTransactions(contractAddress);
+                { //add datetime for erc20 && update only 3 minutes left
+                    var tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
+                    var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
+                       t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+                    token.TransactionsCount = tmp.TransactionsCount;
+                    token.WalletsCount = tmp.HoldersCount;
+                    await dbContext.SaveChangesAsync();
+                    return tmp;
                 });
 
                 await Task.WhenAll(getContractInfoFromDb, getHoldersAndTransactions);
