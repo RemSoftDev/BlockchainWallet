@@ -180,13 +180,26 @@ namespace Wallet.Controllers
         {
             try
             {
-                var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
-                    t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+                Task<ERC20Token> getContractInfoFromDb = Task.Run(async () =>
+                {
+                    var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
+                        t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+                    token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
+                        token.DecimalPlaces);
+                    return token;
+                });
 
-                token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
-                    token.DecimalPlaces);                
+                Task<ContractHoldersAndTransactionsModel> getHoldersAndTransactions = Task.Run(async() =>
+                {
+                    return await Parser.GetContractHoldersAndTransactions(contractAddress);
+                });
 
-                return new OkObjectResult(token);
+                await Task.WhenAll(getContractInfoFromDb, getHoldersAndTransactions);
+                var result = getContractInfoFromDb.Result;
+                result.TransactionsCount = getHoldersAndTransactions.Result.TransactionsCount;
+                result.WalletsCount = getHoldersAndTransactions.Result.HoldersCount;
+
+                return new OkObjectResult(result);
             }
             catch (Exception e)
             {
