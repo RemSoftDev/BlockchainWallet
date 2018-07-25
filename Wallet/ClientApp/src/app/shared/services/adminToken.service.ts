@@ -21,20 +21,20 @@ export class TokenService extends BaseService {
     this.hostUrl = hostUrl;
   }
 
-  addToTokenList(token: TokenModel) {
+  updateContract(token: TokenModel) {
     return this.http
       .post(
-      this.hostUrl + this.baseUrl + '/AddToTokenlist', JSON.stringify(token), httpOptions)
+      this.hostUrl + this.baseUrl + '/UpdateSmartContract', JSON.stringify(token), httpOptions)
       .map(res => {
         return true;
       })
       .catch(this.handleError);
   }
 
-  getWatchlistInfo(userEmail: string) {
-    //const params = new HttpParams().set('userEmail', userEmail);
+  getContractInfo(contractAddress: string) {
+    const params = new HttpParams().set('contractAddress', contractAddress);
     return this.http
-      .get(this.hostUrl + this.baseUrl + '/GetTokenlist')
+      .get <TokenModel>(this.hostUrl + this.baseUrl + '/GetSmartContract', { params })
       .catch(this.handleError);
   }
 

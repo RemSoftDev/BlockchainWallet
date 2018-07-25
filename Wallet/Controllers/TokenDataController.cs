@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Wallet.Helpers;
@@ -22,17 +23,34 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTokenlist()
+        public async Task<IActionResult> GetSmartContract(string contractAddress)
         {
             try
             {
-                var data = await _dbContext.Erc20Tokens.ToListAsync();
+                var token = await _dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
+                    t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+                return new OkObjectResult(token);
 
-                return new ObjectResult(data);
             }
             catch (Exception e)
             {
-                return StatusCode(500, $"En error occurred :{e.Message}");
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("[action]")]
+        [Authorize(Policy = "ApiAdmin")]
+        public async Task<IActionResult> UpdateSmartContract([FromBody] ERC20Token model)
+        {
+            try
+            {
+                _dbContext.Erc20Tokens.Update(model);
+                await _dbContext.SaveChangesAsync();
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
     }

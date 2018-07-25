@@ -41,8 +41,8 @@ namespace Wallet.Controllers
             List<ERC20TokenViewModel> tokens = new List<ERC20TokenViewModel>();
 
             foreach (var token in dbContext.Erc20Tokens)
-            { 
-                if (token.Address != accountAddress)//finish with module 5, check ico
+            {
+                if (token.Address != accountAddress) //finish with module 5, check ico
                 {
                     Task<ERC20TokenViewModel> task = _explorer.BalanceToken(token, accountAddress);
                     tasks.Add(task);
@@ -62,6 +62,7 @@ namespace Wallet.Controllers
                 {
                     tokens.Add(listtask.Result);
                 }
+
                 model.Tokens = tokens.Where(x => x.Balance != 0).ToList();
             }
             catch (Exception e)
@@ -94,13 +95,13 @@ namespace Wallet.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetTokenByParameters(string tokenParams)
         {
-            int res;           
+            int res;
 
             try
             {
                 List<ERC20Token> token = null;
                 bool isDecimal = Int32.TryParse(tokenParams, out res);
-                if (res != 0 )
+                if (res != 0)
                 {
                     //token= await dbContext.Erc20Tokens.FindAsync( (pr => pr.DecimalPlaces == res) );
                     //token = await dbContext.Erc20Tokens.FindAsync((pr => pr.DecimalPlaces == res));
@@ -117,22 +118,19 @@ namespace Wallet.Controllers
         }
 
 
-
-
         [HttpGet("[action]")]
         public async Task<IActionResult> IsContract(string address)
-        {  
+        {
             try
             {
-                string result =  await _explorer.GetCode(address);
-               
+                string result = await _explorer.GetCode(address);
+
                 return new OkObjectResult(result != Constants.Strings.WalletCode.AccountCode);
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
             }
-
         }
 
         [HttpGet("[action]")]
@@ -147,7 +145,7 @@ namespace Wallet.Controllers
                 }
                 else
                 {
-                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
+                    searchBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
                 }
 
                 var tasks = new List<Task<List<CustomTransaction>>>();
@@ -166,8 +164,12 @@ namespace Wallet.Controllers
                 }
 
                 return new OkObjectResult(
-                    new TransactionsViewModel() { BlockNumber = searchBlockNumber, Transactions = result.OrderByDescending(t => t.Date).ToList() }
-                    );
+                    new TransactionsViewModel()
+                    {
+                        BlockNumber = searchBlockNumber,
+                        Transactions = result.OrderByDescending(t => t.Date).ToList()
+                    }
+                );
             }
             catch (Exception e)
             {
@@ -189,28 +191,27 @@ namespace Wallet.Controllers
                     return token;
                 });
 
-
-
-                Task<ContractHoldersAndTransactionsModel> getHoldersAndTransactions = Task.Run(async() =>
-                { //add datetime for erc20 && update only 3 minutes left
+                Task<ContractHoldersAndTransactionsModel> getHoldersAndTransactions = Task.Run(async () =>
+                {
                     var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
-                       t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+                        t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
 
                     ContractHoldersAndTransactionsModel tmp;
-                    //if ( ((TimeSpan)(DateTime.Now - token.UpdDate)).Minutes >10 )
-                    //{
+                    if (((TimeSpan) (DateTime.Now - token.UpdDate)).Minutes > 10)
+                    {
                         tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
                         token.TransactionsCount = tmp.TransactionsCount;
                         token.WalletsCount = tmp.HoldersCount;
                         token.UpdDate = DateTime.Now;
                         await dbContext.SaveChangesAsync();
-                    //}
-                    //else
-                    //{
-                    //    tmp = new ContractHoldersAndTransactionsModel();
-                    //    tmp.HoldersCount = token.WalletsCount;
-                    //    tmp.TransactionsCount = token.TransactionsCount;
-                    //}
+                    }
+                    else
+                    {
+                        tmp = new ContractHoldersAndTransactionsModel();
+                        tmp.HoldersCount = token.WalletsCount;
+                        tmp.TransactionsCount = token.TransactionsCount;
+                    }
+
                     return tmp;
                 });
 
@@ -239,7 +240,7 @@ namespace Wallet.Controllers
                 }
                 else
                 {
-                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
+                    searchBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
                 }
                 //check by time updates && update db count of transaction "v.	Quantity of transactions"
 
@@ -263,7 +264,11 @@ namespace Wallet.Controllers
                 }
 
                 return new OkObjectResult(
-                    new TransactionsViewModel() { BlockNumber = searchBlockNumber, Transactions = result.OrderByDescending(t => t.Date).ToList() }
+                    new TransactionsViewModel()
+                    {
+                        BlockNumber = searchBlockNumber,
+                        Transactions = result.OrderByDescending(t => t.Date).ToList()
+                    }
                 );
             }
             catch (Exception e)

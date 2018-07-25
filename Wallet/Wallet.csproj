@@ -39,7 +39,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="ClientApp\src\app\components\admin-token\admin-token.component.ts" />
     <None Remove="ClientApp\src\app\components\login\login.component.ts" />
     <None Remove="ClientApp\src\app\pipe\sort-watchlist.ts" />
     <None Remove="ClientApp\src\app\shared\models\tokenModel.ts" />
@@ -59,7 +58,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\app\components\admin-token\admin-token.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\components\login\login.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\pipe\sort-watchlist.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\tokenModel.ts" />

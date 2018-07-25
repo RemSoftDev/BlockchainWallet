@@ -1,37 +1,107 @@
 <div class="row">
-  <div *ngIf="isRequested" class="col-md-6 col-md-offset-2">
+  <div class="col-md-12">
     <h2>Admin panel</h2>
 
-    <form #myForm="ngForm" (ngSubmit)="postData(myForm)">
+    <div class="row tabsRow">
+      <ul class="nav nav-tabs">
+        <li [ngClass]="contentTabClass" class="tab" (click)="switchToContent()">
+          <a>Page Content</a>
+        </li>
+        <li [ngClass]="contractTabClass" class="tab" (click)="switchToContracts()">
+          <a>Smart Contracts</a>
+        </li>
+      </ul>
+    </div>
 
-      <div class="form-group">
-        <label for="addressBTC">Tips BTC</label>
-        <input class="form-control" [(ngModel)]="addressBTC.elementData" name="addressBTC" ngModel />
-      </div>
+    <div *ngIf="isContractsOpened" class="col-md-10">
+      <form #myForm="ngForm" (ngSubmit)="getSmartContract(myForm)">
 
-      <div class="form-group">
-        <label for="addressETH">Tips ETH</label>
-        <input class="form-control" [(ngModel)]="addressETH.elementData" name="addressETH" ngModel />
-      </div>
+        <div class="form-group">
+          <label for="addressBTC">Contract sddress</label>
+          <input class="form-control" name="contractAddress" ngModel />
+        </div>
 
-      <div class="form-group">
-        <label for="aboutPage">About Page</label>
-        <textarea class="form-control" rows="5" [(ngModel)]="aboutPage.elementData" name="aboutPage" ngModel ></textarea>
-      </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary"> &nbsp; Get &nbsp;</button>
+        </div>
+        <div *ngIf="errors" class="alert alert-danger" role="alert">
+          {{errors}}
+        </div>
 
-      <div class="form-group">
-        <label for="contactPage">Contact Page</label>
-        <textarea class="form-control" rows="5" [(ngModel)]="contactPage.elementData" name="contactPage" ngModel ></textarea>
-      </div>
+        <form *ngIf="isGotContract" #myForm="ngForm" (ngSubmit)="updateContract(myForm)">
+
+          <div class="form-group">
+            <label for="addressBTC">Name</label>
+            <input class="form-control" [(ngModel)]="token.name" name="name" ngModel />
+          </div>
+
+          <div class="form-group">
+            <label for="addressBTC">Symbol</label>
+            <input class="form-control" [(ngModel)]="token.symbol" name="symbol" ngModel />
+          </div>
+
+          <div class="form-group">
+            <label for="addressBTC">Decimal Places</label>
+            <input class="form-control" [(ngModel)]="token.DecimalPlaces" name="DecimalPlaces" ngModel />
+          </div>
+          
+          <div class="form-group">
+            <label for="addressBTC">Web Site Link</label>
+            <input class="form-control" [(ngModel)]="token.webSiteLink" name="webSiteLink" ngModel />
+          </div>
+
+          <div class="form-group">
+            <label for="addressBTC">Created date</label>
+            <input class="form-control" [(ngModel)]="createdDate" name="createdDate" ngModel />
+          </div>
 
 
-      <div class="form-group">
-        <button type="submit" class="btn btn-primary">Update</button>
-      </div>
-      <div *ngIf="errors" class="alert alert-danger" role="alert">
-        {{errors}}
-      </div>
 
-    </form>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Update</button>
+          </div>
+          <div *ngIf="errors" class="alert alert-danger" role="alert">
+            {{errors}}
+          </div>
+
+        </form>
+
+      </form>
+    </div>
+
+    <div *ngIf="isContentOpened" class="col-md-10">
+
+      <form *ngIf="isRequested" #myForm="ngForm" (ngSubmit)="postData(myForm)">
+
+        <div class="form-group">
+          <label for="addressBTC">Tips BTC</label>
+          <input class="form-control" [(ngModel)]="addressBTC.elementData" name="addressBTC" ngModel/>
+        </div>
+
+        <div class="form-group">
+          <label for="addressETH">Tips ETH</label>
+          <input class="form-control" [(ngModel)]="addressETH.elementData" name="addressETH" ngModel/>
+        </div>
+
+        <div class="form-group">
+          <label for="aboutPage">About Page</label>
+          <textarea class="form-control" rows="5" [(ngModel)]="aboutPage.elementData" name="aboutPage" ngModel></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="contactPage">Contact Page</label>
+          <textarea class="form-control" rows="5" [(ngModel)]="contactPage.elementData" name="contactPage" ngModel></textarea>
+        </div>
+
+
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+        <div *ngIf="errors" class="alert alert-danger" role="alert">
+          {{errors}}
+        </div>
+
+      </form>
+    </div>
   </div>
 </div>

@@ -32,6 +32,7 @@ import { AuthAdminGuardService } from './shared/services/auth-admin-guard.servic
 import { AuthUserGuardService } from './shared/services/auth-user-guard.service';
 import { WatchlistService } from './shared/services/watchlist.service';
 import { NotificationsService } from './shared/services/notifications.service';
+import { TokenService } from './shared/services/adminToken.service';
 import { SortingWatchlistPipe } from './pipe/sort-watchlist';
 
 @NgModule({
@@ -87,6 +88,7 @@ import { SortingWatchlistPipe } from './pipe/sort-watchlist';
     PageDataService,
     WatchlistService,
     NotificationsService,
+    TokenService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
