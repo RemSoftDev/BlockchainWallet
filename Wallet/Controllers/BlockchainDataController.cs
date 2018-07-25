@@ -145,7 +145,7 @@ namespace Wallet.Controllers
                 }
                 else
                 {
-                    searchBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
+                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
                 }
 
                 var tasks = new List<Task<List<CustomTransaction>>>();
@@ -182,10 +182,12 @@ namespace Wallet.Controllers
         {
             try
             {
+                // if didnt have in db sometime error, bcause try to get data in one time
                 Task<ERC20Token> getContractInfoFromDb = Task.Run(async () =>
                 {
                     var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
                         t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
+                    token = token == null ? token = new ERC20Token() { Address = contractAddress } : token;
                     token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
                         token.DecimalPlaces);
                     return token;
@@ -193,24 +195,45 @@ namespace Wallet.Controllers
 
                 Task<ContractHoldersAndTransactionsModel> getHoldersAndTransactions = Task.Run(async () =>
                 {
-                    var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
+                    var token1 = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
                         t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
 
+                    //token = token == null ? token = new ERC20Token() { Address = contractAddress }:token;
+
+
                     ContractHoldersAndTransactionsModel tmp;
-                    if (((TimeSpan) (DateTime.Now - token.UpdDate)).Minutes > 10)
+                    //tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
+                    if (token1 == null)
                     {
+                        token1 = new ERC20Token() { Address = contractAddress };
                         tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
-                        token.TransactionsCount = tmp.TransactionsCount;
-                        token.WalletsCount = tmp.HoldersCount;
-                        token.UpdDate = DateTime.Now;
+
+                        token1.TransactionsCount = tmp.TransactionsCount;
+                        token1.WalletsCount = tmp.HoldersCount;
+                        token1.UpdDate = DateTime.Now;
+                        dbContext.Erc20Tokens.Add(token1);
                         await dbContext.SaveChangesAsync();
+
                     }
                     else
                     {
-                        tmp = new ContractHoldersAndTransactionsModel();
-                        tmp.HoldersCount = token.WalletsCount;
-                        tmp.TransactionsCount = token.TransactionsCount;
+                        if (token1.UpdDate == null || (((TimeSpan)(DateTime.Now - token1.UpdDate)).Minutes > 10))
+                        {
+                            tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
+
+                            token1.TransactionsCount = tmp.TransactionsCount;
+                            token1.WalletsCount = tmp.HoldersCount;
+                            token1.UpdDate = DateTime.Now;
+                            await dbContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            tmp = new ContractHoldersAndTransactionsModel();
+                            tmp.HoldersCount = token1.WalletsCount;
+                            tmp.TransactionsCount = token1.TransactionsCount;
+                        }
                     }
+
 
                     return tmp;
                 });
@@ -240,7 +263,7 @@ namespace Wallet.Controllers
                 }
                 else
                 {
-                    searchBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
+                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
                 }
                 //check by time updates && update db count of transaction "v.	Quantity of transactions"
 
