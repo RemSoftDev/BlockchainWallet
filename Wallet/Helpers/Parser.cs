@@ -10,9 +10,9 @@ using Wallet.ViewModels;
 
 namespace Wallet.Helpers
 {
-    public static class Parser
+    public class Parser : IParser
     {
-        public static async Task<ContractHoldersAndTransactionsModel> GetContractHoldersAndTransactions(string contractAddress)
+        public async Task<ContractHoldersAndTransactionsModel> GetContractHoldersAndTransactions(string contractAddress)
         {
             HtmlParser parser = new HtmlParser();
 

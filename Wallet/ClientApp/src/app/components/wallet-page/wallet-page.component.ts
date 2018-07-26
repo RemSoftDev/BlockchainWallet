@@ -16,13 +16,18 @@ export class WalletPageComponent implements OnInit{
 
   ngOnInit() {
     let address = this.activatedRoute.snapshot.paramMap.get('searchString');
-    this.BCservice.checkAddress(address).subscribe(res => {
-      if (res) {
-        this.router.navigate(['/search/contract',address]);
-      } else {
-        this.router.navigate(['/search/account',address]);
-      }
-    }, error => this.errors = true);
+    if (!address.startsWith('0x')) {
+      this.router.navigate(['/search/contract', address]);
+    }
+    else {
+      this.BCservice.checkAddress(address).subscribe(res => {
+        if (res) {
+          this.router.navigate(['/search/contract', address]);
+        } else {
+          this.router.navigate(['/search/account', address]);
+        }
+      }, error => this.errors = true);
+    }
   }
 
 }

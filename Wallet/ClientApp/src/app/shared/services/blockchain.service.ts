@@ -38,10 +38,24 @@ export class BlockchainService extends BaseService {
       .catch(this.handleError);
   }
 
+  getSmartContractInfoByName(name: string) {
+    const params = new HttpParams().set('contractName', name);
+    return this.http
+      .get<TokenModel>(this.hostUrl + this.baseUrl + '/GetSmartContractInfoByName', { params })
+      .catch(this.handleError);
+  }
+
   getSmartContractTransactions(accountAddress: string) {
     const params = new HttpParams().set('accountAddress', accountAddress);
     return this.http
       .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetSmartContractTransactions', { params })
+      .catch(this.handleError);
+  }
+
+  getSmartContractTransactionsByName(name: string) {
+    const params = new HttpParams().set('contractName', name);
+    return this.http
+      .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetSmartContractTransactionsByName', { params })
       .catch(this.handleError);
   }
 

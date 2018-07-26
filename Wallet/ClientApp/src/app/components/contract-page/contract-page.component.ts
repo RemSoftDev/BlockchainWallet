@@ -47,23 +47,46 @@ export class ContractPageComponent implements OnInit, OnDestroy {
     this.errors = false;
     this.searchString = this.activatedRoute.snapshot.paramMap.get('searchString');
 
-    this.BCservice.getSmartContractInfo(this.searchString).subscribe(info => {
-        this.infoRequesting = true;
-        this.smartContractInfo = info;
-      },
-      error => {
-        console.log(error);
-        this.errors = true;
-      });
+    if (!this.searchString.startsWith('0x')) {
+      this.BCservice.getSmartContractInfoByName(this.searchString).subscribe(info => {
+          this.infoRequesting = true;
+          this.smartContractInfo = info;
+          this.searchString = info.address;
+        },
+        error => {
+          console.log(error);
+          this.errors = true;
+        });
 
-    this.BCservice.getSmartContractTransactions(this.searchString).subscribe(transact => {
-        this.transactionRequesting = true;
-        this.transactionsModel = transact;
-      },
-      error => {
-        console.log(error);
-        this.errors = true;
-      });
+
+      this.BCservice.getSmartContractTransactionsByName(this.searchString).subscribe(transact => {
+          this.transactionRequesting = true;
+          this.transactionsModel = transact;
+        },
+        error => {
+          console.log(error);
+          this.errors = true;
+        });
+
+    } else {
+      this.BCservice.getSmartContractInfo(this.searchString).subscribe(info => {
+          this.infoRequesting = true;
+          this.smartContractInfo = info;
+        },
+        error => {
+          console.log(error);
+          this.errors = true;
+        });
+
+      this.BCservice.getSmartContractTransactions(this.searchString).subscribe(transact => {
+          this.transactionRequesting = true;
+          this.transactionsModel = transact;
+        },
+        error => {
+          console.log(error);
+          this.errors = true;
+        });
+    }
   }
 
   loadTransaction(blockNumber) {

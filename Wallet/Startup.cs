@@ -42,6 +42,7 @@ namespace Wallet
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
             services.AddSingleton<IUserInfoInMemory,UserInfoInMemory>();
             services.AddHostedService<NotificationService>();
+            services.AddTransient<IParser, Parser>();
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTSettings));
 
