@@ -151,7 +151,7 @@
           {{trans.what}}
         </td>
         <td *ngIf="trans.what!='ETH'" title="{{trans.what}}">
-          <a [routerLink]='["/search",trans.contractAddress]'>
+          <a [routerLink]='["/search/contract/",trans.contractAddress]'>
             {{trans.what}}
           </a>
         </td>

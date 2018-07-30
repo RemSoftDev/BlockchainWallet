@@ -7,6 +7,8 @@ import { NotificationOptions } from "../../shared/models/watchlistModel";
 import { TokenModel } from "../../shared/models/tokenModel";
 import { NgForm } from '@angular/forms';
 import { TransactionsModel } from "../../shared/models/transactionsModel.interface";
+import { TokenHolder } from "../../shared/models/tokenHolder.interface";
+
 
 @Component({
   selector: 'app-contract-page',
@@ -30,7 +32,9 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   walletsTabClass: string;
   navigationSubscription;
   searchString: string;
+  tokenHolders: TokenHolder;
   errors: boolean;
+  holdersRequested:boolean;
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute,
     private BCservice: BlockchainService, private watchlistService: WatchlistService) {
@@ -110,10 +114,19 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   }
 
   SwitchToWallets() {
+    this.getTokenHoldersInfo();
     this.isWalletsOpen = true;
     this.isTransactionsOpen = false;
     this.walletsTabClass = 'active';
     this.transactionTabClass = '';
+  }
+
+  getTokenHoldersInfo() {
+    this.holdersRequested = false;
+    this.BCservice.getSmartContractHoldersInfo(this.smartContractInfo.id).subscribe(info => {
+      this.tokenHolders = info;
+      this.holdersRequested = true;
+    });
   }
 
   setNotification(withNotification,

@@ -165,14 +165,21 @@
 </div>
 
 <div *ngIf="transactionRequesting && isWalletsOpen" class="row tableRow">
-  <table class="table table-striped">
+  <div *ngIf="!holdersRequested" class="row">
+    <app-spinner></app-spinner>
+  </div>
+  <table *ngIf="holdersRequested" class="table table-striped">
     <thead>
     <tr>
-      <th rowspan="2" scope="col"><p class="walletsTableTh">Wallet <br /> Address </p> </th>
-      <th rowspan="2" scope="col"><p class="walletsTableTh">Quantity</p></th>
-      <th rowspan="2" scope="col"><p class="walletsTableTh">Tokens Sent</p></th>
-      <th rowspan="2" scope="col"><p class="walletsTableTh">Tokens Received</p></th>
-      <th colspan="3" scope="col">Transactions Number</th>
+      <th rowspan="2" scope="col">
+        <p class="walletsTableTh">Wallet <br/> Address </p> </th>
+      <th rowspan="2" scope="col">
+        <p class="walletsTableTh">Quantity</p></th>
+      <th rowspan="2" scope="col">
+        <p class="walletsTableTh">Tokens Sent</p></th>
+      <th rowspan="2" scope="col">
+        <p class="walletsTableTh">Tokens Received</p></th>
+      <th colspan="3" scope="col" class="text-center">Transactions Number</th>
     </tr>
     <tr>
       <th scope="col">General</th>
@@ -181,22 +188,15 @@
     </tr>
     </thead>
     <tbody>
-      <!--<tr *ngFor="let trans of transactionsModel.transactions">
-        <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
-        <td title="{{trans.from}}">
-          <a [routerLink]='["/search",trans.from]'>
-            {{trans.from | slice : 0:20}}...
-          </a>
-        </td>
-        <td title="{{trans.to}}">
-          <a [routerLink]='["/search",trans.to]'>
-            {{trans.to | slice : 0:20}}...
-          </a>
-        </td>
-        <td title="{{trans.decimalValue}}">{{trans.decimalValue | number : '1.2-5'}}</td>
-        <td title="{{trans.date }}">{{trans.date | date : 'short' }}</td>
-        <td title="{{trans.isSuccess}}">{{trans.isSuccess}}</td>
-      </tr>-->
+    <tr *ngFor="let holder of tokenHolders">
+      <th title="{{holder.address}}">{{holder.address | slice : 0:20}}...</th>
+      <td title="{{holder.quantity}}">{{holder.quantity}}</td>
+      <td title="{{holder.tokensSent}}">{{holder.tokensSent}}</td>
+      <td title="{{holder.tokensReceived}}">{{holder.tokensReceived}}</td>
+      <td title="{{holder.generalTransactionsNumber}}">{{holder.generalTransactionsNumber}}</td>
+      <td title="{{holder.sentTransactionsNumber}}">{{holder.sentTransactionsNumber}}</td>
+      <td title="{{holder.receivedTransactionsNumber}}">{{holder.receivedTransactionsNumber}}</td>
+    </tr>
     </tbody>
   </table>
   <div class="col-md-12 text-center">

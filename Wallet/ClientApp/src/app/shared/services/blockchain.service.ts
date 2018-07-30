@@ -5,6 +5,7 @@ import { WalletInfo } from '../models/walletInfo.interface';
 import { TransactionsModel } from '../models/transactionsModel.interface';
 import { BaseService } from "./base.service";
 import { TokenModel } from '../models/tokenModel';
+import { TokenHolder } from '../models/tokenHolder.interface';
 
 
 @Injectable()
@@ -58,11 +59,18 @@ export class BlockchainService extends BaseService {
       .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetSmartContractTransactionsByName', { params })
       .catch(this.handleError);
   }
-
+  
   getSmartContractTransactionsByNumber(blockNumber, accountAddress: string) {
     const params = new HttpParams().set("blockNumber", blockNumber).set('accountAddress', accountAddress);
     return this.http
       .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetSmartContractTransactions', { params })
+      .catch(this.handleError);
+  }
+
+  getSmartContractHoldersInfo(contractId : string) {
+    const params = new HttpParams().set("contractId", contractId);
+    return this.http
+      .get<TokenHolder>(this.hostUrl + this.baseUrl + '/GetTokenHoldersInfo', { params })
       .catch(this.handleError);
   }
 

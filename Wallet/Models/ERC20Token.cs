@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Wallet.Models
@@ -29,5 +30,7 @@ namespace Wallet.Models
         public int WalletsCount { get; set; }
 
         public DateTime? UpdDate { get; set; }
+
+        public List<TokenHolder> Holders { get; set; }
     }
 }

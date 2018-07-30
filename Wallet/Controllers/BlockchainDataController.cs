@@ -136,6 +136,21 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
+        public async Task<IActionResult> GetTokenHoldersInfo(int contractId)
+        {
+            try
+            {
+                var holders = await dbContext.TokenHolder.Where(h => h.ERC20TokenId == contractId).ToListAsync();
+
+                return new OkObjectResult(holders);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("[action]")]
         public async Task<IActionResult> GetTransactions(int? blockNumber, string accountAddress)
         {
             try

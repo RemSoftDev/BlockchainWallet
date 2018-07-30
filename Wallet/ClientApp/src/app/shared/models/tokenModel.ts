@@ -1,4 +1,5 @@
 export class TokenModel {
+  id: string;
   address: string;
   symbol: string;
   decimalplaces: number;
