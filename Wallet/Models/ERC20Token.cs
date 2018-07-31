@@ -31,6 +31,6 @@ namespace Wallet.Models
 
         public DateTime? UpdDate { get; set; }
 
-        public List<TokenHolder> Holders { get; set; }
+        public ICollection<CustomEventLog> Logs { get; set; }
     }
 }

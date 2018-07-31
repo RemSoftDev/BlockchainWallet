@@ -135,14 +135,81 @@ namespace Wallet.Controllers
             }
         }
 
+        private List<TokenHolder> GetInfoFromLogs(List<CustomEventLog> logs)
+        {
+            List<TokenHolder> holders = new List<TokenHolder>();
+
+            var addresses = new HashSet<string>();
+
+            logs.ForEach(l =>
+            {
+                addresses.Add(l.From);
+                addresses.Add(l.To);
+            });
+
+            foreach (var address in addresses)
+            {
+                var generalTransNumber = logs.Count(e => e.To.Equals(address,
+                                                             StringComparison.CurrentCultureIgnoreCase) ||
+                                                         e.From.Equals(address,
+                                                             StringComparison.CurrentCultureIgnoreCase));
+
+                var sentTransactionsNumber =
+                    logs.Count(e => e.From.Equals(address, StringComparison.CurrentCultureIgnoreCase));
+
+                var recievedTransactionsNumber =
+                    logs.Count(e => e.To.Equals(address, StringComparison.CurrentCultureIgnoreCase));
+
+                var tokenSentNumber = logs.Where(e => e.From.Equals(address, StringComparison.CurrentCultureIgnoreCase))
+                    .Select(t => t.AmountOfToken).Sum();
+
+                var tokenRecievedNumber = logs
+                    .Where(e => e.To.Equals(address, StringComparison.CurrentCultureIgnoreCase))
+                    .Select(t => t.AmountOfToken).Sum();
+
+
+                holders.Add(new TokenHolder()
+                {
+                    Address = address,
+                    GeneralTransactionsNumber = generalTransNumber,
+                    SentTransactionsNumber = sentTransactionsNumber,
+                    ReceivedTransactionsNumber = recievedTransactionsNumber,
+                    TokensSent = tokenSentNumber,
+                    TokensReceived = tokenRecievedNumber
+                });
+            }
+
+            return holders;
+        }
+
         [HttpGet("[action]")]
         public async Task<IActionResult> GetTokenHoldersInfo(int contractId)
         {
             try
             {
-                var holders = await dbContext.TokenHolder.Where(h => h.ERC20TokenId == contractId).ToListAsync();
+                var events = dbContext.CustomEventLogs.Where(e => e.ERC20TokenId == contractId);
 
-                return new OkObjectResult(holders);
+                var logs = GetInfoFromLogs(await events.OrderByDescending(e=>e.dateTime).ToListAsync()).Take(30);
+
+                var tasks = new List<Task<TokenHolder>>();
+
+                foreach (var log in logs)
+                {                  
+                    Task<TokenHolder> task = _explorer.GetTokenHolderBalance(log, await dbContext.Erc20Tokens.FindAsync(contractId));
+                    tasks.Add(task);                   
+                }
+
+                await Task.WhenAll(tasks);
+
+                var result = new List<TokenHolder>();
+
+                foreach (var task in tasks)
+                {
+                    result.Add(task.Result);
+                }
+
+
+                return new OkObjectResult(result);
             }
             catch (Exception e)
             {

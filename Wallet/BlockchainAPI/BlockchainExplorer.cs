@@ -12,6 +12,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Nethereum.Contracts;
+using Nethereum.StandardTokenEIP20.Events.DTO;
 using Wallet.BlockchainAPI.Model;
 using Wallet.Helpers;
 using Wallet.Models;
@@ -229,6 +231,61 @@ namespace Wallet.BlockchainAPI
             var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contractAddress);
             var eth = cont.GetFunction("totalSupply");
             return eth.CallAsync<BigInteger>();
+        }
+
+        public async Task<List<CustomEventLog>> GetEventLogs(ERC20Token contract)
+        {
+            var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contract.Address);
+            var transEvent = cont.GetEvent("Transfer");
+
+            var logs = new List<EventLog<Transfer>>();
+            var events = new List<CustomEventLog>();
+
+            var lastBlockNumber = (ulong)(await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync()).Value;
+
+            for (var i = lastBlockNumber; i > lastBlockNumber - 2000; i -= 100)
+            {
+                var filter = transEvent.CreateFilterInput(new BlockParameter(i - 99), new BlockParameter(i));
+                var log = transEvent.GetAllChanges<Transfer>(filter).Result;
+                logs.AddRange(log);
+            }
+
+            foreach (var log in logs)
+            {
+                var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
+                    new HexBigInteger(log.Log.BlockNumber)).Result;
+
+                var timestamp = block.Timestamp.Value;
+
+                events.Add(new CustomEventLog()
+                {
+                    ERC20TokenId = contract.Id,
+                    From = log.Event.AddressFrom,
+                    To = log.Event.AddressTo,
+                    AmountOfToken = Web3.Convert.FromWei(log.Event.Value, contract.DecimalPlaces),
+                    dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                        (long)(timestamp)),
+                    BlockNumber = (int)log.Log.BlockNumber.Value
+                });
+            }
+
+            return events;
+        }
+
+        public async Task<TokenHolder> GetTokenHolderBalance(TokenHolder holder, ERC20Token contract)
+        {
+            try
+            {
+                var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contract.Address);
+                var eth = cont.GetFunction("balanceOf");
+                var balance = await eth.CallAsync<BigInteger>(holder.Address);
+                holder.Quantity = Web3.Convert.FromWei(balance, contract.DecimalPlaces);
+                return holder;
+            }
+            catch (Exception e)
+            {
+                return holder;
+            }
         }
 
         /// <summary>

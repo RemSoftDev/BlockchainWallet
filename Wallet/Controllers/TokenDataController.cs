@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Wallet.BlockchainAPI;
 using Wallet.Helpers;
 using Wallet.Models;
 using Wallet.ViewModels;
@@ -15,11 +16,12 @@ namespace Wallet.Controllers
     public class TokenDataController : Controller
     {
         private WalletDbContext _dbContext;
+        private IBlockchainExplorer _explorer;
 
-
-        public TokenDataController(WalletDbContext context)
+        public TokenDataController(IBlockchainExplorer explorer, WalletDbContext context)
         {          
             _dbContext = context;
+            this._explorer = explorer;
         }
 
         [HttpGet("[action]")]
