@@ -15,6 +15,7 @@ using Wallet.BlockchainAPI;
 using Wallet.Helpers;
 using Wallet.Models;
 using Wallet.Notifications;
+using Wallet.Services;
 
 namespace Wallet
 {
@@ -34,15 +35,18 @@ namespace Wallet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Utils.LogWriter("12231423423");
+
             services.AddDbContext<WalletDbContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("ProdConn")));
-            //options.UseSqlServer(Configuration.GetConnectionString("TestConn")));
+            //options.UseSqlServer(Configuration.GetConnectionString("ProdConn")));
+            options.UseSqlServer(Configuration.GetConnectionString("TestConn")));
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
             services.AddSingleton<IUserInfoInMemory,UserInfoInMemory>();
             services.AddHostedService<NotificationService>();
             services.AddTransient<IParser, Parser>();
+            services.AddSingleton<BlockchainDataUpdateService>();
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTSettings));
 
