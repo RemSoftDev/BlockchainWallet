@@ -19,7 +19,7 @@ namespace Wallet.BlockchainAPI
         Task<HexBigInteger> GetLastAvailableBlockNumber();
         Task<string> GetCode(string address);
         Task<BlockWithTransactions> GetBlockByNumber(int blockNumber);
-        Task<List<CustomEventLog>> GetEventLogs(ERC20Token contract);
+        Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract);
         Task<BigInteger> GetTokenHolderBalance(string holderAddress, string contractAddress);
     }
 }

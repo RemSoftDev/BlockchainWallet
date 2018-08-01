@@ -233,7 +233,7 @@ namespace Wallet.BlockchainAPI
             return eth.CallAsync<BigInteger>();
         }
 
-        public async Task<List<CustomEventLog>> GetEventLogs(ERC20Token contract)
+        public async Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract)
         {
             var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contract.Address);
             var transEvent = cont.GetEvent("Transfer");
@@ -241,19 +241,19 @@ namespace Wallet.BlockchainAPI
             var logs = new List<EventLog<Transfer>>();
             var events = new List<CustomEventLog>();
 
-            var lastBlockNumber = (ulong)(await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync()).Value;
+            var lastBlockNumber = (int)(await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync()).Value;
 
-            for (var i = lastBlockNumber; i > lastBlockNumber - 2000; i -= 100)
+            for (var i = 1; i <= lastBlockNumber; i += 100)
             {
                 try
                 {
-                    var filter = transEvent.CreateFilterInput(new BlockParameter(i - 99), new BlockParameter(i));
+                    var filter = transEvent.CreateFilterInput(new BlockParameter((ulong)i), new BlockParameter((ulong)(i + 99)));
                     var log = transEvent.GetAllChanges<Transfer>(filter).Result;
                     logs.AddRange(log);
                 }
                 catch (Exception e)
                 {
-                    i += 100;
+                    i -= 100;
                 }
 
             }
