@@ -1,7 +1,7 @@
 .tableRow {
   width: 50%;
   cursor: pointer;
-  color: -webkit-link;
+  color: #0645AD;
 }
 
 .tableRow:hover {

@@ -34,7 +34,14 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   searchString: string;
   tokenHolders: TokenHolder;
   errors: boolean;
-  holdersRequested:boolean;
+  holdersRequested: boolean;
+
+  sortByQuantity: boolean = true;
+  sortByTokensSent: boolean = true;
+  sortByTokensReceived: boolean = true;
+  sortByGeneralTxNumber: boolean = true;
+  sortBySentTxNumber: boolean = true;
+  sortByReceivedTxNumber: boolean = true;
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute,
     private BCservice: BlockchainService, private watchlistService: WatchlistService) {
@@ -91,6 +98,73 @@ export class ContractPageComponent implements OnInit, OnDestroy {
           this.errors = true;
         });
     }
+  }
+
+  Sort(param: string) {
+    this.holdersRequested = false;
+    let order = 'Quantity';
+
+    if (param == 'Quantity') {
+      if (this.sortByQuantity) {
+        order = 'Quantity';
+        this.sortByQuantity = false;
+      } else {
+        order = 'QuantityDesc';
+        this.sortByQuantity = true;
+      }
+    }
+    if (param == 'TokensSent') {
+      if (this.sortByTokensSent) {
+        order = 'TokensSent';
+        this.sortByTokensSent = false;
+      } else {
+        order = 'TokensSentDesc';
+        this.sortByTokensSent = true;
+      }
+    }
+    if (param == 'TokensReceived') {
+      if (this.sortByTokensReceived) {
+        order = 'TokensReceived';
+        this.sortByTokensReceived = false;
+      } else {
+        order = 'TokensReceivedDesc';
+        this.sortByTokensReceived = true;
+      }
+    }
+    if (param == 'GeneralTxNumber') {
+      if (this.sortByGeneralTxNumber) {
+        order = 'GeneralTransactionsNumber';
+        this.sortByGeneralTxNumber = false;
+      } else {
+        order = 'GeneralTransactionsNumberDesc';
+        this.sortByGeneralTxNumber = true;
+      }
+    }
+    if (param == 'SentTxNumber') {
+      if (this.sortBySentTxNumber) {
+        order = 'SentTransactionsNumber';
+        this.sortBySentTxNumber = false;
+      } else {
+        order = 'SentTransactionsNumberDesc';
+        this.sortBySentTxNumber = true;
+      }
+    }
+    if (param == 'ReceivedTxNumber') {
+      if (this.sortByReceivedTxNumber) {
+        order = 'ReceivedTransactionsNumber';
+        this.sortByReceivedTxNumber = false;
+      } else {
+        order = 'ReceivedTransactionsNumberDesc';
+        this.sortByReceivedTxNumber = true;
+      }
+    }
+
+    console.log(order);
+
+    this.BCservice.getSortedSmartContractHoldersInfo(this.smartContractInfo.id, order).subscribe(info => {
+      this.tokenHolders = info;
+      this.holdersRequested = true;
+    });
   }
 
   loadTransaction(blockNumber) {

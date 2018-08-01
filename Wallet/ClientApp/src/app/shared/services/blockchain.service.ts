@@ -74,6 +74,13 @@ export class BlockchainService extends BaseService {
       .catch(this.handleError);
   }
 
+  getSortedSmartContractHoldersInfo(contractId: string, sortOrder:string) {
+    const params = new HttpParams().set("contractId", contractId).set("sortOrder",sortOrder);
+    return this.http
+      .get<TokenHolder>(this.hostUrl + this.baseUrl + '/GetTokenHoldersInfo', { params })
+      .catch(this.handleError);
+  }
+
   getTransactions(accountAddress: string) {
     const params = new HttpParams().set('accountAddress', accountAddress);
     return this.http

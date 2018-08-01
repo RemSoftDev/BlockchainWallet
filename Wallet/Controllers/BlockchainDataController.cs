@@ -135,81 +135,55 @@ namespace Wallet.Controllers
             }
         }
 
-        private List<TokenHolder> GetInfoFromLogs(List<CustomEventLog> logs)
-        {
-            List<TokenHolder> holders = new List<TokenHolder>();
-
-            var addresses = new HashSet<string>();
-
-            logs.ForEach(l =>
-            {
-                addresses.Add(l.From);
-                addresses.Add(l.To);
-            });
-
-            foreach (var address in addresses)
-            {
-                var generalTransNumber = logs.Count(e => e.To.Equals(address,
-                                                             StringComparison.CurrentCultureIgnoreCase) ||
-                                                         e.From.Equals(address,
-                                                             StringComparison.CurrentCultureIgnoreCase));
-
-                var sentTransactionsNumber =
-                    logs.Count(e => e.From.Equals(address, StringComparison.CurrentCultureIgnoreCase));
-
-                var recievedTransactionsNumber =
-                    logs.Count(e => e.To.Equals(address, StringComparison.CurrentCultureIgnoreCase));
-
-                var tokenSentNumber = logs.Where(e => e.From.Equals(address, StringComparison.CurrentCultureIgnoreCase))
-                    .Select(t => t.AmountOfToken).Sum();
-
-                var tokenRecievedNumber = logs
-                    .Where(e => e.To.Equals(address, StringComparison.CurrentCultureIgnoreCase))
-                    .Select(t => t.AmountOfToken).Sum();
-
-
-                holders.Add(new TokenHolder()
-                {
-                    Address = address,
-                    GeneralTransactionsNumber = generalTransNumber,
-                    SentTransactionsNumber = sentTransactionsNumber,
-                    ReceivedTransactionsNumber = recievedTransactionsNumber,
-                    TokensSent = tokenSentNumber,
-                    TokensReceived = tokenRecievedNumber
-                });
-            }
-
-            return holders;
-        }
-
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTokenHoldersInfo(int contractId)
+        public async Task<IActionResult> GetTokenHoldersInfo(int contractId, SortOrder sortOrder = SortOrder.QuantityDesc)
         {
             try
             {
-                var events = dbContext.CustomEventLogs.Where(e => e.ERC20TokenId == contractId);
+                var result = dbContext.TokenHolders.Where(h => h.ERC20TokenId == contractId);
 
-                var logs = GetInfoFromLogs(await events.OrderByDescending(e=>e.dateTime).ToListAsync()).Take(30);
-
-                var tasks = new List<Task<TokenHolder>>();
-
-                foreach (var log in logs)
-                {                  
-                    Task<TokenHolder> task = _explorer.GetTokenHolderBalance(log, await dbContext.Erc20Tokens.FindAsync(contractId));
-                    tasks.Add(task);                   
-                }
-
-                await Task.WhenAll(tasks);
-
-                var result = new List<TokenHolder>();
-
-                foreach (var task in tasks)
+                switch (sortOrder)
                 {
-                    result.Add(task.Result);
+                    case SortOrder.QuantityDesc:
+                        result = result.OrderByDescending(h => h.Quantity);
+                        break;
+                    case SortOrder.Quantity:
+                        result = result.OrderBy(h => h.Quantity);
+                        break;
+                    case SortOrder.TokensSent:
+                        result = result.OrderBy(h => h.TokensSent);
+                        break;
+                    case SortOrder.TokensSentDesc:
+                        result = result.OrderByDescending(h => h.TokensSent);
+                        break;
+                    case SortOrder.TokensReceived:
+                        result = result.OrderBy(h => h.TokensReceived);
+                        break;
+                    case SortOrder.TokensReceivedDesc:
+                        result = result.OrderByDescending(h => h.TokensReceived);
+                        break;
+                    case SortOrder.GeneralTransactionsNumber:
+                        result = result.OrderBy(h => h.GeneralTransactionsNumber);
+                        break;
+                    case SortOrder.GeneralTransactionsNumberDesc:
+                        result = result.OrderByDescending(h => h.GeneralTransactionsNumber);
+                        break;
+                    case SortOrder.SentTransactionsNumber:
+                        result = result.OrderBy(h => h.SentTransactionsNumber);
+                        break;
+                    case SortOrder.SentTransactionsNumberDesc:
+                        result = result.OrderByDescending(h => h.SentTransactionsNumber);
+                        break;
+                    case SortOrder.ReceivedTransactionsNumber:
+                        result = result.OrderBy(h => h.ReceivedTransactionsNumber);
+                        break;
+                    case SortOrder.ReceivedTransactionsNumberDesc:
+                        result = result.OrderByDescending(h => h.ReceivedTransactionsNumber);
+                        break;
+
                 }
 
-
-                return new OkObjectResult(result);
+                return new OkObjectResult(await result.Skip(0).Take(40).ToListAsync());
             }
             catch (Exception e)
             {
@@ -496,5 +470,21 @@ namespace Wallet.Controllers
                 return BadRequest(HttpErrorHandler.AddError("Failure", e.Message, ModelState));
             }
         }
+    }
+
+    public enum  SortOrder
+    {
+        QuantityDesc,
+        Quantity,
+        TokensSent,
+        TokensSentDesc,
+        TokensReceived,
+        TokensReceivedDesc,
+        GeneralTransactionsNumber,
+        GeneralTransactionsNumberDesc,
+        SentTransactionsNumber,
+        SentTransactionsNumberDesc,
+        ReceivedTransactionsNumber,
+        ReceivedTransactionsNumberDesc
     }
 }

@@ -101,17 +101,16 @@
 <div *ngIf="isWalletsOpen" novalidate class="row">
   <div class="col-md-12">
     <h3>Sort by date, time</h3>
-
     <form class="form-inline" #myForm="ngForm" (ngSubmit)="sortByDateTime(myForm)">
       <div class="form-group">
         <label for="dateFrom">From:</label>
-        <input placeholder="date" class="form-control" name="dateFrom" ngModel required>
-        <input placeholder="time" class="form-control" name="timeFrom" ngModel required>
+        <input type="date" class="form-control" name="dateFrom" ngModel required>
+        <input type="time" class="form-control" name="timeFrom" ngModel required>
       </div>
       <div class="form-group">
         <label for="dateTo">To:</label>
-        <input placeholder="date" class="form-control" name="dateTo" ngModel required>
-        <input placeholder="time" class="form-control" name="timeTo" ngModel required>
+        <input type="date" class="form-control" name="dateTo" ngModel required>
+        <input type="time" class="form-control" name="timeTo" ngModel required>
       </div>
       <button [disabled]="myForm.invalid" type="submit" class="btn btn-default">Sort</button>
     </form>
@@ -174,25 +173,51 @@
       <th rowspan="2" scope="col">
         <p class="walletsTableTh">Wallet <br/> Address </p> </th>
       <th rowspan="2" scope="col">
-        <p class="walletsTableTh">Quantity</p></th>
+        <p class="sortLink walletsTableTh" (click)="Sort('Quantity')">
+          Quantity
+          <span *ngIf="!sortByQuantity" class="glyphicon glyphicon-triangle-top"></span>
+          <span *ngIf="sortByQuantity" class="glyphicon glyphicon-triangle-bottom"></span>
+        </p>
+      </th>
       <th rowspan="2" scope="col">
-        <p class="walletsTableTh">Tokens Sent</p></th>
+        <p class="sortLink walletsTableTh" (click)="Sort('TokensSent')">Tokens Sent
+          <span *ngIf="!sortByTokensSent" class="glyphicon glyphicon-triangle-top"></span>
+          <span *ngIf="sortByTokensSent" class="glyphicon glyphicon-triangle-bottom"></span>
+        </p>
+      </th>
       <th rowspan="2" scope="col">
-        <p class="walletsTableTh">Tokens Received</p></th>
+        <p class="sortLink walletsTableTh" (click)="Sort('TokensReceived')">Tokens Received
+          <span *ngIf="!sortByTokensReceived" class="glyphicon glyphicon-triangle-top"></span>
+          <span *ngIf="sortByTokensReceived" class="glyphicon glyphicon-triangle-bottom"></span>
+        </p>
+      </th>
       <th colspan="3" scope="col" class="text-center">Transactions Number</th>
     </tr>
     <tr>
-      <th scope="col">General</th>
-      <th scope="col">Sent</th>
-      <th scope="col">Received</th>
+      <th scope="col" class="sortLink" (click)="Sort('GeneralTxNumber')">General
+        <span *ngIf="!sortByGeneralTxNumber" class="glyphicon glyphicon-triangle-top"></span>
+        <span *ngIf="sortByGeneralTxNumber" class="glyphicon glyphicon-triangle-bottom"></span>
+      </th>
+      <th scope="col" class="sortLink" (click)="Sort('SentTxNumber')">Sent
+        <span *ngIf="!sortBySentTxNumber" class="glyphicon glyphicon-triangle-top"></span>
+        <span *ngIf="sortBySentTxNumber" class="glyphicon glyphicon-triangle-bottom"></span>
+      </th>
+      <th scope="col" class="sortLink" (click)="Sort('ReceivedTxNumber')">Received
+        <span *ngIf="!sortByReceivedTxNumber" class="glyphicon glyphicon-triangle-top"></span>
+        <span *ngIf="sortByReceivedTxNumber" class="glyphicon glyphicon-triangle-bottom"></span>
+      </th>
     </tr>
     </thead>
     <tbody>
     <tr *ngFor="let holder of tokenHolders">
-      <th title="{{holder.address}}">{{holder.address | slice : 0:20}}...</th>
-      <td title="{{holder.quantity}}">{{holder.quantity}}</td>
-      <td title="{{holder.tokensSent}}">{{holder.tokensSent}}</td>
-      <td title="{{holder.tokensReceived}}">{{holder.tokensReceived}}</td>
+      <th title="{{holder.address}}">
+        <a [routerLink]='["/search/account",holder.address]'>
+          {{holder.address | slice : 0:20}}...
+        </a>       
+      </th>
+      <td title="{{holder.quantity}}">{{holder.quantity | number : '1.2-5'}}</td>
+      <td title="{{holder.tokensSent}}">{{holder.tokensSent | number : '1.2-5'}}</td>
+      <td title="{{holder.tokensReceived}}">{{holder.tokensReceived | number : '1.2-5'}}</td>
       <td title="{{holder.generalTransactionsNumber}}">{{holder.generalTransactionsNumber}}</td>
       <td title="{{holder.sentTransactionsNumber}}">{{holder.sentTransactionsNumber}}</td>
       <td title="{{holder.receivedTransactionsNumber}}">{{holder.receivedTransactionsNumber}}</td>

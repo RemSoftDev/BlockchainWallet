@@ -69,3 +69,13 @@
 .walletsTableTh {
   margin-top: -40px;
 }
+
+.sortLink {
+  color: #0645AD;
+  cursor: pointer;
+}
+
+.sortLink span {
+  font-size: 10px;
+}
+

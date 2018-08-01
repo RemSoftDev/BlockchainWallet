@@ -245,9 +245,17 @@ namespace Wallet.BlockchainAPI
 
             for (var i = lastBlockNumber; i > lastBlockNumber - 2000; i -= 100)
             {
-                var filter = transEvent.CreateFilterInput(new BlockParameter(i - 99), new BlockParameter(i));
-                var log = transEvent.GetAllChanges<Transfer>(filter).Result;
-                logs.AddRange(log);
+                try
+                {
+                    var filter = transEvent.CreateFilterInput(new BlockParameter(i - 99), new BlockParameter(i));
+                    var log = transEvent.GetAllChanges<Transfer>(filter).Result;
+                    logs.AddRange(log);
+                }
+                catch (Exception e)
+                {
+                    i += 100;
+                }
+
             }
 
             foreach (var log in logs)
@@ -272,20 +280,11 @@ namespace Wallet.BlockchainAPI
             return events;
         }
 
-        public async Task<TokenHolder> GetTokenHolderBalance(TokenHolder holder, ERC20Token contract)
+        public Task<BigInteger> GetTokenHolderBalance(string holderAddress, string contractAddress)
         {
-            try
-            {
-                var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contract.Address);
-                var eth = cont.GetFunction("balanceOf");
-                var balance = await eth.CallAsync<BigInteger>(holder.Address);
-                holder.Quantity = Web3.Convert.FromWei(balance, contract.DecimalPlaces);
-                return holder;
-            }
-            catch (Exception e)
-            {
-                return holder;
-            }
+            var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contractAddress);
+            var eth = cont.GetFunction("balanceOf");
+            return eth.CallAsync<BigInteger>(holderAddress);
         }
 
         /// <summary>

@@ -23,5 +23,8 @@ namespace Wallet.Models
 
         public DateTime DateTime { get; set; }
 
+        public int ERC20TokenId { get; set; }
+        public ERC20Token Token { get; set; }
+
     }
 }

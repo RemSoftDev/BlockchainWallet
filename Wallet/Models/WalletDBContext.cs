@@ -10,6 +10,7 @@ namespace Wallet.Models
         public DbSet<PageData> PageData { get; set; }
         public DbSet<NotificationOptions> NotificationOptions { get; set; }
         public DbSet<CustomEventLog> CustomEventLogs { get; set; }
+        public DbSet<TokenHolder> TokenHolders { get; set; }
 
         public WalletDbContext(DbContextOptions<WalletDbContext> options)
             : base(options)
