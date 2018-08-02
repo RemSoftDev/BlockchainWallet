@@ -138,7 +138,7 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTokenHoldersInfo(int contractId, SortOrder sortOrder = SortOrder.QuantityDesc)
+        public async Task<IActionResult> GetTokenHoldersInfo(int skipElementsCount, int contractId, SortOrder sortOrder = SortOrder.QuantityDesc)
         {
             try
             {
@@ -185,7 +185,18 @@ namespace Wallet.Controllers
 
                 }
 
-                return new OkObjectResult(await result.Skip(0).Take(40).ToListAsync());
+                if (skipElementsCount == 0)
+                {
+                    return new OkObjectResult(result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList());
+                }
+
+                return new OkObjectResult(
+                    new TokenHoldersViewModel()
+                    {
+                        HoldersInfo = result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList(),
+                        SkipElementsCount = skipElementsCount
+                    }
+                );
             }
             catch (Exception e)
             {
@@ -194,7 +205,7 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTokenHoldersInfoByDateTime(int contractId, string secondsFrom, string secondsTo, SortOrder sortOrder = SortOrder.QuantityDesc)
+        public async Task<IActionResult> GetTokenHoldersInfoByDateTime(int skipElementsCount, int contractId, string secondsFrom, string secondsTo, SortOrder sortOrder = SortOrder.QuantityDesc)
         {
             try
             {
@@ -254,7 +265,18 @@ namespace Wallet.Controllers
 
                 }
 
-                return new OkObjectResult(result.Skip(0).Take(40).ToList());
+                if (skipElementsCount == 0)
+                {
+                    return new OkObjectResult(result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList());
+                }
+
+                return new OkObjectResult(
+                        new TokenHoldersViewModel()
+                        {
+                            HoldersInfo = result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList(),
+                            SkipElementsCount = skipElementsCount
+                        }                
+                    );
             }
             catch (Exception e)
             {

@@ -32,11 +32,12 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   walletsTabClass: string;
   navigationSubscription;
   searchString: string;
-  tokenHolders: TokenHolder;
+  tokenHolders: TokenHolder[];
   errors: boolean;
   holdersRequested: boolean;
   dateFrom:Date;
-  dateTo:Date;
+  dateTo: Date;
+  skipCount: number = 0;
 
   isSortByDateTime: boolean = false;
   sortByQuantity: boolean = true;
@@ -292,7 +293,12 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   }
 
   loadMoreHoldersInfo() {
-
+    this.holdersRequested = false;
+    this.BCservice.loadMoreSortedSmartContractHoldersInfo(this.skipCount + 40, this.smartContractInfo.id, 'QuantityDesc').subscribe(info => {
+      this.tokenHolders = this.tokenHolders.concat(info.holdersInfo);
+      this.skipCount = info.skipElementsCount;
+      this.holdersRequested = true;
+    });
   }
 
   ngOnInit() {

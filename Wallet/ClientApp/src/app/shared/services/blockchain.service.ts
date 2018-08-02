@@ -5,7 +5,7 @@ import { WalletInfo } from '../models/walletInfo.interface';
 import { TransactionsModel } from '../models/transactionsModel.interface';
 import { BaseService } from "./base.service";
 import { TokenModel } from '../models/tokenModel';
-import { TokenHolder } from '../models/tokenHolder.interface';
+import { TokenHolder, HolderModel } from '../models/tokenHolder.interface';
 
 
 @Injectable()
@@ -90,6 +90,13 @@ export class BlockchainService extends BaseService {
       .set("sortOrder",sortOrder);
     return this.http
       .get<TokenHolder>(this.hostUrl + this.baseUrl + '/GetTokenHoldersInfoByDateTime', { params })
+      .catch(this.handleError);
+  }
+
+  loadMoreSortedSmartContractHoldersInfo(skipCount: number, contractId: string, sortOrder: string) {
+    const params = new HttpParams().set("skipElementsCount", skipCount.toString()).set("contractId", contractId).set("sortOrder", sortOrder);
+    return this.http
+      .get<HolderModel>(this.hostUrl + this.baseUrl + '/GetTokenHoldersInfo', { params })
       .catch(this.handleError);
   }
 
