@@ -232,8 +232,8 @@ namespace Wallet.BlockchainAPI
             var eth = cont.GetFunction("totalSupply");
             return eth.CallAsync<BigInteger>();
         }
-
-        public async Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract)
+        //add in db block num and find from this
+        public async Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract,int blocknum = 1)
         {
             var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contract.Address);
             var transEvent = cont.GetEvent("Transfer");
@@ -243,7 +243,7 @@ namespace Wallet.BlockchainAPI
 
             var lastBlockNumber = (int)(await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync()).Value;
 
-            for (var i = 1; i <= lastBlockNumber; i += 100)
+            for (var i = blocknum; i <= lastBlockNumber; i += 100)
             {
                 try
                 {

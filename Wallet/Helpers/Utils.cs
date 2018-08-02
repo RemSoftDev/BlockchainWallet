@@ -21,14 +21,14 @@ namespace Wallet.Helpers
 
             if (!File.Exists(logPath+ fileName))
             {
-                    using (StreamWriter sw = File.CreateText(fileName))
+                    using (StreamWriter sw = File.CreateText(logPath + fileName))
                     {  
                         sw.WriteLine(string.Format("{0}", message));
                     }
             }
             else
             {
-                using (StreamWriter sw = File.AppendText(logPath))
+                using (StreamWriter sw = File.AppendText(logPath + fileName))
                 {
                     sw.WriteLine(string.Format("{0}", message));
                 }

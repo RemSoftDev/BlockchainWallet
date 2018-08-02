@@ -187,7 +187,11 @@ namespace Wallet.Controllers
 
                 if (skipElementsCount == 0)
                 {
+                    //tst get data
+                    //Utils.LogWriter("123");
+                    //  var t = _explorer.GetFullEventLogs(new ERC20Token() {Address = "0xd341d1680Eeee3255b8C4c75bCCE7EB57f144dAe" }).Result; 
                     return new OkObjectResult(result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList());
+                    
                 }
 
                 return new OkObjectResult(
@@ -363,26 +367,26 @@ namespace Wallet.Controllers
                         token1.WalletsCount = tmp.HoldersCount;
                         token1.UpdDate = DateTime.Now;
                         dbContext.Erc20Tokens.Add(token1);
-                        await dbContext.SaveChangesAsync();
+                        dbContext.SaveChangesAsync();
 
                     }
                     else
                     {
-                        if (token1.UpdDate == null || (((TimeSpan)(DateTime.Now - token1.UpdDate)).Minutes > 10))
+                        //if (token1.UpdDate == null || (((TimeSpan)(DateTime.Now - token1.UpdDate)).Minutes > 10))
                         {
                             tmp = await _parser.GetContractHoldersAndTransactions(contractAddress);
 
                             token1.TransactionsCount = tmp.TransactionsCount;
                             token1.WalletsCount = tmp.HoldersCount;
                             token1.UpdDate = DateTime.Now;
-                            await dbContext.SaveChangesAsync();
+                            dbContext.SaveChangesAsync();
                         }
-                        else
-                        {
-                            tmp = new ContractHoldersAndTransactionsModel();
-                            tmp.HoldersCount = token1.WalletsCount;
-                            tmp.TransactionsCount = token1.TransactionsCount;
-                        }
+                        //else
+                        //{
+                        //    tmp = new ContractHoldersAndTransactionsModel();
+                        //    tmp.HoldersCount = token1.WalletsCount;
+                        //    tmp.TransactionsCount = token1.TransactionsCount;
+                        //}
                     }
 
 
