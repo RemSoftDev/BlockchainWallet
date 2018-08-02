@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Data;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -184,6 +186,75 @@ namespace Wallet.Controllers
                 }
 
                 return new OkObjectResult(await result.Skip(0).Take(40).ToListAsync());
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetTokenHoldersInfoByDateTime(int contractId, string secondsFrom, string secondsTo, SortOrder sortOrder = SortOrder.QuantityDesc)
+        {
+            try
+            {
+                var from = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Int64.Parse(secondsFrom));
+                var to = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Int64.Parse(secondsTo));
+                var logs = await dbContext.CustomEventLogs.Where(l=>l.dateTime>=from && l.dateTime<=to).ToListAsync();
+
+                
+                var holders = EventLogsExplorer.GetInfoFromLogs(logs);
+
+
+                holders.ForEach(h =>
+                    {
+                        h.Quantity = (h.TokensReceived - h.TokensSent) > 0 ? h.TokensReceived - h.TokensSent : 0;
+                    });
+
+                var result = holders.AsQueryable();
+
+                switch (sortOrder)
+                {
+                    case SortOrder.QuantityDesc:
+                        result = result.OrderByDescending(h => h.Quantity);
+                        break;
+                    case SortOrder.Quantity:
+                        result = result.OrderBy(h => h.Quantity);
+                        break;
+                    case SortOrder.TokensSent:
+                        result = result.OrderBy(h => h.TokensSent);
+                        break;
+                    case SortOrder.TokensSentDesc:
+                        result = result.OrderByDescending(h => h.TokensSent);
+                        break;
+                    case SortOrder.TokensReceived:
+                        result = result.OrderBy(h => h.TokensReceived);
+                        break;
+                    case SortOrder.TokensReceivedDesc:
+                        result = result.OrderByDescending(h => h.TokensReceived);
+                        break;
+                    case SortOrder.GeneralTransactionsNumber:
+                        result = result.OrderBy(h => h.GeneralTransactionsNumber);
+                        break;
+                    case SortOrder.GeneralTransactionsNumberDesc:
+                        result = result.OrderByDescending(h => h.GeneralTransactionsNumber);
+                        break;
+                    case SortOrder.SentTransactionsNumber:
+                        result = result.OrderBy(h => h.SentTransactionsNumber);
+                        break;
+                    case SortOrder.SentTransactionsNumberDesc:
+                        result = result.OrderByDescending(h => h.SentTransactionsNumber);
+                        break;
+                    case SortOrder.ReceivedTransactionsNumber:
+                        result = result.OrderBy(h => h.ReceivedTransactionsNumber);
+                        break;
+                    case SortOrder.ReceivedTransactionsNumberDesc:
+                        result = result.OrderByDescending(h => h.ReceivedTransactionsNumber);
+                        break;
+
+                }
+
+                return new OkObjectResult(result.Skip(0).Take(40).ToList());
             }
             catch (Exception e)
             {

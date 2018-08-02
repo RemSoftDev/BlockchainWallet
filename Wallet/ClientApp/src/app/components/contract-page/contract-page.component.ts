@@ -35,7 +35,10 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   tokenHolders: TokenHolder;
   errors: boolean;
   holdersRequested: boolean;
+  dateFrom:Date;
+  dateTo:Date;
 
+  isSortByDateTime: boolean = false;
   sortByQuantity: boolean = true;
   sortByTokensSent: boolean = true;
   sortByTokensReceived: boolean = true;
@@ -159,12 +162,17 @@ export class ContractPageComponent implements OnInit, OnDestroy {
       }
     }
 
-    console.log(order);
-
-    this.BCservice.getSortedSmartContractHoldersInfo(this.smartContractInfo.id, order).subscribe(info => {
-      this.tokenHolders = info;
-      this.holdersRequested = true;
-    });
+    if (this.isSortByDateTime) {
+      this.BCservice.getSortedSmartContractHoldersInfoByDate(this.smartContractInfo.id, order, this.dateFrom, this.dateTo).subscribe(info => {
+        this.tokenHolders = info;
+        this.holdersRequested = true;
+      });
+    } else {
+      this.BCservice.getSortedSmartContractHoldersInfo(this.smartContractInfo.id, order).subscribe(info => {
+        this.tokenHolders = info;
+        this.holdersRequested = true;
+      });
+    }
   }
 
   loadTransaction(blockNumber) {
@@ -264,10 +272,27 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   }
 
   sortByDateTime(form: NgForm) {
-    console.log(form.value.dateFrom);
-    console.log(form.value.timeFrom);
-    console.log(form.value.dateTo);
-    console.log(form.value.timeTo);
+    this.holdersRequested = false;
+    this.isSortByDateTime = true;
+    let dateTimeFrom = new Date(form.value.dateFrom +' ' +form.value.timeFrom);
+    let dateTimeTo = new Date(form.value.dateTo + ' ' + form.value.timeTo);
+    this.dateFrom = dateTimeFrom;
+    this.dateTo = dateTimeTo;
+
+    this.BCservice.getSortedSmartContractHoldersInfoByDate(this.smartContractInfo.id, 'QuantityDesc', dateTimeFrom, dateTimeTo).subscribe(info => {
+      this.tokenHolders = info;
+      this.holdersRequested = true;
+    });
+
+  }
+
+  removeDateTimeSorting() {
+    this.isSortByDateTime = false;
+    this.getTokenHoldersInfo();
+  }
+
+  loadMoreHoldersInfo() {
+
   }
 
   ngOnInit() {

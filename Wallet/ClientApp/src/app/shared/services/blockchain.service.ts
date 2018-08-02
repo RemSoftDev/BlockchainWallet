@@ -74,10 +74,22 @@ export class BlockchainService extends BaseService {
       .catch(this.handleError);
   }
 
+  
   getSortedSmartContractHoldersInfo(contractId: string, sortOrder:string) {
     const params = new HttpParams().set("contractId", contractId).set("sortOrder",sortOrder);
     return this.http
       .get<TokenHolder>(this.hostUrl + this.baseUrl + '/GetTokenHoldersInfo', { params })
+      .catch(this.handleError);
+  }
+
+  getSortedSmartContractHoldersInfoByDate(contractId: string, sortOrder: string, from: Date, to: Date) {
+    let secFrom = from.getTime()/1000;
+    let secTo = to.getTime()/1000;
+      
+    const params = new HttpParams().set("contractId", contractId).set("secondsFrom", secFrom.toString() ).set("secondsTo",secTo.toString())
+      .set("sortOrder",sortOrder);
+    return this.http
+      .get<TokenHolder>(this.hostUrl + this.baseUrl + '/GetTokenHoldersInfoByDateTime', { params })
       .catch(this.handleError);
   }
 

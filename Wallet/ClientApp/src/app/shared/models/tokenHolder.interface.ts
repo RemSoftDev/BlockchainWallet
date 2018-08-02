@@ -1,3 +1,8 @@
+export interface HolderModel {
+  holdersInfo:TokenHolder;
+  skipElementsCount:number;
+}
+
 export interface TokenHolder {
   address: string;
   quantity: number;

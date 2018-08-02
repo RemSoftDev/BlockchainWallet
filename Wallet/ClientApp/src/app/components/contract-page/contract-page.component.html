@@ -112,7 +112,8 @@
         <input type="date" class="form-control" name="dateTo" ngModel required>
         <input type="time" class="form-control" name="timeTo" ngModel required>
       </div>
-      <button [disabled]="myForm.invalid" type="submit" class="btn btn-default">Sort</button>
+      <button [disabled]="myForm.invalid" type="submit" class="btn btn-default"> Sort </button>
+      <button *ngIf="isSortByDateTime" (click)="removeDateTimeSorting()" type="button" class="btn btn-danger">Remove</button>
     </form>
   </div>
 </div>
@@ -228,7 +229,7 @@
     <div *ngIf="moreTransactionRequesting" class="row">
       <app-spinner></app-spinner>
     </div>
-    <button (click)="loadTransaction(transactionsModel.blockNumber)" class="btn btn-primary">More</button>
+    <button (click)="loadMoreHoldersInfo()" class="btn btn-primary">More</button>
   </div>
 </div>
 
