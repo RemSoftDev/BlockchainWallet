@@ -245,6 +245,8 @@ namespace Wallet.BlockchainAPI
 
             for (var i = blocknum; i <= lastBlockNumber; i += 100)
             {
+                if ((i+99)>lastBlockNumber)
+                    break;
                 try
                 {
                     var filter = transEvent.CreateFilterInput(new BlockParameter((ulong)i), new BlockParameter((ulong)(i + 99)));

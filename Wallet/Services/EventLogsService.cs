@@ -29,7 +29,7 @@ namespace Wallet.Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _timer = new Timer(DoWork, null, TimeSpan.Zero,
-                TimeSpan.FromHours(10));
+                TimeSpan.FromDays(1));
 
             return Task.CompletedTask;
         }
@@ -44,6 +44,11 @@ namespace Wallet.Services
 
                 foreach (var token in tokens)
                 {
+                    var logsCount = dbContext.CustomEventLogs.Where(l => l.ERC20TokenId == token.Id);
+
+                    if (logsCount.Any())
+                        continue;
+
                     var logs = _explorer.GetFullEventLogs(token).Result;
 
                     var holders = EventLogsExplorer.GetInfoFromLogs(logs);

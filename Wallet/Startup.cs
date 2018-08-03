@@ -45,7 +45,7 @@ namespace Wallet
             services.AddSingleton<IUserInfoInMemory,UserInfoInMemory>();
             services.AddHostedService<NotificationService>();
             services.AddTransient<IParser, Parser>();
-            services.AddSingleton<BlockchainDataUpdateService>();
+            services.AddHostedService<BlockchainDataUpdateService>();
             services.AddHostedService<EventLogsService>();
 
 
