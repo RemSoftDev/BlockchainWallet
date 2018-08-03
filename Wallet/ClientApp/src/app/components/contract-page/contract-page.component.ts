@@ -38,6 +38,8 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   dateFrom:Date;
   dateTo: Date;
   skipCount: number = 0;
+  currentSortOrder: string = 'QuantityDesc';
+  showWarningMessage: boolean= false;
 
   isSortByDateTime: boolean = false;
   sortByQuantity: boolean = true;
@@ -106,6 +108,7 @@ export class ContractPageComponent implements OnInit, OnDestroy {
 
   Sort(param: string) {
     this.holdersRequested = false;
+    this.skipCount = 0;
     let order = 'Quantity';
 
     if (param == 'Quantity') {
@@ -162,6 +165,7 @@ export class ContractPageComponent implements OnInit, OnDestroy {
         this.sortByReceivedTxNumber = true;
       }
     }
+    this.currentSortOrder = order;
 
     if (this.isSortByDateTime) {
       this.BCservice.getSortedSmartContractHoldersInfoByDate(this.smartContractInfo.id, order, this.dateFrom, this.dateTo).subscribe(info => {
@@ -273,6 +277,9 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   }
 
   sortByDateTime(form: NgForm) {
+    this.showWarningMessage = true;
+    setTimeout(() => { this.showWarningMessage = false }, 3000);
+    this.skipCount = 0;
     this.holdersRequested = false;
     this.isSortByDateTime = true;
     let dateTimeFrom = new Date(form.value.dateFrom +' ' +form.value.timeFrom);
@@ -288,17 +295,39 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   }
 
   removeDateTimeSorting() {
+    this.skipCount = 0;
     this.isSortByDateTime = false;
+    this.currentSortOrder = 'QuantityDesc';
+    this.sortByQuantity = true;
+    this.sortByTokensSent = false;
+    this.sortByTokensReceived = false;
+    this.sortByGeneralTxNumber = false;
+    this.sortBySentTxNumber = false;
+    this.sortByReceivedTxNumber = false;
     this.getTokenHoldersInfo();
   }
 
   loadMoreHoldersInfo() {
     this.holdersRequested = false;
-    this.BCservice.loadMoreSortedSmartContractHoldersInfo(this.skipCount + 40, this.smartContractInfo.id, 'QuantityDesc').subscribe(info => {
-      this.tokenHolders = this.tokenHolders.concat(info.holdersInfo);
-      this.skipCount = info.skipElementsCount;
-      this.holdersRequested = true;
-    });
+
+    if (this.isSortByDateTime) {
+      this.BCservice
+        .loadMoreSortedSmartContractHoldersInfoByDate(this.skipCount + 40,this.smartContractInfo.id, this.currentSortOrder, this.dateFrom, this.dateTo)
+        .subscribe(info => {
+          this.tokenHolders = this.tokenHolders.concat(info.holdersInfo);
+          this.skipCount = info.skipElementsCount;
+          this.holdersRequested = true;
+        });
+    } else {
+      this.BCservice
+        .loadMoreSortedSmartContractHoldersInfo(this.skipCount + 40, this.smartContractInfo.id, this.currentSortOrder)
+        .subscribe(info => {
+          this.tokenHolders = this.tokenHolders.concat(info.holdersInfo);
+          this.skipCount = info.skipElementsCount;
+          this.holdersRequested = true;
+        });
+    }
+
   }
 
   ngOnInit() {

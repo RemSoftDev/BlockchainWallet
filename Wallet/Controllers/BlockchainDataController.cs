@@ -142,62 +142,61 @@ namespace Wallet.Controllers
         {
             try
             {
-                var result = dbContext.TokenHolders.Where(h => h.ERC20TokenId == contractId);
+                var holders = dbContext.TokenHolders.Where(h => h.ERC20TokenId == contractId);
 
                 switch (sortOrder)
                 {
                     case SortOrder.QuantityDesc:
-                        result = result.OrderByDescending(h => h.Quantity);
+                        holders = holders.OrderByDescending(h => h.Quantity);
                         break;
                     case SortOrder.Quantity:
-                        result = result.OrderBy(h => h.Quantity);
+                        holders = holders.OrderBy(h => h.Quantity);
                         break;
                     case SortOrder.TokensSent:
-                        result = result.OrderBy(h => h.TokensSent);
+                        holders = holders.OrderBy(h => h.TokensSent);
                         break;
                     case SortOrder.TokensSentDesc:
-                        result = result.OrderByDescending(h => h.TokensSent);
+                        holders = holders.OrderByDescending(h => h.TokensSent);
                         break;
                     case SortOrder.TokensReceived:
-                        result = result.OrderBy(h => h.TokensReceived);
+                        holders = holders.OrderBy(h => h.TokensReceived);
                         break;
                     case SortOrder.TokensReceivedDesc:
-                        result = result.OrderByDescending(h => h.TokensReceived);
+                        holders = holders.OrderByDescending(h => h.TokensReceived);
                         break;
                     case SortOrder.GeneralTransactionsNumber:
-                        result = result.OrderBy(h => h.GeneralTransactionsNumber);
+                        holders = holders.OrderBy(h => h.GeneralTransactionsNumber);
                         break;
                     case SortOrder.GeneralTransactionsNumberDesc:
-                        result = result.OrderByDescending(h => h.GeneralTransactionsNumber);
+                        holders = holders.OrderByDescending(h => h.GeneralTransactionsNumber);
                         break;
                     case SortOrder.SentTransactionsNumber:
-                        result = result.OrderBy(h => h.SentTransactionsNumber);
+                        holders = holders.OrderBy(h => h.SentTransactionsNumber);
                         break;
                     case SortOrder.SentTransactionsNumberDesc:
-                        result = result.OrderByDescending(h => h.SentTransactionsNumber);
+                        holders = holders.OrderByDescending(h => h.SentTransactionsNumber);
                         break;
                     case SortOrder.ReceivedTransactionsNumber:
-                        result = result.OrderBy(h => h.ReceivedTransactionsNumber);
+                        holders = holders.OrderBy(h => h.ReceivedTransactionsNumber);
                         break;
                     case SortOrder.ReceivedTransactionsNumberDesc:
-                        result = result.OrderByDescending(h => h.ReceivedTransactionsNumber);
+                        holders = holders.OrderByDescending(h => h.ReceivedTransactionsNumber);
                         break;
 
                 }
 
                 if (skipElementsCount == 0)
                 {
-                    //tst get data
-                    //Utils.LogWriter("123");
-                    //  var t = _explorer.GetFullEventLogs(new ERC20Token() {Address = "0xd341d1680Eeee3255b8C4c75bCCE7EB57f144dAe" }).Result; 
-                    return new OkObjectResult(result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList());
+                    return new OkObjectResult(await holders.Take(40).ToListAsync());
                     
                 }
+
+                var result = await holders.Skip(skipElementsCount).Take( 40).ToListAsync();
 
                 return new OkObjectResult(
                     new TokenHoldersViewModel()
                     {
-                        HoldersInfo = result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList(),
+                        HoldersInfo = result,
                         SkipElementsCount = skipElementsCount
                     }
                 );
@@ -271,13 +270,13 @@ namespace Wallet.Controllers
 
                 if (skipElementsCount == 0)
                 {
-                    return new OkObjectResult(result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList());
+                    return new OkObjectResult(result.Skip(skipElementsCount).Take(40).ToList());
                 }
 
                 return new OkObjectResult(
                         new TokenHoldersViewModel()
                         {
-                            HoldersInfo = result.Skip(skipElementsCount).Take(skipElementsCount + 40).ToList(),
+                            HoldersInfo = result.Skip(skipElementsCount).Take(40).ToList(),
                             SkipElementsCount = skipElementsCount
                         }                
                     );

@@ -100,6 +100,17 @@ export class BlockchainService extends BaseService {
       .catch(this.handleError);
   }
 
+  loadMoreSortedSmartContractHoldersInfoByDate(skipCount: number, contractId: string, sortOrder: string, from: Date, to: Date) {
+    let secFrom = from.getTime() / 1000;
+    let secTo = to.getTime() / 1000;
+
+    const params = new HttpParams().set("skipElementsCount", skipCount.toString()).set("contractId", contractId).set("secondsFrom", secFrom.toString()).set("secondsTo", secTo.toString())
+      .set("sortOrder", sortOrder);
+    return this.http
+      .get<TokenHolder>(this.hostUrl + this.baseUrl + '/GetTokenHoldersInfoByDateTime', { params })
+      .catch(this.handleError);
+  }
+
   getTransactions(accountAddress: string) {
     const params = new HttpParams().set('accountAddress', accountAddress);
     return this.http
