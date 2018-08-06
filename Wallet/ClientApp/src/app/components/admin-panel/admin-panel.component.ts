@@ -26,7 +26,11 @@ export class AdminPanelComponent implements OnInit {
   addressETH: PageData;
   aboutPage: PageData;
   contactPage: PageData;
+  tokens: TokenModel[];
   errors: string;
+
+
+
 
   constructor(private pageDataService: PageDataService, private tokenService: TokenService) {}
 
@@ -90,6 +94,7 @@ export class AdminPanelComponent implements OnInit {
     let dates = this.createdDate.split('-');
     this.errors = null;
     this.token.createdDate = new Date(new Date(+dates[2], +dates[0] - 1, +dates[1] + 1));
+   
     this.tokenService.updateContract(this.token).subscribe(data => {
         alert("Updated");
       },
@@ -109,6 +114,14 @@ export class AdminPanelComponent implements OnInit {
       },
       error => this.errors = error);
   }
+  getAllSmartContract(form: NgForm) {
+    this.errors = null;    
+    this.tokenService.getAllContractInfo().subscribe(res => {
+      this.tokens = res;
+    },
+      error => this.errors = error);
+  }
+
 
   switchToContent() {
     this.isContentOpened = true;
@@ -122,6 +135,14 @@ export class AdminPanelComponent implements OnInit {
     this.isContractsOpened = true;
     this.contentTabClass = '';
     this.contractTabClass = 'active';
+
+    this.tokenService.getAllContractInfo().subscribe(res => {
+      this.tokens = res;
+    },
+      error => this.errors = error);
+
+
+
   }
 
 }

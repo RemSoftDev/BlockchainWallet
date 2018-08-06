@@ -107,7 +107,7 @@
 
 <div *ngIf="isContractsOpened" class="addNewContractRow row">
   <div class="col-md-10">
-    <button class="btn btn-primary" (click)="newContract()" > Add New</button>
+    <button class="btn btn-primary" (click)="newContract()"> Add New</button>
     <form *ngIf="showAddNewContract" #myForm="ngForm" (ngSubmit)="addContract(myForm)">
 
       <div class="form-group">
@@ -149,4 +149,31 @@
 
     </form>
   </div>
+</div>
+
+
+<div *ngIf="isContractsOpened" class="col-md-10">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Address</th>
+        <th scope="col">Name</th>
+        <th scope="col">Symbol</th>
+        <th scope="col">Decimal Places</th>
+        <th scope="col">Web Site Link</th>
+        <th scope="col">Created date</th>
+      </tr>
+    </thead>
+    <tbody>    
+      <tr *ngFor="let tn of tokens">
+        <td title="{{tn.address}}">{{tn.address}}</td>
+        <td title="{{tn.name}}">{{tn.name}}</td>
+        <td title="{{tn.symbol}}">{{tn.symbol}}</td>
+        <td title="{{tn.DecimalPlaces}}">{{tn.DecimalPlaces}}</td>
+        <td title="{{tn.webSiteLink}}">{{tn.webSiteLink}}</td>
+        <td title="{{tn.createdDate}}">{{tn.createdDate | date : 'shortDate'}}</td>
+      </tr>
+    </tbody>
+  </table>
+ 
 </div>

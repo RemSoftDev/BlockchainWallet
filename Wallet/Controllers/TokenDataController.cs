@@ -40,6 +40,23 @@ namespace Wallet.Controllers
             }
         }
 
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllContract()
+        {
+            try
+            {
+                List<ERC20Token> token = await _dbContext.Erc20Tokens.ToListAsync();
+                return new OkObjectResult(token);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
         [HttpPost("[action]")]
         [Authorize(Policy = "ApiAdmin")]
         public async Task<IActionResult> UpdateSmartContract([FromBody] ERC20Token model)

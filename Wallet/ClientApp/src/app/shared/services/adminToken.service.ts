@@ -39,6 +39,12 @@ export class TokenService extends BaseService {
       .catch(this.handleError);
   }
 
+  getAllContractInfo() {    
+    return this.http
+      .get<TokenModel[]>(this.hostUrl + this.baseUrl + '/GetAllContract')
+      .catch(this.handleError);
+  }
+
   addToken(token: UpdateTokenModel) {
     return this.http
       .post(
