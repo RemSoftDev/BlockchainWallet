@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { TokenModel } from '../models/tokenModel';
+import { UpdateTokenModel } from '../models/updateTokenModel';
 import { BaseService } from "./base.service";
 
 const httpOptions = {
@@ -35,6 +36,16 @@ export class TokenService extends BaseService {
     const params = new HttpParams().set('contractAddress', contractAddress);
     return this.http
       .get <TokenModel>(this.hostUrl + this.baseUrl + '/GetSmartContract', { params })
+      .catch(this.handleError);
+  }
+
+  addToken(token: UpdateTokenModel) {
+    return this.http
+      .post(
+        this.hostUrl + this.baseUrl + '/AddSmartContract', JSON.stringify(token), httpOptions)
+      .map(res => {
+        return true;
+      })
       .catch(this.handleError);
   }
 

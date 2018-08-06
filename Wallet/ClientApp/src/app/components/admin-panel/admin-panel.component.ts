@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PageDataService } from '../../shared/services/pageData.service';
 import { TokenService } from '../../shared/services/adminToken.service';
 import { TokenModel } from '../../shared/models/tokenModel';
+import { UpdateTokenModel } from '../../shared/models/updateTokenModel';
 import { PageData } from '../../shared/models/pageData.interface';
 import { NgForm } from '@angular/forms';
 
@@ -12,6 +13,7 @@ import { NgForm } from '@angular/forms';
 })
 export class AdminPanelComponent implements OnInit {
 
+  showAddNewContract: boolean = false;
   contentTabClass: string = 'active';
   contractTabClass: string;
   isContentOpened: boolean = true;
@@ -63,6 +65,25 @@ export class AdminPanelComponent implements OnInit {
         this.isRequested = true;
       },
       error => console.log(error));
+  }
+
+  newContract() {
+    this.showAddNewContract = true;
+  }
+
+  addContract(form: NgForm) {
+    let token = new UpdateTokenModel();
+    token.address = form.value.address;
+    token.decimalplaces = form.value.decimalPlaces;
+    token.name = form.value.name;
+    token.symbol = form.value.symbol;
+    token.webSiteLink = form.value.webSiteLink;
+    token.time = new Date(form.value.createdDate).getTime() / 1000;
+    this.tokenService.addToken(token).subscribe(data => {
+      this.showAddNewContract = false;
+      alert("Added");
+    },
+     error => this.errors = error);
   }
 
   updateContract(form: NgForm) {

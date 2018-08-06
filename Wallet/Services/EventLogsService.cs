@@ -36,42 +36,49 @@ namespace Wallet.Services
 
         private void DoWork(object state)
         {
-            using (var scope = _scopeFactory.CreateScope())
+            try
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
-
-                var tokens = dbContext.Erc20Tokens.ToList();
-
-                foreach (var token in tokens)
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    var logsCount = dbContext.CustomEventLogs.Where(l => l.ERC20TokenId == token.Id);
+                    var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
 
-                    if (logsCount.Any())
-                        continue;
+                    var tokens = dbContext.Erc20Tokens.ToList();
 
-                    var logs = _explorer.GetFullEventLogs(token).Result;
-
-                    var holders = EventLogsExplorer.GetInfoFromLogs(logs);
-
-                    for (int i = 0; i < holders.Count; i++)
+                    foreach (var token in tokens)
                     {
-                        try
+                        var logsCount = dbContext.CustomEventLogs.Where(l => l.ERC20TokenId == token.Id);
+
+                        if (logsCount.Any())
+                            continue;
+
+                        var logs = _explorer.GetFullEventLogs(token).Result;
+
+                        var holders = EventLogsExplorer.GetInfoFromLogs(logs);
+
+                        for (int i = 0; i < holders.Count; i++)
                         {
-                            var balance = _explorer.GetTokenHolderBalance(holders[i].Address, token.Address).Result;
-                            holders[i].Quantity = Web3.Convert.FromWei(balance, token.DecimalPlaces);
-                            holders[i].ERC20TokenId = token.Id;
-                        }
-                        catch (Exception e)
-                        {
-                            i--;
+                            try
+                            {
+                                var balance = _explorer.GetTokenHolderBalance(holders[i].Address, token.Address).Result;
+                                holders[i].Quantity = Web3.Convert.FromWei(balance, token.DecimalPlaces);
+                                holders[i].ERC20TokenId = token.Id;
+                            }
+                            catch (Exception e)
+                            {
+                                i--;
+                            }
                         }
 
+                        dbContext.CustomEventLogs.AddRange(logs);
+                        dbContext.TokenHolders.AddRange(holders);
+                        dbContext.SaveChanges();
                     }
-
-                    dbContext.CustomEventLogs.AddRange(logs);
-                    dbContext.TokenHolders.AddRange(holders);
-                    dbContext.SaveChanges();
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
 

@@ -55,5 +55,31 @@ namespace Wallet.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpPost("[action]")]
+        [Authorize(Policy = "ApiAdmin")]
+        public async Task<IActionResult> AddSmartContract([FromBody] UpdateTokenViewModel model)
+        {
+            try
+            {
+                var token = new ERC20Token()
+                {
+                    Address = model.Address,
+                    Name = model.Name,
+                    Symbol = model.Symbol,
+                    CreatedDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(model.Time),
+                    DecimalPlaces = model.DecimalPlaces,
+                    WebSiteLink = model.WebSiteLink
+            };
+
+                _dbContext.Erc20Tokens.Add(token);
+                await _dbContext.SaveChangesAsync();
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }
