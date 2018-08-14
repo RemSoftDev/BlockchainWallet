@@ -48,12 +48,13 @@ namespace Wallet.Services
                     foreach (var token in dbContext.Erc20Tokens.ToList())
                     {
                         var events = dbContext.CustomEventLogs.Where(l => l.ERC20TokenId == token.Id);
-                        if (!events.Any())
+                        if (!token.IsSynchronized)
                             continue;
+
                         var lastSearchedBlockNumber = events.Max(l => l.BlockNumber);
 
 
-                        var logs = await _explorer.GetFullEventLogs(token, lastSearchedBlockNumber);
+                        var logs = await _explorer.GetFullEventLogs(token, lastSearchedBlockNumber + 1);
                         var holders = EventLogsExplorer.GetInfoFromLogs(logs);
 
                         for (int i = 0; i < holders.Count; i++)

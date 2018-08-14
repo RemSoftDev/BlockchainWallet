@@ -29,6 +29,8 @@ namespace Wallet.Models
 
         public int WalletsCount { get; set; }
 
+        public bool IsSynchronized { get; set; }
+
         public DateTime? UpdDate { get; set; }
 
         public ICollection<CustomEventLog> Logs { get; set; }

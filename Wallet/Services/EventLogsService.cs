@@ -46,9 +46,7 @@ namespace Wallet.Services
 
                     foreach (var token in tokens)
                     {
-                        var logsCount = dbContext.CustomEventLogs.Where(l => l.ERC20TokenId == token.Id);
-
-                        if (logsCount.Any())
+                        if (token.IsSynchronized)
                             continue;
 
                         var logs = _explorer.GetFullEventLogs(token).Result;
@@ -69,6 +67,8 @@ namespace Wallet.Services
                             }
                         }
 
+                        token.IsSynchronized = true;
+                        dbContext.Erc20Tokens.Update(token);
                         dbContext.CustomEventLogs.AddRange(logs);
                         dbContext.TokenHolders.AddRange(holders);
                         dbContext.SaveChanges();
