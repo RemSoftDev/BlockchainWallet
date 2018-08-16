@@ -31,6 +31,8 @@ namespace Wallet.Models
 
         public bool IsSynchronized { get; set; }
 
+        public int LastSynchronizedBlockNumber { get; set; }
+
         public DateTime? UpdDate { get; set; }
 
         public ICollection<CustomEventLog> Logs { get; set; }

@@ -39,7 +39,14 @@ namespace Wallet.BlockchainAPI
 
         public async Task<HexBigInteger> GetLastAvailableBlockNumber()
         {
-            return await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            try
+            {
+                return await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            }
+            catch (Exception e)
+            {
+                return new HexBigInteger(0);
+            }
         }
 
         public Task<BlockWithTransactions> GetBlockByNumber(int blockNumber)
@@ -233,15 +240,13 @@ namespace Wallet.BlockchainAPI
             return eth.CallAsync<BigInteger>();
         }
         //add in db block num and find from this
-        public async Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract,int blocknum = 1)
+        public async Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract, int lastBlockNumber, int blocknum = 1)
         {
             var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contract.Address);
             var transEvent = cont.GetEvent("Transfer");
 
             var logs = new List<EventLog<Transfer>>();
             var events = new List<CustomEventLog>();
-
-            var lastBlockNumber = (int)(await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync()).Value;
 
             for (var i = blocknum; i <= lastBlockNumber; i += 100)
             {

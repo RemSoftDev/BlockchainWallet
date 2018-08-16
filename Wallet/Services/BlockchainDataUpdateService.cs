@@ -47,14 +47,13 @@ namespace Wallet.Services
 
                     foreach (var token in dbContext.Erc20Tokens.ToList())
                     {
-                        var events = dbContext.CustomEventLogs.Where(l => l.ERC20TokenId == token.Id);
                         if (!token.IsSynchronized)
                             continue;
 
-                        var lastSearchedBlockNumber = events.Max(l => l.BlockNumber);
+                        var lastBlockNumber = (int) (_explorer.GetLastAvailableBlockNumber().Result.Value);
 
-
-                        var logs = await _explorer.GetFullEventLogs(token, lastSearchedBlockNumber + 1);
+                        var logs = await _explorer.GetFullEventLogs(token, lastBlockNumber,
+                            token.LastSynchronizedBlockNumber + 1);
                         var holders = EventLogsExplorer.GetInfoFromLogs(logs);
 
                         for (int i = 0; i < holders.Count; i++)
@@ -90,6 +89,9 @@ namespace Wallet.Services
                                 dbContext.TokenHolders.Add(h);
                             }
                         });
+                        token.LastSynchronizedBlockNumber = GetNewLastSearchedBlockNumber(lastBlockNumber,
+                            token.LastSynchronizedBlockNumber + 1);
+                        dbContext.Erc20Tokens.Update(token);
                         dbContext.CustomEventLogs.AddRange(logs);
                         dbContext.SaveChanges();
                     }
@@ -99,6 +101,19 @@ namespace Wallet.Services
             catch (Exception e)
             {
             }
+        }
+
+        private int GetNewLastSearchedBlockNumber(int lastBlockNumber, int blocknum = 1)
+        {
+            int res = blocknum;
+            for (var i = blocknum; i <= lastBlockNumber; i += 100)
+            {
+                if ((i + 99) > lastBlockNumber)
+                    break;
+                res = i + 99;
+            }
+
+            return res;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

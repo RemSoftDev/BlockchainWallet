@@ -49,7 +49,9 @@ namespace Wallet.Services
                         if (token.IsSynchronized)
                             continue;
 
-                        var logs = _explorer.GetFullEventLogs(token).Result;
+                        var lastBlockNumber = (int)(_explorer.GetLastAvailableBlockNumber().Result.Value);
+
+                        var logs = _explorer.GetFullEventLogs(token, lastBlockNumber).Result;
 
                         var holders = EventLogsExplorer.GetInfoFromLogs(logs);
 
@@ -67,6 +69,7 @@ namespace Wallet.Services
                             }
                         }
 
+                        token.LastSynchronizedBlockNumber = lastBlockNumber;
                         token.IsSynchronized = true;
                         dbContext.Erc20Tokens.Update(token);
                         dbContext.CustomEventLogs.AddRange(logs);
@@ -77,8 +80,6 @@ namespace Wallet.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
             }
         }
 
