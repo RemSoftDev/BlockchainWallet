@@ -86,8 +86,9 @@ namespace Wallet.Controllers
                     Symbol = model.Symbol,
                     CreatedDate = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(model.Time),
                     DecimalPlaces = model.DecimalPlaces,
-                    WebSiteLink = model.WebSiteLink
-            };
+                    WebSiteLink = model.WebSiteLink,
+                    Type = "default"
+                };
 
                 _dbContext.Erc20Tokens.Add(token);
                 await _dbContext.SaveChangesAsync();
