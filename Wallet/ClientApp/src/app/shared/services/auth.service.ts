@@ -77,6 +77,7 @@ export class AuthService extends BaseService {
         localStorage.setItem('access_token', JSON.parse(JSON.stringify(res)).access_token);
         localStorage.setItem('userRoles', JSON.parse(JSON.stringify(res)).roles);
         localStorage.setItem('userName', JSON.parse(JSON.stringify(res)).userName);
+        localStorage.setItem('expired_date', new Date(Date.now() + (JSON.parse(JSON.stringify(res)).expires_in) * 1000).toString());
         this.loggedIn = true;
         this._authNavStatusSource.next(true);
         return true;
@@ -96,10 +97,22 @@ export class AuthService extends BaseService {
       .catch(this.handleError);
   }
 
+  checkTokenExpired() : boolean {
+    if (localStorage.getItem('expired_date')) {
+      let currentDate = new Date(Date.now());
+      if (currentDate > new Date(localStorage.getItem('expired_date'))) {
+        this.logout();
+        return true;
+      }
+    }
+    return false;
+  }
+
   logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('userRoles');
-    localStorage.removeItem('userName');    
+    localStorage.removeItem('userName');
+    localStorage.removeItem('expired_date'); 
     this.loggedIn = false;
     this._authNavStatusSource.next(false);
   }
