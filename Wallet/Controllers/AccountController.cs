@@ -32,22 +32,22 @@ namespace Wallet.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            User user = new User() { UserName = model.Email, Email = model.Email };
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+                return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
+
+            string confirmUrl =
+                GetEmailConfirmationUrl(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
+
             try
             {
-                User user = new User() {UserName = model.Email, Email = model.Email};
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (!result.Succeeded)
-                    return BadRequest(HttpErrorHandler.AddErrors(result, ModelState));
-
-                string confirmUrl =
-                    GetEmailConfirmationUrl(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
-
                 await EmailHelper.SendEmailAsync(user.Email, "Email confirmation",
                     EmailHelper.GetEmailConfirmationMessage(confirmUrl));
             }
             catch (Exception e)
             {
-                return StatusCode(500, $"En error occurred :{e.Message}");
+                return StatusCode(500, $"Can't sent email");
             }
 
             return new OkResult();
