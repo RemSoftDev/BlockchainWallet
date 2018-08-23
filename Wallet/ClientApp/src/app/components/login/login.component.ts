@@ -7,6 +7,7 @@ import { CookieService } from 'ngx-cookie';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
 
 export class LoginComponent implements OnInit {
@@ -16,12 +17,17 @@ export class LoginComponent implements OnInit {
   username: string;
   password: string;
   rememberme: string;
+  showConfMessage: boolean;
 
-  constructor(private cookieService: CookieService,private authService: AuthService, private router: Router, private activatedRoute: ActivatedRoute) { }
+  constructor(private cookieService: CookieService, private authService: AuthService, private router: Router, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
     if (this.router.url.startsWith("/api/Account/ConfirmEmail") || this.router.url.startsWith("/Account/ConfirmEmail")) {
       this.confirmEmail();
+    }
+
+    if (this.router.url.startsWith("/log-in/ConfirmEmail")) {
+      this.showConfirmationMessage();
     }
 
     if (this.cookieService.get('remember')) {
@@ -31,6 +37,11 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  showConfirmationMessage() {
+    this.showConfMessage = true;
+    setTimeout(() => { this.showConfMessage = false }, 5000);
+  }
+
   confirmEmail() {
     let code: string;
     let userId: string;
@@ -38,8 +49,6 @@ export class LoginComponent implements OnInit {
       code = param['code'];
       userId = param['userId'];
     });
-    console.log(code);
-    console.log(userId);
     this.authService.confirmEmail(userId, code)
       .finally(() => this.isRequesting = false)
       .subscribe(

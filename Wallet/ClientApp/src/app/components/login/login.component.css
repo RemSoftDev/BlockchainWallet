@@ -1,0 +1,9 @@
+.confMessage {
+  background-color: rgba(0, 255, 0, 0.2);
+  color: black;
+  font-size: 15px;
+  border-radius: 10px;
+  margin-left: 10px;
+  padding-top: 9px;
+  width: 300px;
+}

@@ -1,6 +1,11 @@
+<div *ngIf="showConfMessage" class="row">
+  <div class="confMessage col-md-4">
+    <p>Confirmation link sent, verify your email.</p>
+  </div>
+</div>
+
 <div class="col-md-4 col-md-offset-4">
   <h2>Login</h2>
-
   <form #myForm="ngForm" novalidate (ngSubmit)="login(myForm)">
 
     <div class="form-group">

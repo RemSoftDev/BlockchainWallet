@@ -38,7 +38,7 @@ export class SigninComponent {
       .subscribe(
         result => {
           if (result) {
-            this.router.navigate(['/log-in']);
+            this.router.navigate(['/log-in/ConfirmEmail']);
           }
         },
         error => this.errors = error);

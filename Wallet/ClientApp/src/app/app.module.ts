@@ -71,6 +71,7 @@ import { SortingWatchlistPipe } from './pipe/sort-watchlist';
       { path: 'Account/ResetPassword', component: ResetPasswordComponent },
       { path: 'api/Account/ResetPassword', component: ResetPasswordComponent },
       { path: 'log-in', component: LoginComponent },
+      { path: 'log-in/ConfirmEmail', component: LoginComponent },
       { path: 'api/Account/ConfirmEmail', component: LoginComponent },
       { path: 'Account/ConfirmEmail', component: LoginComponent },
       { path: 'admin-panel', component: AdminPanelComponent, canActivate: [AuthAdminGuardService] },
