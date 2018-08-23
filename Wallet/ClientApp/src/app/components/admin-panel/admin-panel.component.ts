@@ -19,7 +19,6 @@ export class AdminPanelComponent implements OnInit {
   isContentOpened: boolean = true;
   isContractsOpened: boolean = false;
   isGotContract: boolean = false;
-  createdDate:string;
   token: TokenModel;
   isRequested: boolean;
   addressBTC: PageData;
@@ -72,7 +71,7 @@ export class AdminPanelComponent implements OnInit {
   }
 
   newContract() {
-    this.showAddNewContract = true;
+    this.showAddNewContract = !this.showAddNewContract;
   }
 
   addContract(form: NgForm) {
@@ -90,11 +89,7 @@ export class AdminPanelComponent implements OnInit {
      error => this.errors = error);
   }
 
-  updateContract(form: NgForm) {
-    let dates = this.createdDate.split('-');
-    this.errors = null;
-    this.token.createdDate = new Date(new Date(+dates[2], +dates[0] - 1, +dates[1] + 1));
-   
+  updateContract(form: NgForm) {  
     this.tokenService.updateContract(this.token).subscribe(data => {
         alert("Updated");
       },
@@ -106,14 +101,12 @@ export class AdminPanelComponent implements OnInit {
     this.isGotContract = false;
     this.tokenService.getContractInfo(form.value.contractAddress).subscribe(
       result => {
-        let date = new Date(result.createdDate);
-        let resDate = (date.getMonth()+1) + '-' + date.getDate() + '-' + date.getFullYear();
-        this.createdDate = resDate;
         this.token = result;
         this.isGotContract = true;
       },
       error => this.errors = error);
   }
+
   getAllSmartContract(form: NgForm) {
     this.errors = null;    
     this.tokenService.getAllContractInfo().subscribe(res => {
@@ -121,7 +114,6 @@ export class AdminPanelComponent implements OnInit {
     },
       error => this.errors = error);
   }
-
 
   switchToContent() {
     this.isContentOpened = true;
@@ -140,9 +132,6 @@ export class AdminPanelComponent implements OnInit {
       this.tokens = res;
     },
       error => this.errors = error);
-
-
-
   }
 
 }

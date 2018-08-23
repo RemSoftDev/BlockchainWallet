@@ -31,31 +31,29 @@
       <form *ngIf="isGotContract" #myForm="ngForm" (ngSubmit)="updateContract(myForm)">
 
         <div class="form-group">
-          <label for="addressBTC">Name</label>
+          <label for="name">Name</label>
           <input class="form-control" [(ngModel)]="token.name" name="name" ngModel />
         </div>
 
         <div class="form-group">
-          <label for="addressBTC">Symbol</label>
+          <label for="symbol">Symbol</label>
           <input class="form-control" [(ngModel)]="token.symbol" name="symbol" ngModel />
         </div>
 
         <div class="form-group">
-          <label for="addressBTC">Decimal Places</label>
+          <label for="DecimalPlaces">Decimal Places</label>
           <input class="form-control" [(ngModel)]="token.DecimalPlaces" name="DecimalPlaces" ngModel />
         </div>
 
         <div class="form-group">
-          <label for="addressBTC">Web Site Link</label>
+          <label for="webSiteLink">Web Site Link</label>
           <input class="form-control" [(ngModel)]="token.webSiteLink" name="webSiteLink" ngModel />
         </div>
 
         <div class="form-group">
-          <label for="addressBTC">Created date</label>
-          <input class="form-control" [(ngModel)]="createdDate" name="createdDate" ngModel />
+          <label for="createdDate">Created date</label>
+          <input type="date" class="form-control" [ngModel]="token.createdDate | date:'yyyy-MM-dd'" (ngModelChange)="token.createdDate = $event"  name="createdDate" ngModel/>
         </div>
-
-
 
         <div class="form-group">
           <button type="submit" class="btn btn-primary">Update</button>
@@ -107,7 +105,7 @@
 
 <div *ngIf="isContractsOpened" class="addNewContractRow row">
   <div class="col-md-10">
-    <button class="btn btn-primary" (click)="newContract()"> Add New</button>
+    <button class="btn btn-primary" (click)="newContract()"> Add New </button>
     <form *ngIf="showAddNewContract" #myForm="ngForm" (ngSubmit)="addContract(myForm)">
 
       <div class="form-group">
