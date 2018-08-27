@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Wallet.BlockchainAPI.Model;
 
 namespace Wallet.Models
 {
@@ -13,6 +14,7 @@ namespace Wallet.Models
         public DbSet<TokenHolder> TokenHolders { get; set; }
         public DbSet<ChainBlock> ChainBlock { get; set; }
         public DbSet<ChainTransaction> ChainTransaction { get; set; }
+        public DbSet<TransactionMod> CustomTransaction { get; set; }
 
         public WalletDbContext(DbContextOptions<WalletDbContext> options)
             : base(options)

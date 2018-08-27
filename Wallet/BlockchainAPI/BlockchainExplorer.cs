@@ -126,6 +126,7 @@ namespace Wallet.BlockchainAPI
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                     (long)(timestamp))
                             });
+                            //insert into db
                         }
                         else if (decodedInput.To.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
                         {
@@ -144,6 +145,7 @@ namespace Wallet.BlockchainAPI
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                     (long)(timestamp))
                             });
+                            //insert into db
                         }
                     }
                 }
