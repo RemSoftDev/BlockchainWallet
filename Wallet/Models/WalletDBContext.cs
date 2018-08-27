@@ -11,6 +11,8 @@ namespace Wallet.Models
         public DbSet<NotificationOptions> NotificationOptions { get; set; }
         public DbSet<CustomEventLog> CustomEventLogs { get; set; }
         public DbSet<TokenHolder> TokenHolders { get; set; }
+        public DbSet<ChainBlock> ChainBlock { get; set; }
+        public DbSet<ChainTransaction> ChainTransaction { get; set; }
 
         public WalletDbContext(DbContextOptions<WalletDbContext> options)
             : base(options)
