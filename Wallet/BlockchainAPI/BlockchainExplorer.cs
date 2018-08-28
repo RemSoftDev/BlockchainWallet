@@ -59,6 +59,7 @@ namespace Wallet.BlockchainAPI
         {
             var result = new List<CustomTransaction>();
 
+            // make search first in db
             foreach (var t in transactions)
             {
                 if (t.Input.Equals(Constants.Strings.TransactionType.Usual,
@@ -125,8 +126,7 @@ namespace Wallet.BlockchainAPI
                                 DecimalValue = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18),
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                     (long)(timestamp))
-                            });
-                            //insert into db
+                            });                            
                         }
                         else if (decodedInput.To.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
                         {
@@ -144,15 +144,43 @@ namespace Wallet.BlockchainAPI
                                 DecimalValue = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18),
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                     (long)(timestamp))
-                            });
-                            //insert into db
+                            });                           
                         }
                     }
                 }
             }
-
+            //SaveTransactionToDB(result);
             return result;
         }
+
+        private void SaveTransactionToDB(List<CustomTransaction> customTransactions )
+        {
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
+                var model = new List<TransactionMod>();
+                foreach (var trans in customTransactions)
+                {
+                    model.Add(new TransactionMod()
+                    {
+                        BlockNumber = Convert.ToInt32( trans.BlockNumber),
+                        ContractAddress = trans.ContractAddress,
+                        Date = trans.Date,
+                        DecimalValue = trans.DecimalValue,
+                        From = trans.From,
+                        Hash = trans.TransactionHash,
+                        To = trans.To,
+                        IsSuccess = trans.IsSuccess,
+                        What = trans.What
+                    }
+                    );
+                }
+                dbContext.CustomTransaction.AddRange(model);
+                dbContext.SaveChanges();
+            }
+
+        }
+        
 
         private async Task<List<CustomTransaction>> GetSmartContractTransactionByAddress(string accountAddress,
             List<Transaction> transactions, BigInteger timestamp)
