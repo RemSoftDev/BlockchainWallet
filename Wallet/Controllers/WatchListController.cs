@@ -14,11 +14,13 @@ using Wallet.ViewModels;
 
 namespace Wallet.Controllers
 {
+
     [Route("api/[controller]")]
     public class WatchListController : Controller
     {
         private readonly UserManager<User> _userManager;
         private WalletDbContext _dbContext;
+        Web3 web3 = new Web3();
 
         public WatchListController(UserManager<User> userManager, WalletDbContext context)
         {
@@ -54,54 +56,91 @@ namespace Wallet.Controllers
                 var blocks = await _dbContext.ChainBlock.ToListAsync();
                 var count = _dbContext.ChainTransaction.Count();
                 var transactions = await _dbContext.ChainTransaction
-                    .Where(t => t.From.Equals("0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE", StringComparison.CurrentCultureIgnoreCase) || 
+                    .Where(t => t.From.Equals("0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE", StringComparison.CurrentCultureIgnoreCase) ||
                                 t.From.Equals("0x514910771af9ca656af840dff83e8264ecf986ca", StringComparison.CurrentCultureIgnoreCase))
                     .ToListAsync();
                 bool res = false;
             }
             catch (Exception e)
             {
-               
+
             }
-
-            //Web3 web3 = new Web3();
-            //for (var i = 6000001; i <= 6010000; i += 1)
+            //var tasks = new List<Task<List<ChainTransaction>>>();
+            //for (int i = 6000000; i < 6010000; i+=100)
             //{
-            //    try
-            //    {
-            //        var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
-            //            new HexBigInteger(i)).Result;
-            //        List<ChainTransaction> transact = new List<ChainTransaction>();
-            //        var numb = (int)block.Number.Value;
-            //        var time = (long)block.Timestamp.Value;
-            //        ChainBlock chain = new ChainBlock()
-            //        {
-            //            Number = numb,
-            //            TimeStamp = time,
-            //        };
-            //        _dbContext.ChainBlock.Add(chain);
-            //        foreach (var blockTransaction in block.Transactions)
-            //        {
-            //            transact.Add(new ChainTransaction()
-            //            {
-            //                From = blockTransaction.From,
-            //                To = blockTransaction.To,
-            //                Value = Web3.Convert.FromWei(blockTransaction.Value, 18),
-            //                IsSuccess = true,
-            //                BlockNumber = (int)block.Number.Value,
-            //                ChainBlockId = chain.Id
-            //            });
-            //        }
+            //    var task = Task.Run(() => SaveBLocksAndTransactions(i, i+100));
+            //    tasks.Add(task);
+            //}
 
-            //        _dbContext.ChainTransaction.AddRange(transact);
+            //await Task.WhenAll(tasks);
+            //var res = new List<ChainTransaction>();
+            //foreach (var task in tasks)
+            //{
+            //    task.Result.ForEach(t=> res.Add(t));
+            //}
+
+            //try
+            //{
+            //    _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            //    for (int i = 0; i < 1300000; i += 1000)
+            //    {
+            //        _dbContext.ChainTransaction.AddRange(res.Skip(i).Take(1000));
             //        _dbContext.SaveChanges();
             //    }
-            //    catch (Exception e)
-            //    {
-            //        i--;
-            //    }   
             //}
+            //catch (Exception e)
+            //{
+
+            //}
+            //finally
+            //{
+            //    _dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
+
+            //}
+
+
             return Ok();
+        }
+
+        private List<ChainTransaction> SaveBLocksAndTransactions(int startNumber, int endNumber)
+        {
+            List<ChainTransaction> transact = new List<ChainTransaction>();
+            for (var i = startNumber; i <= endNumber; i++)
+            {
+                try
+                {
+                    var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
+                        new HexBigInteger(i)).Result;
+                    
+
+                    //var numb = (int)block.Number.Value;
+                    //var time = (long)block.Timestamp.Value;
+                    //ChainBlock chain = new ChainBlock()
+                    //{
+                    //    Number = numb,
+                    //    TimeStamp = time,
+                    //};
+
+                    foreach (var blockTransaction in block.Transactions)
+                    {
+                        transact.Add(new ChainTransaction()
+                        {
+                            From = blockTransaction.From,
+                            To = blockTransaction.To,
+                            Value = Web3.Convert.FromWei(blockTransaction.Value, 18),
+                            IsSuccess = true,
+                            BlockNumber = (int)block.Number.Value,
+                            ChainBlockId = 326
+                        });
+                    }
+                }
+                catch (Exception e)
+                {
+                    i--;
+                }
+            }
+
+            return transact;
         }
 
         public async Task DeleteFromWatchlist(int idwatchlist)
