@@ -81,6 +81,7 @@ namespace Wallet.BlockchainAPI
 
                         result.Add(new CustomTransaction()
                         {
+                            BlockNumber = t.BlockNumber,
                             TransactionHash = t.TransactionHash,
                             From = t.From,
                             To = t.To,
@@ -117,6 +118,7 @@ namespace Wallet.BlockchainAPI
 
                             result.Add(new CustomTransaction()
                             {
+                                BlockNumber = t.BlockNumber,
                                 TransactionHash = t.TransactionHash,
                                 From = t.From,
                                 To = decodedInput.To,
@@ -135,6 +137,7 @@ namespace Wallet.BlockchainAPI
 
                             result.Add(new CustomTransaction()
                             {
+                                BlockNumber = t.BlockNumber,
                                 TransactionHash = t.TransactionHash,
                                 From = t.From,
                                 To = decodedInput.To,
@@ -149,8 +152,38 @@ namespace Wallet.BlockchainAPI
                     }
                 }
             }
-            //SaveTransactionToDB(result);
+            if (result.Count> 0)
+            SaveTransactionToDB(result);
             return result;
+        }
+        public async void SaveNumWalletBlockToTemp(int start, int end, string wallet)
+        {
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
+                var lastWallet = dbContext.LastWalletBlocks.FirstOrDefault(adr =>
+                                adr.Wallet.Equals(wallet, StringComparison.CurrentCultureIgnoreCase));
+                if(lastWallet != null)
+                {
+                    lastWallet.BlockStart = start;
+                    lastWallet.BlockEnd = end;
+                    lastWallet.Date = DateTime.Now;
+
+                }
+                else
+                {
+                    lastWallet = new LastWalletBlock()
+                    {
+                        BlockStart = start,
+                        BlockEnd = end,
+                        Date = DateTime.Now,
+                        Wallet = wallet
+                    };
+                    dbContext.LastWalletBlocks.Add(lastWallet);
+
+                }
+                dbContext.SaveChanges();
+            }
         }
 
         private void SaveTransactionToDB(List<CustomTransaction> customTransactions )
@@ -163,12 +196,14 @@ namespace Wallet.BlockchainAPI
                 {
                     model.Add(new TransactionMod()
                     {
-                        BlockNumber = Convert.ToInt32( trans.BlockNumber),
+                        BlockNumber =(int) trans.BlockNumber.Value
+                        ,
                         ContractAddress = trans.ContractAddress,
                         Date = trans.Date,
                         DecimalValue = trans.DecimalValue,
                         From = trans.From,
-                        Hash = trans.TransactionHash,
+                        Hash = trans.TransactionHash
+                        ,
                         To = trans.To,
                         IsSuccess = trans.IsSuccess,
                         What = trans.What

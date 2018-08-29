@@ -303,11 +303,14 @@ namespace Wallet.Controllers
                 }
 
                 var tasks = new List<Task<List<CustomTransaction>>>();
+
                 for (int i = searchBlockNumber - 100; i <= searchBlockNumber; i++)
                 {
                     Task<List<CustomTransaction>> task = _explorer.GetTransactions(accountAddress, i);
                     tasks.Add(task);
                 }
+
+                _explorer.SaveNumWalletBlockToTemp(/*if eist - old data, else -*/searchBlockNumber - 100, searchBlockNumber, accountAddress);
 
                 await Task.WhenAll(tasks.ToArray());
 
@@ -316,6 +319,7 @@ namespace Wallet.Controllers
                 {
                     result.AddRange(listtask.Result);
                 }
+
 
                 return new OkObjectResult(
                     new TransactionsViewModel()

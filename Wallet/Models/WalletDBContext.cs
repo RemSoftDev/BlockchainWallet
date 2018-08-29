@@ -15,6 +15,7 @@ namespace Wallet.Models
         public DbSet<ChainBlock> ChainBlock { get; set; }
         public DbSet<ChainTransaction> ChainTransaction { get; set; }
         public DbSet<TransactionMod> CustomTransaction { get; set; }
+        public DbSet<LastWalletBlock> LastWalletBlocks { get; set; }
 
         public WalletDbContext(DbContextOptions<WalletDbContext> options)
             : base(options)
