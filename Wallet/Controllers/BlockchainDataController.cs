@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nethereum.Hex.HexConvertors;
@@ -95,32 +96,6 @@ namespace Wallet.Controllers
                 return BadRequest(e.Message);
             }
         }
-
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetTokenByParameters(string tokenParams)
-        {
-            int res;
-
-            try
-            {
-                List<ERC20Token> token = null;
-                bool isDecimal = Int32.TryParse(tokenParams, out res);
-                if (res != 0)
-                {
-                    //token= await dbContext.Erc20Tokens.FindAsync( (pr => pr.DecimalPlaces == res) );
-                    //token = await dbContext.Erc20Tokens.FindAsync((pr => pr.DecimalPlaces == res));
-                }
-                //выгружать пользователю список всего, где встретилось значение???
-
-
-                return new OkObjectResult(token);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
 
         [HttpGet("[action]")]
         public async Task<IActionResult> IsContract(string address)
@@ -292,38 +267,31 @@ namespace Wallet.Controllers
         {
             try
             {
-                int searchBlockNumber;
-                if (blockNumber.HasValue)
-                {
-                    searchBlockNumber = blockNumber.Value;
-                }
-                else
-                {
-                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
-                }
+                //int searchBlockNumber;
+                //if (blockNumber.HasValue)
+                //{
+                //    searchBlockNumber = blockNumber.Value;
+                //}
+                //else
+                //{
+                //    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
+                //}
 
-                var tasks = new List<Task<List<CustomTransaction>>>();
-                for (int i = searchBlockNumber - 100; i <= searchBlockNumber; i++)
-                {
-                    Task<List<CustomTransaction>> task = _explorer.GetTransactions(accountAddress, i);
-                    tasks.Add(task);
-                }
-
-                await Task.WhenAll(tasks.ToArray());
-
-                var result = new List<CustomTransaction>();
-                foreach (var listtask in tasks)
-                {
-                    result.AddRange(listtask.Result);
-                }
+                var res = dbContext.BlockChainTransactions.Where(t =>
+                        t.From.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase) ||
+                        t.To.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
+                    .OrderByDescending(t => t.Date);
 
                 return new OkObjectResult(
                     new TransactionsViewModel()
                     {
-                        BlockNumber = searchBlockNumber,
-                        Transactions = result.OrderByDescending(t => t.Date).ToList()
+                        BlockNumber = 0,
+                        Transactions = await res.ToListAsync()
                     }
                 );
+
+
+
             }
             catch (Exception e)
             {
@@ -516,8 +484,8 @@ namespace Wallet.Controllers
                 return new OkObjectResult(
                     new TransactionsViewModel()
                     {
-                        BlockNumber = searchBlockNumber,
-                        Transactions = result.OrderByDescending(t => t.Date).ToList()
+                        BlockNumber = searchBlockNumber
+                        //Transactions = result.OrderByDescending(t => t.Date).ToList()
                     }
                 );
             }
@@ -556,8 +524,8 @@ namespace Wallet.Controllers
                 return new OkObjectResult(
                     new TransactionsViewModel()
                     {
-                        BlockNumber = searchBlockNumber,
-                        Transactions = result.OrderByDescending(t => t.Date).ToList()
+                        BlockNumber = searchBlockNumber
+                        //Transactions = result.OrderByDescending(t => t.Date).ToList()
                     }
                 );
             }
@@ -565,6 +533,53 @@ namespace Wallet.Controllers
             {
                 return BadRequest(HttpErrorHandler.AddError("Failure", e.Message, ModelState));
             }
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> SaveLatestTransactions()
+        {
+            try
+            {
+                var lastKnownBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
+                var tasks = new List<Task<List<BlockChainTransaction>>>();
+                for (int i = lastKnownBlockNumber-500; i < lastKnownBlockNumber; i += 100)
+                {
+                    var i1 = i;
+                    var task = Task.Run(() => _explorer.GetLatestTransactions(i1, i1 + 99));
+                    tasks.Add(task);
+                }
+
+                await Task.WhenAll(tasks);
+                var result = new List<BlockChainTransaction>();
+                foreach (var task in tasks)
+                {
+                    task.Result.ForEach(t => result.Add(t));
+                }
+
+                dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
+                var tempList = new List<BlockChainTransaction>();
+                foreach (var transact in result)
+                {
+                    tempList.Add(transact);
+                    if (tempList.Count == 1000)
+                    {
+                        dbContext.BlockChainTransactions.AddRange(tempList);
+                        dbContext.SaveChanges();
+                        tempList.Clear();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
+            }
+
+            return Ok();
         }
     }
 

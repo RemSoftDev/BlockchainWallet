@@ -21,5 +21,6 @@ namespace Wallet.BlockchainAPI
         Task<BlockWithTransactions> GetBlockByNumber(int blockNumber);
         Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract, int lastBlockNumber, int blocknum =1);
         Task<BigInteger> GetTokenHolderBalance(string holderAddress, string contractAddress);
+        List<BlockChainTransaction> GetLatestTransactions(int startBlockNumber, int endBlockNumber);
     }
 }

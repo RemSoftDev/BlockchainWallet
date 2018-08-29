@@ -35,6 +35,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20180829105738_UpdateDecimalPresicion.cs" />
+    <Compile Remove="Migrations\20180829105738_UpdateDecimalPresicion.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="BlockchainAPI\ethTokens.json" />
   </ItemGroup>
 

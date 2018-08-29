@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using Wallet.BlockchainAPI.Model;
+using Wallet.Models;
 
 namespace Wallet.ViewModels
 {
     public class TransactionsViewModel
     {
-        public List<CustomTransaction> Transactions { get; set; }
+        public List<BlockChainTransaction> Transactions { get; set; }
 
         public int BlockNumber { get; set; }
     }

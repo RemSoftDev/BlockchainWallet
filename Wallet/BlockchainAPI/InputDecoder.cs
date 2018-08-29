@@ -19,7 +19,15 @@ namespace Wallet.BlockchainAPI
             HexBigIntegerBigEndianConvertor hexConverter = new HexBigIntegerBigEndianConvertor();
             //cut off method name (first 4 byte)
             input = input.Substring(10);
-            //get value         
+            //get value      
+            if (input.Length > 133)
+            {
+                 return new TransactionInput()
+                {
+                    To = string.Empty,
+                    Value = new BigInteger()
+                };
+            }
             var value = hexConverter.ConvertFromHex(input.Substring(input.Length / 2));
             //get address
             var address = hexConverter.ConvertToHex(hexConverter.ConvertFromHex("0x" + input.Substring(0, input.Length / 2)));

@@ -54,6 +54,96 @@ namespace Wallet.BlockchainAPI
             return web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
         }
 
+        public List<BlockChainTransaction> GetLatestTransactions(int startBlockNumber, int endBlockNumber)
+        {
+            var result = new List<BlockChainTransaction>();
+            for (var i = startBlockNumber; i <= endBlockNumber; i++)
+            {
+                try
+                {
+                    var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
+                        new HexBigInteger(i)).Result;
+
+                    foreach (var transact in block.Transactions)
+                    {
+                        if (transact.Input.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            var status =
+                                 web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(transact.TransactionHash).Result;
+                            bool isSuccess = true;
+                            if (status != null)
+                            {
+                                if (status.Status.Value == 0)
+                                {
+                                    isSuccess = false;
+                                }
+                            }
+
+                            result.Add(new BlockChainTransaction()
+                            {
+                                TransactionHash = transact.TransactionHash,
+                                From = transact.From,
+                                To = transact.To,
+                                What = "ETH",
+                                IsSuccess = isSuccess,
+                                DecimalValue = Web3.Convert.FromWei(transact.Value.Value, 18),
+                                Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                    (long)(block.Timestamp.Value)),
+                                BlockNumber = (int)block.Number.Value
+                            });
+                        }
+                        else if (transact.Input.StartsWith(Constants.Strings.TransactionType.Transfer))
+                        {
+                            using (var scope = _scopeFactory.CreateScope())
+                            {
+                                var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
+                                var status =
+                                    web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(transact.TransactionHash).Result;
+                                bool isSuccess = true;
+                                if (status != null)
+                                {
+                                    if (status.Status.Value == 0)
+                                    {
+                                        isSuccess = false;
+                                    }
+                                }
+
+                                var decodedInput = InputDecoder.DecodeTransferInput(transact.Input);
+                                var token = dbContext.Erc20Tokens.FirstOrDefault(tok =>
+                                    tok.Address.Equals(transact.To, StringComparison.CurrentCultureIgnoreCase));
+
+
+                                decimal value = 0;
+                                if (token != null)
+                                {
+                                    value = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18);
+                                }
+
+                                result.Add(new BlockChainTransaction()
+                                {
+                                    TransactionHash = transact.TransactionHash,
+                                    From = transact.From,
+                                    To = decodedInput.To,
+                                    ContractAddress = transact.To,
+                                    What = token?.Symbol ?? "Unknown",
+                                    IsSuccess = isSuccess,
+                                    DecimalValue = value,
+                                    Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                                        (long)(block.Timestamp.Value)),
+                                    BlockNumber = (int)block.Number.Value
+                                });
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    i--;
+                }
+            }
+            return result;
+        }
+
         private async Task<List<CustomTransaction>> GetTransactionByAddress(string accountAddress,
             List<Transaction> transactions, BigInteger timestamp)
         {
