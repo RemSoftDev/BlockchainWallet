@@ -15,10 +15,11 @@ namespace Wallet.Services
     public class TransactionService : IHostedService, IDisposable
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private IBlockchainExplorer _explorer;                
+        private IBlockchainExplorer _explorer;
         private Timer _timer;
         private int _lastCheckedBlockNumber;
         private int _lastBlockNumber;
+
 
 
 
@@ -26,7 +27,7 @@ namespace Wallet.Services
         {
             _explorer = explorer;
             _scopeFactory = scopeFactory;
-        }      
+        }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -39,8 +40,8 @@ namespace Wallet.Services
 
         private void DoWork(object state)
         {
-            int minBlock,maxBlock,tmp;
-            
+            int minBlock, maxBlock, tmp;
+
             Task.Run(async () =>
             {
                 try
@@ -54,18 +55,19 @@ namespace Wallet.Services
                         maxBlock = (int)(dbContext.BlockChainTransactions
                                    .Max(w => w.BlockNumber));
                         tmp = _lastBlockNumber - 5000;
-                        if (minBlock >0 && minBlock< tmp)
+                        if (minBlock > 0 && minBlock < tmp)
                         {
                             var data = dbContext.BlockChainTransactions.Where(t => t.BlockNumber < tmp);
-                            foreach (var t in data )
+                            foreach (var t in data)
                             {
                                 dbContext.BlockChainTransactions.Remove(t);
                             }
                         }
 
-                        if (maxBlock >0 && maxBlock< _lastBlockNumber)
+                        if (maxBlock > 0 && maxBlock < _lastBlockNumber)
                         {
-                            //add meth
+                            //var a = await SaveLatestTransactions(_lastBlockNumber, maxBlock, dbContext);
+
                         }
                         dbContext.SaveChanges();
 
@@ -77,6 +79,62 @@ namespace Wallet.Services
                 }
             });
         }
+
+
+        public async Task<int> SaveLatestTransactions(int lastKnownBlockNumber, int maxBlockDb, WalletDbContext context)
+        {
+            try
+            {
+                int substract = 5000;
+                substract = (lastKnownBlockNumber - maxBlockDb) < 5000 ? (lastKnownBlockNumber - maxBlockDb) : 5000;
+
+                var tasks = new List<Task<List<BlockChainTransaction>>>();
+                for (int i = lastKnownBlockNumber - substract; i < lastKnownBlockNumber; i += 100)
+                {
+                    var i1 = i;
+                    var task = Task.Run(() => _explorer.GetLatestTransactions(i1, i1 + 99));
+                    tasks.Add(task);
+                }
+                
+                await Task.WhenAll(tasks);
+
+                //debug only for this point
+                var result = new List<BlockChainTransaction>();
+                foreach (var task in tasks)
+                {
+                    task.Result.ForEach(t => result.Add(t));
+                }
+
+                context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+                var tempList = new List<BlockChainTransaction>();
+                foreach (var transact in result)
+                {
+                    tempList.Add(transact);
+                    if (tempList.Count == 100)
+                    {
+                        try
+                        {
+                            context.BlockChainTransactions.AddRange(tempList);
+                            context.SaveChanges();
+                            tempList.Clear();
+                        }
+                        catch (Exception e)
+                        {
+                            tempList.Clear();
+                        }
+                    }
+                }
+                context.ChangeTracker.AutoDetectChangesEnabled = true;
+                return 1;
+            }
+            catch(Exception e)
+            {
+                return 0;
+            }
+
+        }
+
 
 
 
