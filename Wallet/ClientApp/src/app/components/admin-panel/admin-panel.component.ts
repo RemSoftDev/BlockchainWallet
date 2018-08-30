@@ -4,6 +4,7 @@ import { TokenService } from '../../shared/services/adminToken.service';
 import { TokenModel } from '../../shared/models/tokenModel';
 import { UpdateTokenModel } from '../../shared/models/updateTokenModel';
 import { PageData } from '../../shared/models/pageData.interface';
+import { BlockchainService } from '../../shared/services/blockchain.service'
 import { NgForm } from '@angular/forms';
 
 @Component({
@@ -31,7 +32,7 @@ export class AdminPanelComponent implements OnInit {
 
 
 
-  constructor(private pageDataService: PageDataService, private tokenService: TokenService) {}
+  constructor(private pageDataService: PageDataService, private tokenService: TokenService, private blockChainService: BlockchainService) {}
 
   ngOnInit() {
     this.loadData();
@@ -132,6 +133,11 @@ export class AdminPanelComponent implements OnInit {
       this.tokens = res;
     },
       error => this.errors = error);
+  }
+
+  saveLatestTransactions() {
+    this.blockChainService.saveLatestTransactions().subscribe();
+    alert('Started');
   }
 
 }

@@ -1,12 +1,12 @@
 export interface TransactionsModel {
   transactions: Transaction[];
-  blockNumber: number;
+  skipElementsNumber: number;
 }
 
 interface Transaction {
-  hash: string;
-  from: string;
-  to: string;
+  transactionHash: string;
+  fromAddress: string;
+  toAddress: string;
   what: string;
   decimalValue: number;
   date: Date;

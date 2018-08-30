@@ -63,16 +63,16 @@ export class AccountPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  loadTransaction(blockNumber) {
+  loadTransaction(skipElementsNumber) {
     this.moreTransactionRequesting = true;
-    this.BCservice.getTransactionsByNumber(blockNumber - 100, this.searchString).subscribe(model => {
+    this.BCservice.getTransactionsByNumber(skipElementsNumber, this.searchString).subscribe(model => {
         this.moreTransactionRequesting = false;
-        this.transactionsModel.blockNumber = model.blockNumber;
+        this.transactionsModel.skipElementsNumber = model.skipElementsNumber;
         this.transactionsModel.transactions = this.transactionsModel.transactions.concat(model.transactions);
       },
       error => {
         console.log(error);
-        this.errors = true
+        this.errors = true;
       });
   }
 

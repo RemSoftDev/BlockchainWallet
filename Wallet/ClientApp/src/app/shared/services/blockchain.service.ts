@@ -61,7 +61,7 @@ export class BlockchainService extends BaseService {
   }
   
   getSmartContractTransactionsByNumber(blockNumber, accountAddress: string) {
-    const params = new HttpParams().set("blockNumber", blockNumber).set('accountAddress', accountAddress);
+    const params = new HttpParams().set("skipElementsNumber", blockNumber).set('accountAddress', accountAddress);
     return this.http
       .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetSmartContractTransactions', { params })
       .catch(this.handleError);
@@ -119,9 +119,16 @@ export class BlockchainService extends BaseService {
   }
 
   getTransactionsByNumber(blockNumber,accountAddress: string) {
-    const params = new HttpParams().set("blockNumber", blockNumber).set('accountAddress', accountAddress);
+    const params = new HttpParams().set("skipElementsNumber", blockNumber).set('accountAddress', accountAddress);
     return this.http
       .get<TransactionsModel>(this.hostUrl + this.baseUrl + '/GetTransactions', { params })
       .catch(this.handleError);
   }
+
+  saveLatestTransactions() {
+    return this.http
+      .get(this.hostUrl + this.baseUrl + '/SaveLatestTransactions')
+      .catch(this.handleError);
+  }
+
 }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wallet.Models;
 
 namespace Wallet.Migrations
 {
     [DbContext(typeof(WalletDbContext))]
-    partial class WalletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180830084909_ChangeFiledsNames")]
+    partial class ChangeFiledsNames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,7 +144,7 @@ namespace Wallet.Migrations
                     b.Property<DateTime>("Date");
 
                     b.Property<decimal>("DecimalValue")
-                        .HasColumnType("decimal(38, 5)");
+                        .HasColumnType("decimal(28, 10)");
 
                     b.Property<string>("FromAddress");
 
@@ -166,7 +168,7 @@ namespace Wallet.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("AmountOfToken")
-                        .HasColumnType("decimal(38, 5)");
+                        .HasColumnType("decimal(28, 10)");
 
                     b.Property<int>("BlockNumber");
 
@@ -204,7 +206,7 @@ namespace Wallet.Migrations
                     b.Property<string>("Name");
 
                     b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(38, 5)");
+                        .HasColumnType("decimal(28, 10)");
 
                     b.Property<string>("Symbol");
 
@@ -305,17 +307,17 @@ namespace Wallet.Migrations
                     b.Property<int>("GeneralTransactionsNumber");
 
                     b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(38, 5)");
+                        .HasColumnType("decimal(28, 10)");
 
                     b.Property<int>("ReceivedTransactionsNumber");
 
                     b.Property<int>("SentTransactionsNumber");
 
                     b.Property<decimal>("TokensReceived")
-                        .HasColumnType("decimal(38, 5)");
+                        .HasColumnType("decimal(28, 10)");
 
                     b.Property<decimal>("TokensSent")
-                        .HasColumnType("decimal(38, 5)");
+                        .HasColumnType("decimal(28, 10)");
 
                     b.HasKey("Id");
 

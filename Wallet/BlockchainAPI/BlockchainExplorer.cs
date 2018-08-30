@@ -82,10 +82,11 @@ namespace Wallet.BlockchainAPI
                             result.Add(new BlockChainTransaction()
                             {
                                 TransactionHash = transact.TransactionHash,
-                                From = transact.From,
-                                To = transact.To,
+                                FromAddress = transact.From,
+                                ToAddress = transact.To,
                                 What = "ETH",
                                 IsSuccess = isSuccess,
+                                ContractAddress = String.Empty,
                                 DecimalValue = Web3.Convert.FromWei(transact.Value.Value, 18),
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                     (long)(block.Timestamp.Value)),
@@ -122,8 +123,8 @@ namespace Wallet.BlockchainAPI
                                 result.Add(new BlockChainTransaction()
                                 {
                                     TransactionHash = transact.TransactionHash,
-                                    From = transact.From,
-                                    To = decodedInput.To,
+                                    FromAddress = transact.From,
+                                    ToAddress = decodedInput.To,
                                     ContractAddress = transact.To,
                                     What = token?.Symbol ?? "Unknown",
                                     IsSuccess = isSuccess,

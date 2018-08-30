@@ -1,10 +1,8 @@
-
 <div *ngIf="showWarningMessage" class="row">
   <div class="warnMessage col-md-3">
     <p>This will take some time.</p>
   </div>
 </div>
-
 
 <div *ngIf="showNotWind" class="notificationWindow container-fluid">
   <div class="row">
@@ -64,10 +62,6 @@
   Opps, some error occurred. Try again
 </div>
 
-<div *ngIf="!infoRequesting||!transactionRequesting" class="row">
-  <app-spinner></app-spinner>
-</div>
-
 <div *ngIf="infoRequesting" class="row">
   <div class="col-sm-4">
     <div class="divInfo">
@@ -103,6 +97,10 @@
       </div>
     </div>
   </div>
+</div>
+
+<div *ngIf="!infoRequesting||!transactionRequesting" class="row">
+  <app-spinner></app-spinner>
 </div>
 
 <div *ngIf="isWalletsOpen" novalidate class="row">
@@ -146,15 +144,15 @@
     </thead>
     <tbody>
       <tr *ngFor="let trans of transactionsModel.transactions">
-        <th title="{{trans.hash}}">{{trans.hash | slice : 0:20}}...</th>
-        <td title="{{trans.from}}">
-          <a [routerLink]='["/search",trans.from]'>
-            {{trans.from | slice : 0:20}}...
+        <th title="{{trans.transactionHash}}">{{trans.transactionHash | slice : 0:20}}...</th>
+        <td title="{{trans.fromAddress}}">
+          <a [routerLink]='["/search",trans.fromAddress]'>
+            {{trans.fromAddress | slice : 0:20}}...
           </a>
         </td>
-        <td title="{{trans.to}}">
-          <a [routerLink]='["/search",trans.to]'>
-            {{trans.to | slice : 0:20}}...
+        <td title="{{trans.toAddress}}">
+          <a [routerLink]='["/search",trans.toAddress]'>
+            {{trans.toAddress | slice : 0:20}}...
           </a>
         </td>
         <td title="{{trans.decimalValue}}">{{trans.decimalValue | number : '1.2-5'}}</td>
@@ -167,7 +165,7 @@
     <div *ngIf="moreTransactionRequesting" class="row">
       <app-spinner></app-spinner>
     </div>
-    <button (click)="loadTransaction(transactionsModel.blockNumber)" class="btn btn-primary">More</button>
+    <button (click)="loadTransaction(transactionsModel.skipElementsNumber)" class="btn btn-primary">More</button>
   </div>
 </div>
 

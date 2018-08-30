@@ -1,24 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Data;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Nethereum.Hex.HexConvertors;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
 using Wallet.BlockchainAPI;
 using Wallet.BlockchainAPI.Model;
 using Wallet.Models;
 using Wallet.ViewModels;
-using Nethereum.ABI;
 using Wallet.Helpers;
-
 
 namespace Wallet.Controllers
 {
@@ -47,7 +39,7 @@ namespace Wallet.Controllers
 
             foreach (var token in dbContext.Erc20Tokens)
             {
-                if (token.Address != accountAddress) //finish with module 5, check ico
+                if (token.Address != accountAddress)
                 {
                     Task<ERC20TokenViewModel> task = _explorer.BalanceToken(token, accountAddress);
                     tasks.Add(task);
@@ -113,7 +105,8 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTokenHoldersInfo(int skipElementsCount, int contractId, SortOrder sortOrder = SortOrder.QuantityDesc)
+        public async Task<IActionResult> GetTokenHoldersInfo(int skipElementsCount, int contractId,
+            SortOrder sortOrder = SortOrder.QuantityDesc)
         {
             try
             {
@@ -157,16 +150,14 @@ namespace Wallet.Controllers
                     case SortOrder.ReceivedTransactionsNumberDesc:
                         holders = holders.OrderByDescending(h => h.ReceivedTransactionsNumber);
                         break;
-
                 }
 
                 if (skipElementsCount == 0)
                 {
                     return new OkObjectResult(await holders.Take(40).ToListAsync());
-                    
                 }
 
-                var result = await holders.Skip(skipElementsCount).Take( 40).ToListAsync();
+                var result = await holders.Skip(skipElementsCount).Take(40).ToListAsync();
 
                 return new OkObjectResult(
                     new TokenHoldersViewModel()
@@ -183,22 +174,24 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTokenHoldersInfoByDateTime(int skipElementsCount, int contractId, string secondsFrom, string secondsTo, SortOrder sortOrder = SortOrder.QuantityDesc)
+        public async Task<IActionResult> GetTokenHoldersInfoByDateTime(int skipElementsCount, int contractId,
+            string secondsFrom, string secondsTo, SortOrder sortOrder = SortOrder.QuantityDesc)
         {
             try
             {
                 var from = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Int64.Parse(secondsFrom));
                 var to = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Int64.Parse(secondsTo));
-                var logs = await dbContext.CustomEventLogs.Where(l=>l.dateTime>=from && l.dateTime<=to).ToListAsync();
+                var logs = await dbContext.CustomEventLogs.Where(l => l.dateTime >= from && l.dateTime <= to)
+                    .ToListAsync();
 
-                
+
                 var holders = EventLogsExplorer.GetInfoFromLogs(logs);
 
 
                 holders.ForEach(h =>
-                    {
-                        h.Quantity = (h.TokensReceived - h.TokensSent) > 0 ? h.TokensReceived - h.TokensSent : 0;
-                    });
+                {
+                    h.Quantity = (h.TokensReceived - h.TokensSent) > 0 ? h.TokensReceived - h.TokensSent : 0;
+                });
 
                 var result = holders.AsQueryable();
 
@@ -240,7 +233,6 @@ namespace Wallet.Controllers
                     case SortOrder.ReceivedTransactionsNumberDesc:
                         result = result.OrderByDescending(h => h.ReceivedTransactionsNumber);
                         break;
-
                 }
 
                 if (skipElementsCount == 0)
@@ -249,12 +241,12 @@ namespace Wallet.Controllers
                 }
 
                 return new OkObjectResult(
-                        new TokenHoldersViewModel()
-                        {
-                            HoldersInfo = result.Skip(skipElementsCount).Take(40).ToList(),
-                            SkipElementsCount = skipElementsCount
-                        }                
-                    );
+                    new TokenHoldersViewModel()
+                    {
+                        HoldersInfo = result.Skip(skipElementsCount).Take(40).ToList(),
+                        SkipElementsCount = skipElementsCount
+                    }
+                );
             }
             catch (Exception e)
             {
@@ -263,35 +255,24 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetTransactions(int? blockNumber, string accountAddress)
+        public async Task<IActionResult> GetTransactions(int? skipElementsNumber, string accountAddress)
         {
             try
             {
-                //int searchBlockNumber;
-                //if (blockNumber.HasValue)
-                //{
-                //    searchBlockNumber = blockNumber.Value;
-                //}
-                //else
-                //{
-                //    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
-                //}
+                skipElementsNumber = skipElementsNumber ?? 0;
 
                 var res = dbContext.BlockChainTransactions.Where(t =>
-                        t.From.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase) ||
-                        t.To.Equals(accountAddress, StringComparison.CurrentCultureIgnoreCase))
-                    .OrderByDescending(t => t.Date);
+                        t.FromAddress.Equals(accountAddress) ||
+                        t.ToAddress.Equals(accountAddress))
+                    .OrderByDescending(t => t.Date).Skip(skipElementsNumber.Value).Take(40);
 
                 return new OkObjectResult(
                     new TransactionsViewModel()
                     {
-                        BlockNumber = 0,
+                        SkipElementsNumber = skipElementsNumber.Value + 40,
                         Transactions = await res.ToListAsync()
                     }
                 );
-
-
-
             }
             catch (Exception e)
             {
@@ -304,12 +285,11 @@ namespace Wallet.Controllers
         {
             try
             {
-                // if didnt have in db sometime error, bcause try to get data in one time
                 Task<ERC20Token> getContractInfoFromDb = Task.Run(async () =>
                 {
                     var token = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
                         t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
-                    token = token == null ? token = new ERC20Token() { Address = contractAddress } : token;
+                    token = token == null ? token = new ERC20Token() {Address = contractAddress} : token;
                     token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
                         token.DecimalPlaces);
                     return token;
@@ -320,43 +300,30 @@ namespace Wallet.Controllers
                     var token1 = await dbContext.Erc20Tokens.FirstOrDefaultAsync(t =>
                         t.Address.Equals(contractAddress, StringComparison.CurrentCultureIgnoreCase));
 
-                    //token = token == null ? token = new ERC20Token() { Address = contractAddress }:token;
-
-
                     ContractHoldersAndTransactionsModel tmp;
-                    //tmp = await Parser.GetContractHoldersAndTransactions(contractAddress);
+
                     if (token1 == null)
                     {
-                        token1 = new ERC20Token() { Address = contractAddress };
+                        token1 = new ERC20Token() {Address = contractAddress};
                         tmp = await _parser.GetContractHoldersAndTransactions(contractAddress);
 
                         token1.TransactionsCount = tmp.TransactionsCount;
                         token1.WalletsCount = tmp.HoldersCount;
                         token1.UpdDate = DateTime.Now;
                         dbContext.Erc20Tokens.Add(token1);
-                        dbContext.SaveChangesAsync();
-
+                        dbContext.SaveChanges();
                     }
                     else
                     {
-                        //if (token1.UpdDate == null || (((TimeSpan)(DateTime.Now - token1.UpdDate)).Minutes > 10))
                         {
                             tmp = await _parser.GetContractHoldersAndTransactions(contractAddress);
 
                             token1.TransactionsCount = tmp.TransactionsCount;
                             token1.WalletsCount = tmp.HoldersCount;
                             token1.UpdDate = DateTime.Now;
-                            dbContext.SaveChangesAsync();
+                            dbContext.SaveChanges();
                         }
-                        //else
-                        //{
-                        //    tmp = new ContractHoldersAndTransactionsModel();
-                        //    tmp.HoldersCount = token1.WalletsCount;
-                        //    tmp.TransactionsCount = token1.TransactionsCount;
-                        //}
                     }
-
-
                     return tmp;
                 });
 
@@ -378,15 +345,15 @@ namespace Wallet.Controllers
         {
             try
             {
-                var token = dbContext.Erc20Tokens.ToList().FirstOrDefault(t=> t.Name?.Equals(contractName, StringComparison.CurrentCultureIgnoreCase)??false);
+                var token = dbContext.Erc20Tokens.ToList().FirstOrDefault(t =>
+                    t.Name?.Equals(contractName, StringComparison.CurrentCultureIgnoreCase) ?? false);
 
                 if (token == null)
                     return NotFound();
 
                 Task<ERC20Token> getContractQuantity = Task.Run(async () =>
                 {
-
-                    token = token == null ? token = new ERC20Token() { Name = contractName } : token;
+                    token = token == null ? token = new ERC20Token() {Name = contractName} : token;
                     token.Quantity = Web3.Convert.FromWei(await _explorer.GetTokenTotalSupply(token.Address),
                         token.DecimalPlaces);
                     return token;
@@ -400,7 +367,7 @@ namespace Wallet.Controllers
                     ContractHoldersAndTransactionsModel tmp;
                     if (token1 == null)
                     {
-                        token1 = new ERC20Token() { Address = token.Address };
+                        token1 = new ERC20Token() {Address = token.Address};
                         tmp = await _parser.GetContractHoldersAndTransactions(token.Address);
 
                         token1.TransactionsCount = tmp.TransactionsCount;
@@ -408,11 +375,10 @@ namespace Wallet.Controllers
                         token1.UpdDate = DateTime.Now;
                         dbContext.Erc20Tokens.Add(token1);
                         await dbContext.SaveChangesAsync();
-
                     }
                     else
                     {
-                        if (token1.UpdDate == null || (((TimeSpan)(DateTime.Now - token1.UpdDate)).Minutes > 10))
+                        if (token1.UpdDate == null || (((TimeSpan) (DateTime.Now - token1.UpdDate)).Minutes > 10))
                         {
                             tmp = await _parser.GetContractHoldersAndTransactions(token.Address);
 
@@ -428,7 +394,6 @@ namespace Wallet.Controllers
                             tmp.TransactionsCount = token1.TransactionsCount;
                         }
                     }
-
 
                     return tmp;
                 });
@@ -447,45 +412,21 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetSmartContractTransactions(int? blockNumber, string accountAddress)
+        public async Task<IActionResult> GetSmartContractTransactions(int? skipElementsNumber, string accountAddress)
         {
             try
             {
-                int searchBlockNumber;
-                if (blockNumber.HasValue)
-                {
-                    searchBlockNumber = blockNumber.Value;
-                }
-                else
-                {
-                    searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
-                }
-                //check by time updates && update db count of transaction "v.	Quantity of transactions"
+                skipElementsNumber = skipElementsNumber ?? 0;
 
-                //uniq count of wallet "iv.	Quantity of wallets "
-
-                //iii.	Quantity "sold count"???
-
-                var tasks = new List<Task<List<CustomTransaction>>>();
-                for (int i = searchBlockNumber - 100; i <= searchBlockNumber; i++)
-                {
-                    Task<List<CustomTransaction>> task = _explorer.GetSmartContractTransactions(accountAddress, i);
-                    tasks.Add(task);
-                }
-
-                await Task.WhenAll(tasks.ToArray());
-
-                var result = new List<CustomTransaction>();
-                foreach (var listtask in tasks)
-                {
-                    result.AddRange(listtask.Result);
-                }
+                var res = dbContext.BlockChainTransactions.Where(t =>
+                        t.ContractAddress.Equals(accountAddress))
+                    .OrderByDescending(t => t.Date).Skip(skipElementsNumber.Value).Take(40);
 
                 return new OkObjectResult(
                     new TransactionsViewModel()
                     {
-                        BlockNumber = searchBlockNumber
-                        //Transactions = result.OrderByDescending(t => t.Date).ToList()
+                        SkipElementsNumber = skipElementsNumber.Value + 40,
+                        Transactions = await res.ToListAsync()
                     }
                 );
             }
@@ -500,32 +441,21 @@ namespace Wallet.Controllers
         {
             try
             {
-                int searchBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
-                var token = dbContext.Erc20Tokens.ToList().FirstOrDefault(t => t.Name?.Equals(contractName, StringComparison.CurrentCultureIgnoreCase) ?? false);
+                var token = dbContext.Erc20Tokens.ToList().FirstOrDefault(t =>
+                    t.Name?.Equals(contractName) ?? false);
 
                 if (token == null)
                     return NotFound();
 
-                var tasks = new List<Task<List<CustomTransaction>>>();
-                for (int i = searchBlockNumber - 100; i <= searchBlockNumber; i++)
-                {
-                    Task<List<CustomTransaction>> task = _explorer.GetSmartContractTransactions(token.Address, i);
-                    tasks.Add(task);
-                }
-
-                await Task.WhenAll(tasks.ToArray());
-
-                var result = new List<CustomTransaction>();
-                foreach (var listtask in tasks)
-                {
-                    result.AddRange(listtask.Result);
-                }
+                var res = dbContext.BlockChainTransactions.Where(t =>
+                        t.ContractAddress.Equals(token.Address, StringComparison.CurrentCultureIgnoreCase))
+                    .OrderByDescending(t => t.Date).Take(40);
 
                 return new OkObjectResult(
                     new TransactionsViewModel()
                     {
-                        BlockNumber = searchBlockNumber
-                        //Transactions = result.OrderByDescending(t => t.Date).ToList()
+                        SkipElementsNumber = 40,
+                        Transactions = await res.ToListAsync()
                     }
                 );
             }
@@ -538,52 +468,50 @@ namespace Wallet.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> SaveLatestTransactions()
         {
-            try
+            var lastKnownBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
+            var tasks = new List<Task<List<BlockChainTransaction>>>();
+            for (int i = lastKnownBlockNumber - 5000; i < lastKnownBlockNumber; i += 100)
             {
-                var lastKnownBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
-                var tasks = new List<Task<List<BlockChainTransaction>>>();
-                for (int i = lastKnownBlockNumber-500; i < lastKnownBlockNumber; i += 100)
-                {
-                    var i1 = i;
-                    var task = Task.Run(() => _explorer.GetLatestTransactions(i1, i1 + 99));
-                    tasks.Add(task);
-                }
+                var i1 = i;
+                var task = Task.Run(() => _explorer.GetLatestTransactions(i1, i1 + 99));
+                tasks.Add(task);
+            }
 
-                await Task.WhenAll(tasks);
-                var result = new List<BlockChainTransaction>();
-                foreach (var task in tasks)
-                {
-                    task.Result.ForEach(t => result.Add(t));
-                }
+            await Task.WhenAll(tasks);
+            var result = new List<BlockChainTransaction>();
+            foreach (var task in tasks)
+            {
+                task.Result.ForEach(t => result.Add(t));
+            }
 
-                dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
 
-                var tempList = new List<BlockChainTransaction>();
-                foreach (var transact in result)
+            var tempList = new List<BlockChainTransaction>();
+            foreach (var transact in result)
+            {
+                tempList.Add(transact);
+                if (tempList.Count == 100)
                 {
-                    tempList.Add(transact);
-                    if (tempList.Count == 1000)
+                    try
                     {
                         dbContext.BlockChainTransactions.AddRange(tempList);
                         dbContext.SaveChanges();
                         tempList.Clear();
                     }
+                    catch (Exception e)
+                    {
+                        tempList.Clear();
+                    }
                 }
             }
-            catch (Exception e)
-            {
 
-            }
-            finally
-            {
-                dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
-            }
+            dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
 
             return Ok();
         }
     }
 
-    public enum  SortOrder
+    public enum SortOrder
     {
         QuantityDesc,
         Quantity,

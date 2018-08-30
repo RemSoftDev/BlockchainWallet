@@ -7,6 +7,6 @@ namespace Wallet.ViewModels
     {
         public List<BlockChainTransaction> Transactions { get; set; }
 
-        public int BlockNumber { get; set; }
+        public int SkipElementsNumber { get; set; }
     }
 }

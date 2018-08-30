@@ -25,7 +25,7 @@ namespace Wallet.Models
                 .SelectMany(t => t.GetProperties())
                 .Where(p => p.ClrType == typeof(decimal)))
             {
-                property.Relational().ColumnType = "decimal(28, 10)";
+                property.Relational().ColumnType = "decimal(38, 5)";
             }
         }
     }
