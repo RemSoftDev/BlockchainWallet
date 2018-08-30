@@ -38,7 +38,7 @@ namespace Wallet
 
             services.AddDbContext<WalletDbContext>(options =>
             //options.UseSqlServer(Configuration.GetConnectionString("ProdConn")));
-            options.UseSqlServer(Configuration.GetConnectionString("TestConn")));
+            options.UseSqlServer(Configuration.GetConnectionString("TestConn2")));
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
@@ -47,6 +47,7 @@ namespace Wallet
             services.AddTransient<IParser, Parser>();
             services.AddHostedService<BlockchainDataUpdateService>();
             services.AddHostedService<EventLogsService>();
+            services.AddHostedService<TransactionService>();
 
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JWTSettings));
