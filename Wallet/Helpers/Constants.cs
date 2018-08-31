@@ -38,7 +38,7 @@
         {
             public static class BlocksCount
             {
-                public const int SaveBlocksCount = 10000;
+                public const int SaveBlocksCount = 50000;
             }
         }
     }

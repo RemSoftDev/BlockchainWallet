@@ -474,7 +474,7 @@ namespace Wallet.Controllers
 
             var lastKnownBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
             var tasks = new List<Task<List<BlockChainTransaction>>>();
-            for (int i = lastKnownBlockNumber - Constants.Ints.BlocksCount.SaveBlocksCount; i < lastKnownBlockNumber; i += 100)
+            for (int i = lastKnownBlockNumber - 5000; i < lastKnownBlockNumber; i += 100)
             {
                 var i1 = i;
                 var task = Task.Run(() => _explorer.GetLatestTransactions(i1, i1 + 99));
