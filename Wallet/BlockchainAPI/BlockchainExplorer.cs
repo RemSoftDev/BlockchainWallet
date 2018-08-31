@@ -80,6 +80,8 @@ namespace Wallet.BlockchainAPI
                                     isSuccess = false;
                                 }
                             }
+                           
+                            var value = (double) Web3.Convert.FromWei(transact.Value.Value, 18);
 
                             temp.Add(new BlockChainTransaction()
                             {
@@ -89,7 +91,7 @@ namespace Wallet.BlockchainAPI
                                 What = "ETH",
                                 IsSuccess = isSuccess,
                                 ContractAddress = String.Empty,
-                                DecimalValue =(double) Web3.Convert.FromWei(transact.Value.Value, 18),
+                                DecimalValue = value,
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                     (long)(block.Timestamp.Value)),
                                 BlockNumber = (int)block.Number.Value
@@ -116,10 +118,10 @@ namespace Wallet.BlockchainAPI
                                     tok.Address.Equals(transact.To, StringComparison.CurrentCultureIgnoreCase));
 
 
-                                decimal value = 0;
+                                double value = 0;
                                 if (token != null)
                                 {
-                                    value = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18);
+                                    value = (double)Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18);
                                 }
 
                                 temp.Add(new BlockChainTransaction()
@@ -130,7 +132,7 @@ namespace Wallet.BlockchainAPI
                                     ContractAddress = transact.To,
                                     What = token?.Symbol ?? "Unknown",
                                     IsSuccess = isSuccess,
-                                    DecimalValue = (double)value,
+                                    DecimalValue = value,
                                     Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                         (long)(block.Timestamp.Value)),
                                     BlockNumber = (int)block.Number.Value
@@ -138,13 +140,12 @@ namespace Wallet.BlockchainAPI
                             }
                         }
                     }
+                    result.AddRange(temp);
                 }
                 catch (Exception e)
                 {
                     i--;
                 }
-
-                result.AddRange(temp);
             }
             return result;
         }
