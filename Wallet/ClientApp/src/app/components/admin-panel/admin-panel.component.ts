@@ -6,6 +6,8 @@ import { UpdateTokenModel } from '../../shared/models/updateTokenModel';
 import { PageData } from '../../shared/models/pageData.interface';
 import { BlockchainService } from '../../shared/services/blockchain.service'
 import { NgForm } from '@angular/forms';
+import { StausSyncTr } from "../../shared/models/StatusSyncTransaction.interface";
+
 
 @Component({
   selector: 'app-admin-panel',
@@ -27,6 +29,7 @@ export class AdminPanelComponent implements OnInit {
   aboutPage: PageData;
   contactPage: PageData;
   tokens: TokenModel[];
+  statusSync: StausSyncTr;
   errors: string;
 
 
@@ -69,6 +72,13 @@ export class AdminPanelComponent implements OnInit {
         this.isRequested = true;
       },
       error => console.log(error));
+
+    this.blockChainService.getSyncStatus().subscribe(res => {
+      this.statusSync = res;
+    },
+      error => this.errors = error);
+
+
   }
 
   newContract() {
@@ -115,6 +125,16 @@ export class AdminPanelComponent implements OnInit {
     },
       error => this.errors = error);
   }
+
+  getSyncStatus(form: NgForm) {
+    this.errors = null;
+    this.blockChainService.getSyncStatus().subscribe(res => {
+      this.statusSync = res;
+    },
+      error => this.errors = error);
+  }
+
+  
 
   switchToContent() {
     this.isContentOpened = true;

@@ -14,7 +14,14 @@
     </div>
 
     <div *ngIf="isContractsOpened" class="col-md-10">
+      <div>
+        Current Check Block : {{statusSync.currentBlock}}
+        <p>
+        Last Block : {{statusSync.lastBlockBl}}
+</div>
+
       <form #myForm="ngForm" (ngSubmit)="getSmartContract(myForm)">
+
 
         <div class="form-group">
           <label for="addressBTC">Contract Address</label>
@@ -52,7 +59,7 @@
 
         <div class="form-group">
           <label for="createdDate">Created date</label>
-          <input type="date" class="form-control" [ngModel]="token.createdDate | date:'yyyy-MM-dd'" (ngModelChange)="token.createdDate = $event"  name="createdDate" ngModel/>
+          <input type="date" class="form-control" [ngModel]="token.createdDate | date:'yyyy-MM-dd'" (ngModelChange)="token.createdDate = $event" name="createdDate" ngModel />
         </div>
 
         <div class="form-group">

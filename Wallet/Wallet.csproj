@@ -46,6 +46,7 @@
   <ItemGroup>
     <None Remove="ClientApp\src\app\components\login\login.component.ts" />
     <None Remove="ClientApp\src\app\pipe\sort-watchlist.ts" />
+    <None Remove="ClientApp\src\app\shared\models\StatusSyncTransaction.interface.ts" />
     <None Remove="ClientApp\src\app\shared\models\tokenModel.ts" />
     <None Remove="ClientApp\src\app\shared\models\updateTokenModel.ts" />
     <None Remove="ClientApp\src\app\shared\models\watchlistModel.ts" />
@@ -66,6 +67,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\components\login\login.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\pipe\sort-watchlist.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\shared\models\StatusSyncTransaction.interface.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\updateTokenModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\tokenModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\watchlistModel.ts" />

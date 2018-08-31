@@ -6,6 +6,7 @@ import { TransactionsModel } from '../models/transactionsModel.interface';
 import { BaseService } from "./base.service";
 import { TokenModel } from '../models/tokenModel';
 import { TokenHolder, HolderModel } from '../models/tokenHolder.interface';
+import { StausSyncTr } from "../../shared/models/StatusSyncTransaction.interface";
 
 
 @Injectable()
@@ -128,6 +129,11 @@ export class BlockchainService extends BaseService {
   saveLatestTransactions() {
     return this.http
       .get(this.hostUrl + this.baseUrl + '/SaveLatestTransactions')
+      .catch(this.handleError);
+  }
+  getSyncStatus() {
+    return this.http
+      .get<StausSyncTr>(this.hostUrl + this.baseUrl + '/StatusSyncTransactions')
       .catch(this.handleError);
   }
 

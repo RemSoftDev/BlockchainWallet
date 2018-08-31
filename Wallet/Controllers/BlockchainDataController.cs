@@ -531,7 +531,34 @@ namespace Wallet.Controllers
 
             return Ok();
         }
-    }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> StatusSyncTransactions()
+        {
+            try
+            {
+                var _lastBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
+                var _lastCheckedBlockNumber = (int)(dbContext.BlockChainTransactions
+                                    .Max(w => w.BlockNumber));
+
+                return new OkObjectResult(
+                       new StatusSyncTransaction()
+                       {
+                           CurrentBlock = _lastCheckedBlockNumber,
+                           LastBlockBl = _lastBlockNumber
+                       });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(HttpErrorHandler.AddError("Failure", ex.Message, ModelState));
+            }
+
+        }
+
+
+
+
+        }
 
     public enum SortOrder
     {
