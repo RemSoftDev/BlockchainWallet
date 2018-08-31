@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Nethereum.Contracts;
+using Nethereum.JsonRpc.Client;
 using Nethereum.StandardTokenEIP20.Events.DTO;
 using Wallet.BlockchainAPI.Model;
 using Wallet.Helpers;
@@ -68,10 +69,12 @@ namespace Wallet.BlockchainAPI
 
                     foreach (var transact in block.Transactions)
                     {
-                        if (transact.Input.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase))
+                        if (transact.Input.Equals(Constants.Strings.TransactionType.Usual,
+                            StringComparison.CurrentCultureIgnoreCase))
                         {
                             var status =
-                                 web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(transact.TransactionHash).Result;
+                                web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(transact.TransactionHash)
+                                    .Result;
                             bool isSuccess = true;
                             if (status != null)
                             {
@@ -80,8 +83,16 @@ namespace Wallet.BlockchainAPI
                                     isSuccess = false;
                                 }
                             }
-                           
-                            var value = (double) Web3.Convert.FromWei(transact.Value.Value, 18);
+
+                            double value = 0;
+                            try
+                            {
+                                value = (double) Web3.Convert.FromWei(transact.Value.Value, 18);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
 
                             temp.Add(new BlockChainTransaction()
                             {
@@ -93,8 +104,8 @@ namespace Wallet.BlockchainAPI
                                 ContractAddress = String.Empty,
                                 DecimalValue = value,
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
-                                    (long)(block.Timestamp.Value)),
-                                BlockNumber = (int)block.Number.Value
+                                    (long) (block.Timestamp.Value)),
+                                BlockNumber = (int) block.Number.Value
                             });
                         }
                         else if (transact.Input.StartsWith(Constants.Strings.TransactionType.Transfer))
@@ -103,7 +114,8 @@ namespace Wallet.BlockchainAPI
                             {
                                 var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
                                 var status =
-                                    web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(transact.TransactionHash).Result;
+                                    web3.Eth.Transactions.GetTransactionReceipt
+                                        .SendRequestAsync(transact.TransactionHash).Result;
                                 bool isSuccess = true;
                                 if (status != null)
                                 {
@@ -121,7 +133,15 @@ namespace Wallet.BlockchainAPI
                                 double value = 0;
                                 if (token != null)
                                 {
-                                    value = (double)Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18);
+                                    try
+                                    {
+                                        value = (double) Web3.Convert.FromWei(decodedInput.Value,
+                                            token?.DecimalPlaces ?? 18);
+                                    }
+                                    catch (Exception)
+                                    {
+
+                                    }
                                 }
 
                                 temp.Add(new BlockChainTransaction()
@@ -134,17 +154,26 @@ namespace Wallet.BlockchainAPI
                                     IsSuccess = isSuccess,
                                     DecimalValue = value,
                                     Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
-                                        (long)(block.Timestamp.Value)),
-                                    BlockNumber = (int)block.Number.Value
+                                        (long) (block.Timestamp.Value)),
+                                    BlockNumber = (int) block.Number.Value
                                 });
                             }
                         }
                     }
+
                     result.AddRange(temp);
+                }
+                catch (RpcClientUnknownException e)
+                {
+                    i--;
+                }
+                catch (RpcClientTimeoutException)
+                {
+                    i--;
                 }
                 catch (Exception e)
                 {
-                    i--;
+
                 }
             }
             return result;
