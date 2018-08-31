@@ -468,9 +468,13 @@ namespace Wallet.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> SaveLatestTransactions()
         {
+            var status = dbContext.PageData.FirstOrDefault();
+            if (status != null && status.IsTransactionsSaved)
+                return Ok();
+
             var lastKnownBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
             var tasks = new List<Task<List<BlockChainTransaction>>>();
-            for (int i = lastKnownBlockNumber - 5000; i < lastKnownBlockNumber; i += 100)
+            for (int i = lastKnownBlockNumber - Constants.Ints.BlocksCount.SaveBlocksCount; i < lastKnownBlockNumber; i += 100)
             {
                 var i1 = i;
                 var task = Task.Run(() => _explorer.GetLatestTransactions(i1, i1 + 99));
@@ -506,6 +510,24 @@ namespace Wallet.Controllers
             }
 
             dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
+
+            var lastSavedNumber = (int)(dbContext.BlockChainTransactions
+                .Max(w => w.BlockNumber));
+
+            lastKnownBlockNumber = (int) (await _explorer.GetLastAvailableBlockNumber()).Value;
+            var newTransacts = _explorer.GetLatestTransactions(lastSavedNumber, lastKnownBlockNumber);
+
+            dbContext.BlockChainTransactions.AddRange(newTransacts);
+            dbContext.SaveChanges();
+
+            var data = dbContext.PageData.FirstOrDefault();
+            if (data != null)
+            {
+                data.IsTransactionsSaved = true;
+                dbContext.PageData.Update(data);
+            }
+
+            dbContext.SaveChanges();
 
             return Ok();
         }

@@ -7,5 +7,7 @@
         public string ElementName { get; set; }
         
         public string ElementData { get; set; }
+
+        public bool IsTransactionsSaved { get; set; }
     }
 }

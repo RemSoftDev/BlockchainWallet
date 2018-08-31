@@ -57,8 +57,10 @@ namespace Wallet.BlockchainAPI
         public List<BlockChainTransaction> GetLatestTransactions(int startBlockNumber, int endBlockNumber)
         {
             var result = new List<BlockChainTransaction>();
+            var temp = new List<BlockChainTransaction>();
             for (var i = startBlockNumber; i <= endBlockNumber; i++)
             {
+                temp.Clear();
                 try
                 {
                     var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
@@ -79,7 +81,7 @@ namespace Wallet.BlockchainAPI
                                 }
                             }
 
-                            result.Add(new BlockChainTransaction()
+                            temp.Add(new BlockChainTransaction()
                             {
                                 TransactionHash = transact.TransactionHash,
                                 FromAddress = transact.From,
@@ -87,7 +89,7 @@ namespace Wallet.BlockchainAPI
                                 What = "ETH",
                                 IsSuccess = isSuccess,
                                 ContractAddress = String.Empty,
-                                DecimalValue = Web3.Convert.FromWei(transact.Value.Value, 18),
+                                DecimalValue =(double) Web3.Convert.FromWei(transact.Value.Value, 18),
                                 Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                     (long)(block.Timestamp.Value)),
                                 BlockNumber = (int)block.Number.Value
@@ -120,7 +122,7 @@ namespace Wallet.BlockchainAPI
                                     value = Web3.Convert.FromWei(decodedInput.Value, token?.DecimalPlaces ?? 18);
                                 }
 
-                                result.Add(new BlockChainTransaction()
+                                temp.Add(new BlockChainTransaction()
                                 {
                                     TransactionHash = transact.TransactionHash,
                                     FromAddress = transact.From,
@@ -128,7 +130,7 @@ namespace Wallet.BlockchainAPI
                                     ContractAddress = transact.To,
                                     What = token?.Symbol ?? "Unknown",
                                     IsSuccess = isSuccess,
-                                    DecimalValue = value,
+                                    DecimalValue = (double)value,
                                     Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                                         (long)(block.Timestamp.Value)),
                                     BlockNumber = (int)block.Number.Value
@@ -141,6 +143,8 @@ namespace Wallet.BlockchainAPI
                 {
                     i--;
                 }
+
+                result.AddRange(temp);
             }
             return result;
         }

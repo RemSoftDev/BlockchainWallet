@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wallet.BlockchainAPI;
 using Wallet.Models;
-using Wallet.Notifications;
 
 namespace Wallet.Services
 {
@@ -17,11 +15,10 @@ namespace Wallet.Services
         private readonly IServiceScopeFactory _scopeFactory;
         private IBlockchainExplorer _explorer;
         private Timer _timer;
+        private Timer _deleteTimer;
         private int _lastCheckedBlockNumber;
         private int _lastBlockNumber;
-
-
-
+        private bool isRunning;
 
         public TransactionService(IBlockchainExplorer explorer, IServiceScopeFactory scopeFactory)
         {
@@ -34,13 +31,17 @@ namespace Wallet.Services
             _timer = new Timer(DoWork, null, TimeSpan.Zero,
                 TimeSpan.FromSeconds(5));
 
+            _deleteTimer = new Timer(DeleteOld, null, TimeSpan.Zero,
+                TimeSpan.FromMinutes(3));
+
             return Task.CompletedTask;
         }
 
 
         private void DoWork(object state)
         {
-            int minBlock, maxBlock, tmp;
+            if (isRunning)
+                return;
 
             Task.Run(async () =>
             {
@@ -49,27 +50,29 @@ namespace Wallet.Services
                     using (var scope = _scopeFactory.CreateScope())
                     {
                         var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
+
+                        if (!(dbContext.PageData.FirstOrDefault()?.IsTransactionsSaved ?? false))
+                            return;
+
+                        isRunning = true;
+
                         _lastBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
-                        minBlock = (int)(dbContext.BlockChainTransactions
-                                   .Min(w => w.BlockNumber));
-                        maxBlock = (int)(dbContext.BlockChainTransactions
-                                   .Max(w => w.BlockNumber));
-                        tmp = _lastBlockNumber - 5000;
-                        if (minBlock > 0 && minBlock < tmp)
+
+                        if (_lastCheckedBlockNumber == 0)
+                            _lastCheckedBlockNumber = (int) (dbContext.BlockChainTransactions
+                                .Max(w => w.BlockNumber));
+
+                        if (_lastCheckedBlockNumber < _lastBlockNumber)
                         {
-                            var data = dbContext.BlockChainTransactions.Where(t => t.BlockNumber < tmp);
-                            foreach (var t in data)
-                            {
-                                dbContext.BlockChainTransactions.Remove(t);
-                            }
+                            var transactions = _explorer.GetLatestTransactions(_lastCheckedBlockNumber,
+                                _lastCheckedBlockNumber);
+
+                            dbContext.BlockChainTransactions.AddRange(transactions);
+                            dbContext.SaveChanges();
+                            _lastCheckedBlockNumber++;
                         }
 
-                        if (maxBlock > 0 && maxBlock < _lastBlockNumber)
-                        {
-                            //var a = await SaveLatestTransactions(_lastBlockNumber, maxBlock, dbContext);
-
-                        }
-                        dbContext.SaveChanges();
+                        isRunning = false;
 
                     }
                 }
@@ -77,76 +80,45 @@ namespace Wallet.Services
                 {
 
                 }
-            });
+            });           
         }
 
-
-        public async Task<int> SaveLatestTransactions(int lastKnownBlockNumber, int maxBlockDb, WalletDbContext context)
+        private void DeleteOld(object state)
         {
             try
             {
-                int substract = 5000;
-                substract = (lastKnownBlockNumber - maxBlockDb) < 5000 ? (lastKnownBlockNumber - maxBlockDb) : 5000;
-
-                var tasks = new List<Task<List<BlockChainTransaction>>>();
-                for (int i = lastKnownBlockNumber - substract; i < lastKnownBlockNumber; i += 100)
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    var i1 = i;
-                    var task = Task.Run(() => _explorer.GetLatestTransactions(i1, i1 + 99));
-                    tasks.Add(task);
-                }
-                
-                await Task.WhenAll(tasks);
+                    var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
 
-                //debug only for this point
-                var result = new List<BlockChainTransaction>();
-                foreach (var task in tasks)
-                {
-                    task.Result.ForEach(t => result.Add(t));
-                }
+                    var forDelete =
+                        dbContext.BlockChainTransactions.Where(t => t.BlockNumber < (_lastCheckedBlockNumber - Helpers.Constants.Ints.BlocksCount.SaveBlocksCount)).ToList();
 
-                context.ChangeTracker.AutoDetectChangesEnabled = false;
-
-                var tempList = new List<BlockChainTransaction>();
-                foreach (var transact in result)
-                {
-                    tempList.Add(transact);
-                    if (tempList.Count == 100)
+                    foreach (var blockChainTransaction in forDelete)
                     {
-                        try
-                        {
-                            context.BlockChainTransactions.AddRange(tempList);
-                            context.SaveChanges();
-                            tempList.Clear();
-                        }
-                        catch (Exception e)
-                        {
-                            tempList.Clear();
-                        }
+                        dbContext.BlockChainTransactions.Remove(blockChainTransaction);
                     }
+
+                    dbContext.SaveChanges();
+
                 }
-                context.ChangeTracker.AutoDetectChangesEnabled = true;
-                return 1;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return 0;
+
             }
-
         }
-
-
-
-
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            _deleteTimer?.Change(Timeout.Infinite, 0);
             _timer?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
         public void Dispose()
         {
             _timer?.Dispose();
+            _deleteTimer?.Dispose();
         }
     }
 }

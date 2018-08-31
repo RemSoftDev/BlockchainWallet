@@ -33,5 +33,13 @@
                 public const string Usual = "0x";
             }
         }
+
+        public static class Ints
+        {
+            public static class BlocksCount
+            {
+                public const int SaveBlocksCount = 10000;
+            }
+        }
     }
 }

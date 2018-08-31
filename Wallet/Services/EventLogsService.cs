@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -18,6 +19,8 @@ namespace Wallet.Services
         private readonly IServiceScopeFactory _scopeFactory;
         private IBlockchainExplorer _explorer;
         private Timer _timer;
+        private bool isRunning;
+
 
         public EventLogsService(IBlockchainExplorer explorer, IServiceScopeFactory scopeFactory)
         {
@@ -38,6 +41,11 @@ namespace Wallet.Services
         {
             try
             {
+                if (isRunning)
+                    return;
+
+                isRunning = true;
+
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
@@ -71,16 +79,47 @@ namespace Wallet.Services
 
                         token.LastSynchronizedBlockNumber = lastBlockNumber;
                         token.IsSynchronized = true;
+                        var tempLogs = new List<CustomEventLog>();
+                        var tempHolders = new List<TokenHolder>();
+
+                        foreach (var customEventLog in logs)
+                        {
+                            tempLogs.Add(customEventLog);
+                            if (tempLogs.Count == 100)
+                            {
+                                dbContext.CustomEventLogs.AddRange(tempLogs);
+                                dbContext.SaveChanges();
+                                tempLogs.Clear();
+                            }
+                        }
+
+                        dbContext.CustomEventLogs.AddRange(tempLogs);
+                        dbContext.SaveChanges();
+
+                        foreach (var tokenHolder in holders)
+                        {
+                            tempHolders.Add(tokenHolder);
+                            if (tempHolders.Count==100)
+                            {
+                                dbContext.TokenHolders.AddRange(tempHolders);
+                                dbContext.SaveChanges();
+                                tempHolders.Clear();
+                            }
+                        }
+                        dbContext.TokenHolders.AddRange(tempHolders);
+                        dbContext.SaveChanges();
+
                         dbContext.Erc20Tokens.Update(token);
-                        dbContext.CustomEventLogs.AddRange(logs);
-                        dbContext.TokenHolders.AddRange(holders);
                         dbContext.SaveChanges();
                     }
                 }
             }
             catch (Exception e)
             {
+                isRunning = false;
+
             }
+            isRunning = false;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

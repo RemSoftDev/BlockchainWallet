@@ -12,7 +12,7 @@ namespace Wallet.Models
         public bool IsSuccess { get; set; }
         public string ContractAddress { get; set; }
         
-        public decimal DecimalValue { get; set; }
+        public double DecimalValue { get; set; }
         public int BlockNumber { get; set; }
         public DateTime Date { get; set; }
     }
