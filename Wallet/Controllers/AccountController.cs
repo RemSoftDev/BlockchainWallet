@@ -61,7 +61,14 @@ namespace Wallet.Controllers
 
             try
             {
-                if (!await _userManager.IsEmailConfirmedAsync(await _userManager.FindByNameAsync(model.Email)))
+                var user = await _userManager.FindByNameAsync(model.Email);
+
+                if (user == null)
+                {
+                    return BadRequest(HttpErrorHandler.AddError("Failure", "User not found", ModelState));
+                }
+
+                if (!await _userManager.IsEmailConfirmedAsync(user))
                 {
                     return BadRequest(HttpErrorHandler.AddError("Failure", "Confirm your email", ModelState));
                 }
