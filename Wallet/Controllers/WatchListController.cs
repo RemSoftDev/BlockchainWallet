@@ -65,19 +65,24 @@ namespace Wallet.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var watchList = _dbContext.UserWatchlist.Add(new UserWatchlist()
-                {
-                    Address = model.Address,
-                    UserEmail = model.UserEmail,
-                    IsContract = model.IsContract
-                });
+                var data = _dbContext.UserWatchlist
+                   .Where(w => w.UserEmail.Equals(model.UserEmail, StringComparison.CurrentCultureIgnoreCase) && w.Address == model.Address).ToList();
 
+                if (data != null)
+                {
+                    var watchList = _dbContext.UserWatchlist.Add(new UserWatchlist()
+                    {
+                        Address = model.Address,
+                        UserEmail = model.UserEmail,
+                        IsContract = model.IsContract
+                    });
+                
                 model.NotificationOptions.UserWatchlistId = watchList.Entity.Id;
 
                 _dbContext.NotificationOptions.Add(model.NotificationOptions);
 
                 await _dbContext.SaveChangesAsync();
-
+                }
                 return new OkResult();
             }
             catch (Exception e)
