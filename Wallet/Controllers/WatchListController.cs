@@ -68,7 +68,7 @@ namespace Wallet.Controllers
                 var data = _dbContext.UserWatchlist
                    .Where(w => w.UserEmail.Equals(model.UserEmail, StringComparison.CurrentCultureIgnoreCase) && w.Address == model.Address).ToList();
 
-                if (data != null)
+                if (data != null && data.Count == 0)
                 {
                     var watchList = _dbContext.UserWatchlist.Add(new UserWatchlist()
                     {

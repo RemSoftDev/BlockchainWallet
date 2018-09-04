@@ -17,7 +17,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   isNumberOfTokenSent: boolean = false;
   isTokenReceived: boolean = false;
   isNumberOfTokenReceived: boolean = false;
-  isWithNotifications: boolean = false;
+  isWithNotifications: boolean = true;
   showNotWind: boolean;
   searchString: string;
   infoRequesting: boolean;
