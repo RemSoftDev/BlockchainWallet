@@ -24,10 +24,10 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   infoRequesting: boolean = false;
   moreTransactionRequesting:boolean = false;
   transactionRequesting: boolean = false;
+
   showNotWind: boolean;
-  isWithNotifications: boolean = false;
-  isNumberOfTokenSent: boolean = false;
-  isNumberOfTokenReceived: boolean = false;
+  notificationOptions: NotificationOptions;
+
   transactionTabClass: string = 'active';
   walletsTabClass: string;
   navigationSubscription;
@@ -69,6 +69,8 @@ export class ContractPageComponent implements OnInit, OnDestroy {
           this.infoRequesting = true;
           this.smartContractInfo = info;
           this.searchString = info.address;
+          this.requestNotificationOptions(this.smartContractInfo.address);
+
         },
         error => {
           console.log(error);
@@ -103,7 +105,19 @@ export class ContractPageComponent implements OnInit, OnDestroy {
           console.log(error);
           this.errors = true;
         });
+
+      this.requestNotificationOptions(this.searchString);
+
     }
+  }
+
+  requestNotificationOptions(address:string) {
+    this.watchlistService.getNotificationOptions(address).subscribe(options => {
+        this.notificationOptions = options;
+      },
+      error => {
+        this.notificationOptions = new NotificationOptions();
+      });
   }
 
   Sort(param: string) {
@@ -216,39 +230,18 @@ export class ContractPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  setNotification(withNotification,
-    whenNumberOfTokenSent,
-    whenNumberOfTokenReceived,
-    whenNumberOfTokenSentValue,
-    whenNumberOfTokenReceivedValue,
-    whenNumberOfTokenReceivedAddress) {
+  setNotification(w) {
 
-    let notifOptions = new NotificationOptions();
+    let model = new WatchlistModel(localStorage.getItem('userName'),this.searchString, true, this.notificationOptions);
 
-    if (withNotification.checked) {
-      notifOptions.isWithoutNotifications = true;
-    } else {
-      notifOptions.whenNumberOfContractTokenWasSent = true;
-      if (whenNumberOfTokenSentValue.value)
-        notifOptions.numberOfContractTokenWasSent = whenNumberOfTokenSentValue.value;
-      notifOptions.whenNumberOfContractWasReceivedByAddress = whenNumberOfTokenReceived.checked;
-      if (whenNumberOfTokenReceivedValue.value)
-        notifOptions.numberOfTokenWasReceivedByAddress = whenNumberOfTokenReceivedValue.value;
-      notifOptions.addressThatReceivedNumberOfToken = whenNumberOfTokenReceivedAddress.value;
-    }
-
-    let model = new WatchlistModel(localStorage.getItem('userName'),this.searchString, true,notifOptions);
- 
+    console.log(this.notificationOptions);
     this.watchlistService.addToWatchList(model).subscribe(data => {
+      this.requestNotificationOptions(this.smartContractInfo.address);
       this.closeNotificationWindow();
-      alert("Added");
+      alert("Submited");
     },
-    error => this.errors = error);
+    error => console.log(error));
 
-  }
-
-  withNotifications() {
-    this.isWithNotifications = this.isWithNotifications == false;
   }
 
   showNotificationWindow() {
@@ -260,20 +253,7 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   }
 
   closeNotificationWindow() {
-    if (this.isWithNotifications) {
-      this.isWithNotifications = false;
-    }
     this.showNotWind = false;
-    this.isNumberOfTokenSent = false;
-    this.isNumberOfTokenReceived = false;
-  }
-
-  whenNumberOfTokenReceivedFunc() {
-    this.isNumberOfTokenReceived = !this.isNumberOfTokenReceived;
-  }
-
-  whenNumberOfTokenSentFunc() {
-    this.isNumberOfTokenSent = !this.isNumberOfTokenSent;
   }
 
   sortByDateTime(form: NgForm) {

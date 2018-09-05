@@ -19,64 +19,78 @@
       <form>
 
         <div class="form-check">
-          <input #withNotification class="form-check-input notificationInput"  type="checkbox" (change)="withNotifications()">
+          <input class="form-check-input notificationInput" type="checkbox" [checked]="notificationOptions.isWithoutNotifications"
+                 (change)="notificationOptions.isWithoutNotifications = !notificationOptions.isWithoutNotifications">
           Without notifications
         </div>
 
         <div class="form-check">
-          <input #whenTokenSent (change)="whenTokenSentFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          <input (change)="notificationOptions.whenTokenOrEtherIsSent = !notificationOptions.whenTokenOrEtherIsSent" [checked]="notificationOptions.whenTokenOrEtherIsSent"
+                 class="form-check-input notificationInput" type="checkbox" [disabled]="notificationOptions.isWithoutNotifications">
           When
-          <select #whenTokenSentValue [disabled]=!isWithNotifications||!isTokenSent>
-            <option class="dropdownInputField" value="ETH">ETH</option>
-            <option class="dropdownInputField" *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
+          <select [(ngModel)]="notificationOptions.tokenOrEtherSentName" name="tokenOrEtherSentName" [disabled]="notificationOptions.isWithoutNotifications||!notificationOptions.whenTokenOrEtherIsSent">
+            <option *ngIf="notificationOptions.tokenOrEtherSentName != 'ETH'" class="dropdownInputField" value="ETH">ETH</option>
+            <option class="dropdownInputField" [value]="notificationOptions.tokenOrEtherSentName">{{notificationOptions.tokenOrEtherSentName | slice : 0:5}}</option>
+            <option class="dropdownInputField" *ngFor="let token of walletInfo.tokens" [ngValue]="token.symbol">{{token.symbol | slice : 0:5}}</option>
           </select>
           is sent
         </div>
 
         <div class="form-check">
-          <input #whenAnythingSent class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          <input (change)="notificationOptions.whenAnythingSent = !notificationOptions.whenAnythingSent" [checked]="notificationOptions.whenAnythingSent"
+                 class="form-check-input notificationInput" type="checkbox" [disabled]="notificationOptions.isWithoutNotifications">
           When anything was sent from this wallet
         </div>
 
         <div class="form-check">
-          <input #whenNumberOfTokenSent (change)="whenNumberOfTokenSentFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          <input (change)="notificationOptions.whenNumberOfTokenOrEtherWasSent = !notificationOptions.whenNumberOfTokenOrEtherWasSent"
+                 [checked]="notificationOptions.whenNumberOfTokenOrEtherWasSent"
+                 class="form-check-input notificationInput" type="checkbox" [disabled]="notificationOptions.isWithoutNotifications">
           When
-          <input #whenNumberOfTokenSentValueNumberFrom placeholder="number-from" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>-
-          <input #whenNumberOfTokenSentValueNumberTo placeholder="number-to" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>-
+          <input [(ngModel)]="notificationOptions.numberOfTokenOrEtherThatWasSentFrom" name="numberOfTokenOrEtherThatWasSentFrom" placeholder="number-from" class="notificationSmallInput form-check-input" [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfTokenOrEtherWasSent">-
+          <input [(ngModel)]="notificationOptions.numberOfTokenOrEtherThatWasSentTo" name="numberOfTokenOrEtherThatWasSentTo" placeholder="number-to" class="notificationSmallInput form-check-input" [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfTokenOrEtherWasSent">
           of
-          <select #whenNumberOfTokenSentValueToken [disabled]=!isWithNotifications||!isNumberOfTokenSent>
-            <option class="dropdownInputField" value="ETH">ETH</option>
-            <option *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
+          <select [(ngModel)]="notificationOptions.numberOfTokenOrEtherWasSentName" name="numberOfTokenOrEtherWasSentName"
+                  [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfTokenOrEtherWasSent">
+            <option *ngIf="notificationOptions.numberOfTokenOrEtherWasSentName != 'ETH'" class="dropdownInputField" value="ETH">ETH</option>
+            <option class="dropdownInputField" [value]="notificationOptions.numberOfTokenOrEtherWasSentName">{{notificationOptions.numberOfTokenOrEtherWasSentName | slice : 0:5}}</option>
+            <option *ngFor="let token of walletInfo.tokens" [ngValue]="token.symbol">{{token.symbol | slice : 0:5}}</option>
           </select>
           was sent
         </div>
 
         <div class="form-check">
-          <input #whenTokenReceived (change)="whenTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          <input (change)="notificationOptions.whenTokenOrEtherIsReceived = !notificationOptions.whenTokenOrEtherIsReceived"
+                 [checked]="notificationOptions.whenTokenOrEtherIsReceived"
+                 class="form-check-input notificationInput" type="checkbox" [disabled]="notificationOptions.isWithoutNotifications">
           When
-          <select #whenTokenReceivedValue [disabled]=!isWithNotifications||!isTokenReceived>
-            <option class="dropdownInputField" value="ETH">ETH</option>
-            <option *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
+          <select [(ngModel)]="notificationOptions.tokenOrEtherReceivedName" name="tokenOrEtherReceivedName"
+                  [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenTokenOrEtherIsReceived">
+            <option *ngIf="notificationOptions.tokenOrEtherReceivedName != 'ETH'" class="dropdownInputField" value="ETH">ETH</option>
+            <option class="dropdownInputField" [value]="notificationOptions.tokenOrEtherReceivedName">{{notificationOptions.tokenOrEtherReceivedName | slice : 0:5}}</option>
+            <option *ngFor="let token of walletInfo.tokens" value={{token.symbol}}>{{token.symbol | slice : 0:5}}</option>
           </select>
           is received
         </div>
 
         <div class="form-check">
-          <input #whenNumberOfTokenReceived (change)="whenNumberOfTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          <input (change)="notificationOptions.whenNumberOfTokenOrEtherWasReceived = !notificationOptions.whenNumberOfTokenOrEtherWasReceived"
+                 [checked]="notificationOptions.whenNumberOfTokenOrEtherWasReceived"
+                 class="form-check-input notificationInput" type="checkbox" [disabled]="notificationOptions.isWithoutNotifications">
           When
-          <input #whenNumberOfTokenReceivedValueNumber placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+          <input [(ngModel)]="notificationOptions.numberOfTokenOrEtherWasReceived" name="numberOfTokenOrEtherWasReceived" placeholder="number" class="notificationSmallInput form-check-input" [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfTokenOrEtherWasReceived">
           of
-          <select #whenNumberOfTokenReceivedValueToken [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
-            <option class="dropdownInputField" value="ETH">ETH</option>
-            <option *ngFor="let token of walletInfo.tokens" value={{token.address}}>{{token.symbol | slice : 0:5}}</option>
+          <select [(ngModel)]="notificationOptions.tokenOrEtherWasReceivedName" name="tokenOrEtherWasReceivedName"
+                  [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfTokenOrEtherWasReceived">
+            <option *ngIf="notificationOptions.tokenOrEtherWasReceivedName != 'ETH'" class="dropdownInputField" value="ETH">ETH</option>
+            <option class="dropdownInputField" [value]="notificationOptions.tokenOrEtherWasReceivedName">{{notificationOptions.tokenOrEtherWasReceivedName | slice : 0:5}}</option>
+            <option *ngFor="let token of walletInfo.tokens" value={{token.symbol}}>{{token.symbol | slice : 0:5}}</option>
           </select>
           was received
-        </div>       
+        </div>
+
         <div class="form-group">
-          <button (click)="setNotification(withNotification,whenTokenSent,whenAnythingSent,
-                  whenNumberOfTokenSent,whenTokenReceived,whenNumberOfTokenReceived,whenTokenSentValue,
-                  whenNumberOfTokenSentValueNumberFrom,whenNumberOfTokenSentValueNumberTo,whenNumberOfTokenSentValueToken,whenTokenReceivedValue,
-                  whenNumberOfTokenReceivedValueNumber,whenNumberOfTokenReceivedValueToken)"
+          <button (click)="setNotification()"
                   type="submit" [disabled]="isRequesting" class="notificationButton btn btn-primary">
             Submit
           </button>

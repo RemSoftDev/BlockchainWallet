@@ -43,6 +43,22 @@ namespace Wallet.Controllers
 
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetNotificationOptions(string address)
+        {
+            var watchlistModel = await _dbContext.UserWatchlist.Where(w =>
+                w.Address.Equals(address, StringComparison.CurrentCultureIgnoreCase)).Include(w=>w.NotificationOptions).FirstOrDefaultAsync();
+
+            if (watchlistModel != null)
+            {
+                NotificationOptions result = ReplaceTokenAddresses(watchlistModel.NotificationOptions);
+                result.UserWatchlist = null;
+                return new OkObjectResult(result);
+            }
+
+            return NotFound();
+        }
+
         public async Task DeleteFromWatchlist(int idwatchlist)
         {
             UserWatchlist wl = new UserWatchlist
@@ -68,7 +84,7 @@ namespace Wallet.Controllers
                 var data = _dbContext.UserWatchlist
                    .Where(w => w.UserEmail.Equals(model.UserEmail, StringComparison.CurrentCultureIgnoreCase) && w.Address == model.Address).ToList();
 
-                if (data != null && data.Count == 0)
+                if (data.Count == 0)
                 {
                     var watchList = _dbContext.UserWatchlist.Add(new UserWatchlist()
                     {
@@ -77,18 +93,98 @@ namespace Wallet.Controllers
                         IsContract = model.IsContract
                     });
                 
-                model.NotificationOptions.UserWatchlistId = watchList.Entity.Id;
+                    model.NotificationOptions.UserWatchlistId = watchList.Entity.Id;
 
-                _dbContext.NotificationOptions.Add(model.NotificationOptions);
+                    model.NotificationOptions = ReplaceTokenSymbols(model.NotificationOptions);
+
+                    _dbContext.NotificationOptions.Add(model.NotificationOptions);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return new OkResult();
+                }
+                var options  = ReplaceTokenSymbols(model.NotificationOptions);
+
+                _dbContext.NotificationOptions.Update(options);
 
                 await _dbContext.SaveChangesAsync();
-                }
+
                 return new OkResult();
             }
             catch (Exception e)
             {
                 return StatusCode(500, $"En error occurred :{e.Message}");
             }       
+        }
+
+        private NotificationOptions ReplaceTokenAddresses(NotificationOptions options)
+        {
+            if (!string.IsNullOrEmpty(options.TokenOrEtherSentName) && !options.TokenOrEtherSentName.Equals("ETH"))
+            {
+                options.TokenOrEtherSentName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Address.Equals(options.TokenOrEtherSentName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Symbol;
+            }
+            if (!string.IsNullOrEmpty(options.NumberOfTokenOrEtherWasSentName) && !options.NumberOfTokenOrEtherWasSentName.Equals("ETH"))
+            {
+                options.NumberOfTokenOrEtherWasSentName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Address.Equals(options.NumberOfTokenOrEtherWasSentName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Symbol;
+            }
+            if (!string.IsNullOrEmpty(options.TokenOrEtherReceivedName) && !options.TokenOrEtherReceivedName.Equals("ETH"))
+            {
+
+                options.TokenOrEtherReceivedName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Address.Equals(options.TokenOrEtherReceivedName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Symbol;
+            }
+            if (!string.IsNullOrEmpty(options.TokenOrEtherWasReceivedName) && !options.TokenOrEtherWasReceivedName.Equals("ETH"))
+            {
+                options.TokenOrEtherWasReceivedName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Address.Equals(options.TokenOrEtherWasReceivedName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Symbol;
+            }
+
+            return options;
+        }
+
+        private NotificationOptions ReplaceTokenSymbols(NotificationOptions options)
+        {
+            if (!string.IsNullOrEmpty(options.TokenOrEtherSentName) && !options.TokenOrEtherSentName.Equals("ETH"))
+            {
+                options.TokenOrEtherSentName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Symbol.Equals(options.TokenOrEtherSentName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Address;
+            }
+            if (!string.IsNullOrEmpty(options.NumberOfTokenOrEtherWasSentName) && !options.NumberOfTokenOrEtherWasSentName.Equals("ETH"))
+            {
+                options.NumberOfTokenOrEtherWasSentName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Symbol.Equals(options.NumberOfTokenOrEtherWasSentName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Address;
+            }
+            if (!string.IsNullOrEmpty(options.TokenOrEtherReceivedName) && !options.TokenOrEtherReceivedName.Equals("ETH"))
+            {
+
+                options.TokenOrEtherReceivedName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Symbol.Equals(options.TokenOrEtherReceivedName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Address;
+            }
+            if (!string.IsNullOrEmpty(options.TokenOrEtherWasReceivedName) && !options.TokenOrEtherWasReceivedName.Equals("ETH"))
+            {
+                options.TokenOrEtherWasReceivedName = _dbContext.Erc20Tokens
+                    .FirstOrDefault(t => t.Symbol.Equals(options.TokenOrEtherWasReceivedName,
+                        StringComparison.CurrentCultureIgnoreCase))
+                    ?.Address;
+            }
+
+            return options;
         }
     }
 }

@@ -15,22 +15,22 @@ export class WatchlistModel {
 export class NotificationOptions {
   isWithoutNotifications: boolean;
   whenTokenOrEtherIsSent: boolean;
-  tokenOrEtherSentName: string;
+  tokenOrEtherSentName: string = 'ETH';
   whenAnythingWasSent: boolean;
 
   whenNumberOfTokenOrEtherWasSent: boolean;
-  numberOfTokenOrEtherThatWasSentFrom: number = 0;
-  numberOfTokenOrEtherThatWasSentTo: number = 0;
-  numberOfTokenOrEtherWasSentName: string;
+  numberOfTokenOrEtherThatWasSentFrom: number;
+  numberOfTokenOrEtherThatWasSentTo: number;
+  numberOfTokenOrEtherWasSentName: string = 'ETH';
   whenTokenOrEtherIsReceived: boolean;
-  tokenOrEtherReceivedName: string;
+  tokenOrEtherReceivedName: string = 'ETH';
   whenNumberOfTokenOrEtherWasReceived: boolean;
-  numberOfTokenOrEtherWasReceived: number = 0;
-  tokenOrEtherWasReceivedName: string;
+  numberOfTokenOrEtherWasReceived: number;
+  tokenOrEtherWasReceivedName: string = 'ETH';
 
   whenNumberOfContractTokenWasSent: boolean;
-  numberOfContractTokenWasSent: number = 0;
+  numberOfContractTokenWasSent: number;
   whenNumberOfContractWasReceivedByAddress: boolean;
-  numberOfTokenWasReceivedByAddress: number = 0;
+  numberOfTokenWasReceivedByAddress: number;
   addressThatReceivedNumberOfToken: string;
 }

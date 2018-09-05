@@ -38,4 +38,11 @@ export class WatchlistService extends BaseService {
       .catch(this.handleError);
   }
 
+  getNotificationOptions(address: string) {
+    const params = new HttpParams().set('address', address);
+    return this.http
+      .get(this.hostUrl + this.baseUrl + '/GetNotificationOptions', { params })
+      .catch(this.handleError);
+  }
+
 }

@@ -25,28 +25,33 @@
       <form>
 
         <div class="form-check">
-          <input #withNotification class="form-check-input notificationInput" checked="true" type="checkbox" (change)="withNotifications()">
+          <input class="form-check-input notificationInput" type="checkbox" [checked]="notificationOptions.isWithoutNotifications"
+                 (change)="notificationOptions.isWithoutNotifications = !notificationOptions.isWithoutNotifications">
           Without notifications
         </div>
 
         <div class="form-check">
-          <input #whenNumberOfTokenSent (change)="whenNumberOfTokenSentFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          <input (change)="notificationOptions.whenNumberOfContractTokenWasSent = !notificationOptions.whenNumberOfContractTokenWasSent" [checked]="notificationOptions.whenNumberOfContractTokenWasSent"
+                 class="form-check-input notificationInput" type="checkbox" [disabled]="notificationOptions.isWithoutNotifications">
           When
-          <input #whenNumberOfTokenSentValue placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenSent>
+          <input [(ngModel)]="notificationOptions.numberOfContractTokenWasSent" name="numberOfContractTokenWasSent" placeholder="number" class="notificationSmallInput form-check-input"
+                 [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfContractTokenWasSent">
           was sent
         </div>
 
         <div class="form-check">
-          <input #whenNumberOfTokenReceived (change)="whenNumberOfTokenReceivedFunc()" class="form-check-input notificationInput" type="checkbox" [disabled]=!isWithNotifications>
+          <input (change)="notificationOptions.whenNumberOfContractWasReceivedByAddress = !notificationOptions.whenNumberOfContractWasReceivedByAddress" [checked]="notificationOptions.whenNumberOfContractWasReceivedByAddress"
+                 class="form-check-input notificationInput" type="checkbox" [disabled]="notificationOptions.isWithoutNotifications">
           When
-          <input #whenNumberOfTokenReceivedValue placeholder="number" class="notificationSmallInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+          <input [(ngModel)]="notificationOptions.numberOfTokenWasReceivedByAddress" name="numberOfTokenWasReceivedByAddress" placeholder="number" class="notificationSmallInput form-check-input"
+                 [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfContractWasReceivedByAddress">
           were received by <br />
-          <input #whenNumberOfTokenReceivedAddress placeholder="wallet or smart contract address" class="notificationBigInput form-check-input" [disabled]=!isWithNotifications||!isNumberOfTokenReceived>
+          <input [(ngModel)]="notificationOptions.addressThatReceivedNumberOfToken" name="addressThatReceivedNumberOfToken" placeholder="wallet or smart contract address"
+                 class="notificationBigInput form-check-input" [disabled]="notificationOptions.isWithoutNotifications || !notificationOptions.whenNumberOfContractWasReceivedByAddress">
         </div>
 
         <div class="form-group">
-          <button (click)="setNotification(withNotification,whenNumberOfTokenSent,whenNumberOfTokenReceived,whenNumberOfTokenSentValue,
-                  whenNumberOfTokenReceivedValue,whenNumberOfTokenReceivedAddress)"
+          <button (click)="setNotification()"
                   type="submit" [disabled]="isRequesting" class="notificationButton btn btn-primary">
             Submit
           </button>

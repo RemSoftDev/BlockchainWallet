@@ -13,12 +13,8 @@ import { WatchlistModel } from "../../shared/models/watchlistModel";
   styleUrls: ['./account-page.component.css']
 })
 export class AccountPageComponent implements OnInit, OnDestroy {
-  isTokenSent: boolean = false;
-  isNumberOfTokenSent: boolean = false;
-  isTokenReceived: boolean = false;
-  isNumberOfTokenReceived: boolean = false;
-  isWithNotifications: boolean = true;
   showNotWind: boolean;
+  notificationOptions: NotificationOptions;
   searchString: string;
   infoRequesting: boolean;
   transactionRequesting: boolean;
@@ -61,6 +57,18 @@ export class AccountPageComponent implements OnInit, OnDestroy {
         console.log(error);
         this.errors = true;
       });
+
+    this.requestNotificationOptions();
+
+  }
+
+  requestNotificationOptions() {
+    this.watchlistService.getNotificationOptions(this.searchString).subscribe(options => {
+        this.notificationOptions = options;
+      },
+      error => {
+        this.notificationOptions = new NotificationOptions();
+      });
   }
 
   loadTransaction(skipElementsNumber) {
@@ -85,70 +93,16 @@ export class AccountPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  setNotification(withNotification,
-    whenTokenSent,
-    whenAnythingSent,
-    whenNumberOfTokenSent,
-    whenTokenReceived,
-    whenNumberOfTokenReceived,
-    whenTokenSentValue,
-    whenNumberOfTokenSentValueNumberFrom,
-    whenNumberOfTokenSentValueNumberTo,
-    whenNumberOfTokenSentValueToken,
-    whenTokenReceivedValue,
-    whenNumberOfTokenReceivedValueNumber,
-    whenNumberOfTokenReceivedValueToken) {
+  setNotification() {
 
-    let notifOptions = new NotificationOptions();
-
-    if (withNotification.checked) {
-      notifOptions.isWithoutNotifications = true;
-    } else {
-      notifOptions.whenTokenOrEtherIsSent = whenTokenSent.checked;
-      notifOptions.tokenOrEtherSentName = whenTokenSentValue.value;
-      notifOptions.whenAnythingWasSent = whenAnythingSent.checked;
-      notifOptions.whenNumberOfTokenOrEtherWasSent = whenNumberOfTokenSent.checked;
-      if (whenNumberOfTokenSentValueNumberFrom.value)
-        notifOptions.numberOfTokenOrEtherThatWasSentFrom = whenNumberOfTokenSentValueNumberFrom.value;
-      if (whenNumberOfTokenSentValueNumberTo.value)
-        notifOptions.numberOfTokenOrEtherThatWasSentTo = whenNumberOfTokenSentValueNumberTo.value;
-      notifOptions.numberOfTokenOrEtherWasSentName = whenNumberOfTokenSentValueToken.value;
-      notifOptions.whenTokenOrEtherIsReceived = whenTokenReceived.checked;
-      notifOptions.tokenOrEtherReceivedName = whenTokenReceivedValue.value;
-      notifOptions.whenNumberOfTokenOrEtherWasReceived = whenNumberOfTokenReceived.checked;
-      if (whenNumberOfTokenReceivedValueNumber.value)
-        notifOptions.numberOfTokenOrEtherWasReceived = whenNumberOfTokenReceivedValueNumber.value;
-     
-      notifOptions.tokenOrEtherWasReceivedName = whenNumberOfTokenReceivedValueToken.value;
-    }
-
-    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false, notifOptions);
+    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false, this.notificationOptions);
 
     this.watchlistService.addToWatchList(model).subscribe(data => {
+        this.requestNotificationOptions();
         this.closeNotificationWindow();
-        alert("Added");
+        alert("Submited");
       },
-      error => this.errors = error);
-  }
-
-  whenNumberOfTokenReceivedFunc() {
-    this.isNumberOfTokenReceived = !this.isNumberOfTokenReceived;
-  }
-
-  whenTokenReceivedFunc() {
-    this.isTokenReceived = !this.isTokenReceived;
-  }
-
-  whenNumberOfTokenSentFunc() {
-    this.isNumberOfTokenSent = !this.isNumberOfTokenSent;
-  }
-
-  whenTokenSentFunc() {
-    this.isTokenSent = !this.isTokenSent;
-  }
-
-  withNotifications() {
-    this.isWithNotifications = this.isWithNotifications == false;
+      error => console.log(error));
   }
 
   showNotificationWindow() {
@@ -160,13 +114,6 @@ export class AccountPageComponent implements OnInit, OnDestroy {
   }
 
   closeNotificationWindow() {
-    if (this.isWithNotifications) {
-      this.isWithNotifications = false;
-    }
     this.showNotWind = false;
-    this.isTokenSent = false;
-    this.isNumberOfTokenSent = false;
-    this.isTokenReceived = false;
-    this.isNumberOfTokenReceived = false;
   }
 }
