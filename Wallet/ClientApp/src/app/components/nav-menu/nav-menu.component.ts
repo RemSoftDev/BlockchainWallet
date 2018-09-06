@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../shared/services/auth.service';
 import { RedirectionService } from '../../shared/services/redirection.service';
 import { Subscription } from 'rxjs/Subscription';
+import { NotificationService } from '../../shared/services/notifications.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -16,9 +17,10 @@ export class NavMenuComponent implements OnInit, OnDestroy {
   pagesubscription: Subscription;
   isAdmin:boolean;
 
-  constructor(private authService: AuthService, private redirectionService: RedirectionService ) { }
+  constructor(private authService: AuthService, private redirectionService: RedirectionService, private notifService: NotificationService ) { }
 
   logout() {
+    this.notifService.unSubscribuFromNotifications();
     this.authService.logout();
   }
 

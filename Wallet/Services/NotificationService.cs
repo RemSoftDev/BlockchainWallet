@@ -92,7 +92,7 @@ namespace Wallet.Notifications
                 }
                 catch (Exception e)
                 {
-                    await _hubContext.Clients.All.SendAsync("Message", e.Message);
+                    //await _hubContext.Clients.All.SendAsync("Message", e.Message);
                 }
             });
         }

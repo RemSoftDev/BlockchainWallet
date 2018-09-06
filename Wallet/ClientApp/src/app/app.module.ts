@@ -5,6 +5,8 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { ReCaptchaModule } from 'angular2-recaptcha';
 import { CookieModule } from 'ngx-cookie';
+import { SimpleNotificationsModule } from 'angular2-notifications';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { JwtInterceptor } from './jwt.interceptor';
 import { AppComponent } from './app.component';
@@ -31,7 +33,7 @@ import { AdminPanelComponent } from './components/admin-panel/admin-panel.compon
 import { AuthAdminGuardService } from './shared/services/auth-admin-guard.service';
 import { AuthUserGuardService } from './shared/services/auth-user-guard.service';
 import { WatchlistService } from './shared/services/watchlist.service';
-import { NotificationsService } from './shared/services/notifications.service';
+import { NotificationService } from './shared/services/notifications.service';
 import { TokenService } from './shared/services/adminToken.service';
 import { SortingWatchlistPipe } from './pipe/sort-watchlist';
 
@@ -60,6 +62,8 @@ import { SortingWatchlistPipe } from './pipe/sort-watchlist';
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     ReCaptchaModule,
+    BrowserAnimationsModule,
+    SimpleNotificationsModule.forRoot(),
     FormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -88,7 +92,7 @@ import { SortingWatchlistPipe } from './pipe/sort-watchlist';
     RedirectionService,
     PageDataService,
     WatchlistService,
-    NotificationsService,
+    NotificationService,
     TokenService,
     AuthService, {
       provide: HTTP_INTERCEPTORS,

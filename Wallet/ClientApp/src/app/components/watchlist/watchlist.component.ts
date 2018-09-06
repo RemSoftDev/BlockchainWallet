@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RedirectionService } from '../../shared/services/redirection.service';
 import { WatchlistService } from '../../shared/services/watchlist.service';
-import { NotificationsService } from '../../shared/services/notifications.service';
+import { NotificationService } from '../../shared/services/notifications.service';
 import { Subscription } from 'rxjs/Subscription';
 import { Router} from '@angular/router';
 
@@ -20,7 +20,7 @@ export class WatchlistComponent implements OnInit, OnDestroy {
   fakeArray:any[];
 
   constructor(private redirectionService: RedirectionService, private router: Router, private wlService: WatchlistService,
-    private notifService: NotificationsService) { }
+    private notifService: NotificationService) { }
 
   ngOnInit() {
     this.subscription = this.notifService.receivingNavStatus$.subscribe(() => {
@@ -28,14 +28,12 @@ export class WatchlistComponent implements OnInit, OnDestroy {
       }
     );
     this.getWatchlist();
-    this.notifService.subscribuToNotifications();
     this.redirectionService.toWatchlistPage();
 
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-    this.notifService.unSubscribuFromNotifications();
     this.redirectionService.fromWatchListPage();
   }
 
@@ -47,29 +45,8 @@ export class WatchlistComponent implements OnInit, OnDestroy {
     this.router.navigate(['/search/contract', address]);
   }
 
-  playSound() {
-    let audio = new Audio();
-    audio.src = "../../assets/notification.mp3";
-    audio.load();
-    audio.play();
-  }
-
   getNitificatedData() {
-    console.log(this.notifService.getData());
     this.watchList = this.notifService.getData();
-    if (this.shouldMakeSound())
-      this.playSound();
-  }
-
-  shouldMakeSound() {
-    if (this.watchList) {
-      for (let entry of this.watchList) {
-        if (entry.account.isNotificated || entry.contract.isNotificated) {
-          return true;
-        }
-      }
-      return false;
-    }
   }
 
   getWatchlist() {
@@ -79,6 +56,7 @@ export class WatchlistComponent implements OnInit, OnDestroy {
       },
       error => this.errors = error);
   }
+
   sortTable(prop: string) {   
     return false; // do not reload
   }

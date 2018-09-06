@@ -1,5 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { NotificationsService } from './shared/services/notifications.service';
+import { NotificationService } from './shared/services/notifications.service';
 import { AuthService } from './shared/services/auth.service';
 
 @Component({
@@ -11,12 +11,17 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.authService.checkTokenExpired();
+    if (localStorage.getItem('access_token')) {
+      this.notificationsService.subscribuToNotifications();
+    }
   }
 
-  constructor(private notificationsService: NotificationsService, private authService: AuthService) { }
+  constructor(private notificationsService: NotificationService, private authService: AuthService) { }
 
   @HostListener('window:beforeunload', ['$event'])
   unsubscriveFromNotifications(event) {
-    this.notificationsService.unSubscribuFromNotifications();
+    if (localStorage.getItem('access_token')) {
+      this.notificationsService.unSubscribuFromNotifications();
+    }
   }
 }

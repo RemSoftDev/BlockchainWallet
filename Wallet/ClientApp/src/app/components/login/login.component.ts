@@ -3,6 +3,7 @@ import { NgForm } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CookieService } from 'ngx-cookie';
+import { NotificationService } from '../../shared/services/notifications.service';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +20,8 @@ export class LoginComponent implements OnInit {
   rememberme: string;
   showConfMessage: boolean;
 
-  constructor(private cookieService: CookieService, private authService: AuthService, private router: Router, private activatedRoute: ActivatedRoute) { }
+  constructor(private cookieService: CookieService, private authService: AuthService, private router: Router,
+    private activatedRoute: ActivatedRoute, private notifService: NotificationService) { }
 
   ngOnInit() {
     if (this.router.url.startsWith("/api/Account/ConfirmEmail") || this.router.url.startsWith("/Account/ConfirmEmail")) {
@@ -68,6 +70,7 @@ export class LoginComponent implements OnInit {
           this.cookieService.put('username', form.value.email);
           this.cookieService.put('password', form.value.password);
           this.cookieService.put('remember', form.value.rememberme);
+          this.notifService.subscribuToNotifications();
           this.router.navigate(['/']);
         }
       },
