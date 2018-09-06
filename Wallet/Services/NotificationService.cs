@@ -234,7 +234,7 @@ namespace Wallet.Notifications
                 var decPlaces = GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName);
                 var value = Web3.Convert.FromWei(receiver.Value, decPlaces);
 
-                if (receiver.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase)&&
+                if (receiver.To != null && receiver.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase)&&
                     value == watchListLine.NotificationOptions.NumberOfTokenOrEtherWasReceived)
                 {
                     return true;
@@ -248,7 +248,7 @@ namespace Wallet.Notifications
         {
             return (transactions?.Any(t =>
             {
-                if (t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
+                if (t.To !=null && t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
                 {
                     var decPlaces = GetTokenDecimalPlaces(t.To);
                     var value = Web3.Convert.FromWei(InputDecoder.GetTokenCountAndAddressFromInput(t.Input).Value, decPlaces);
@@ -259,14 +259,15 @@ namespace Wallet.Notifications
                     }
                 }
                 return false;
-            }) ?? false);
+
+            }) ?? false);          
         }
 
         private bool CheckNumberOfContractTokenWasReceivedByAddress(List<Transaction> transactions, UserWatchlist watchListLine)
         {
             return (transactions?.Any(t =>
             {
-                if (t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
+                if (t.To != null && t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
                 {
                     var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input);
                     var decPlaces = GetTokenDecimalPlaces(watchListLine.NotificationOptions.TokenOrEtherSentName);
