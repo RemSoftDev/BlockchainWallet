@@ -11,8 +11,6 @@ using Wallet.BlockchainAPI.Model;
 using Wallet.Models;
 using Wallet.ViewModels;
 using Wallet.Helpers;
-using System.Diagnostics;
-using System.Data.SqlClient;
 
 namespace Wallet.Controllers
 {
@@ -261,45 +259,13 @@ namespace Wallet.Controllers
         {
             try
             {
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-                string queryString = "select * from BlockChainTransactions bc where bc.FromAddress = '0xa68fe738f352f9153e6366e94cf86c541659bf64' or bc.ToAddress ='0xa68fe738f352f9153e6366e94cf86c541659bf64' order by bc.Date desc";
-                string connectionString = "Server=(localdb)\\ProjectsV13;Database=WalletDB;Trusted_Connection=True;MultipleActiveResultSets=true";
-                List<BlockChainTransaction> tmp = new List<BlockChainTransaction>();
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    SqlCommand command = new SqlCommand(queryString, connection);
-                    //command.Parameters.AddWithValue("@tPatSName", "Your-Parm-Value");
-                    connection.Open();
-                    SqlDataReader reader = command.ExecuteReader();
-                    try
-                    {
-                        while (reader.Read())
-                        {
-                            tmp.Add(new BlockChainTransaction() { Id = (int)reader[0]});
-                        }
-                    }
-                    finally
-                    {
-                        // Always call Close when done reading.
-                        reader.Close();
-                    }
-                }
-                stopWatch.Stop();
-
-
-
-
                 skipElementsNumber = skipElementsNumber ?? 0;
-                
-               
-                var res = dbContext.BlockChainTransactions//.FromSql("select * from BlockChainTransactions bc where bc.FromAddress = '0xa68fe738f352f9153e6366e94cf86c541659bf64' or bc.ToAddress ='0xa68fe738f352f9153e6366e94cf86c541659bf64' order by bc.Date desc");  //2.5
-                    .Where(t =>//2.8
+
+                var res = dbContext.BlockChainTransactions.Where(t =>
                         t.FromAddress.Equals(accountAddress) ||
                         t.ToAddress.Equals(accountAddress))
                     .OrderByDescending(t => t.Date).Skip(skipElementsNumber.Value).Take(40);
-                //var Transactions = await res.ToListAsync();
-                
+
                 return new OkObjectResult(
                     new TransactionsViewModel()
                     {
@@ -307,7 +273,6 @@ namespace Wallet.Controllers
                         Transactions = await res.ToListAsync()
                     }
                 );
-                
             }
             catch (Exception e)
             {
