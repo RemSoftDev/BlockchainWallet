@@ -29,7 +29,7 @@ namespace Wallet.Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _timer = new Timer(DoWork, null, TimeSpan.Zero,
-                TimeSpan.FromSeconds(5));
+                TimeSpan.FromSeconds(4));
 
             _deleteTimer = new Timer(DeleteOld, null, TimeSpan.Zero,
                 TimeSpan.FromMinutes(3));

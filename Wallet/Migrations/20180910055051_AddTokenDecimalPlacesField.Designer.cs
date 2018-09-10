@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wallet.Models;
 
 namespace Wallet.Migrations
 {
     [DbContext(typeof(WalletDbContext))]
-    partial class WalletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180910055051_AddTokenDecimalPlacesField")]
+    partial class AddTokenDecimalPlacesField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,10 +251,6 @@ namespace Wallet.Migrations
                     b.Property<string>("TokenOrEtherSentName");
 
                     b.Property<string>("TokenOrEtherWasReceivedName");
-
-                    b.Property<int>("TokenReceivedDecimalPlaces");
-
-                    b.Property<int>("TokenSentDecimalPlaces");
 
                     b.Property<int>("UserWatchlistId");
 

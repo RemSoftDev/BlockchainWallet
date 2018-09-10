@@ -17,6 +17,8 @@ namespace Wallet.ViewModels
         [Required]
         public bool IsContract { get; set; }
 
+        public int TokenDecimalPlaces { get; set; }
+
         public NotificationOptions NotificationOptions { get; set; }
 
         public bool IsNotificated { get; set; }

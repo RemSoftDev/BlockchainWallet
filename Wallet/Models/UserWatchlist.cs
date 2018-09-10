@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Wallet.Models
 {
@@ -19,6 +17,9 @@ namespace Wallet.Models
 
         [Required]
         public bool IsContract { get; set; }
+
+        [Required]
+        public int TokenDecimalPlaces { get; set; }
 
         public NotificationOptions NotificationOptions { get; set; }
     }

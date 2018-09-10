@@ -95,7 +95,7 @@ export class AccountPageComponent implements OnInit, OnDestroy {
 
   setNotification() {
 
-    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false, this.notificationOptions);
+    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, false, this.notificationOptions, 18);
 
     this.watchlistService.addToWatchList(model).subscribe(data => {
         this.requestNotificationOptions();

@@ -17,6 +17,8 @@ namespace Wallet.Models
 
         public bool WhenNumberOfTokenOrEtherWasSent { get; set; }
 
+        public int TokenSentDecimalPlaces { get; set; }
+
         public int NumberOfTokenOrEtherThatWasSentFrom { get; set; }
 
         public int NumberOfTokenOrEtherThatWasSentTo { get; set; }
@@ -28,6 +30,8 @@ namespace Wallet.Models
         public string TokenOrEtherReceivedName { get; set; }
 
         public bool WhenNumberOfTokenOrEtherWasReceived { get; set; }
+
+        public int TokenReceivedDecimalPlaces { get; set; }
 
         public int NumberOfTokenOrEtherWasReceived { get; set; }
 

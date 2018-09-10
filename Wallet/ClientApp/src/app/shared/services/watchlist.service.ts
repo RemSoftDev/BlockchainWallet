@@ -23,8 +23,7 @@ export class WatchlistService extends BaseService {
 
   addToWatchList(watchlist: WatchlistModel) {
     return this.http
-      .post(
-      this.hostUrl + this.baseUrl + '/AddToWatchlist', JSON.stringify(watchlist), httpOptions)
+      .post(this.hostUrl + this.baseUrl + '/AddToWatchlist', JSON.stringify(watchlist), httpOptions)
       .map(res => {
         return true;
       })

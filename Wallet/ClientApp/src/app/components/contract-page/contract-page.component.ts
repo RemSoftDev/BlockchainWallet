@@ -232,9 +232,8 @@ export class ContractPageComponent implements OnInit, OnDestroy {
 
   setNotification(w) {
 
-    let model = new WatchlistModel(localStorage.getItem('userName'),this.searchString, true, this.notificationOptions);
+    let model = new WatchlistModel(localStorage.getItem('userName'), this.searchString, true, this.notificationOptions, this.smartContractInfo.DecimalPlaces);
 
-    console.log(this.notificationOptions);
     this.watchlistService.addToWatchList(model).subscribe(data => {
       this.requestNotificationOptions(this.smartContractInfo.address);
       this.closeNotificationWindow();

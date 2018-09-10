@@ -90,7 +90,8 @@ namespace Wallet.Controllers
                     {
                         Address = model.Address,
                         UserEmail = model.UserEmail,
-                        IsContract = model.IsContract
+                        IsContract = model.IsContract,
+                        TokenDecimalPlaces = model.TokenDecimalPlaces
                     });
                 
                     model.NotificationOptions.UserWatchlistId = watchList.Entity.Id;
@@ -163,10 +164,11 @@ namespace Wallet.Controllers
             }
             if (!string.IsNullOrEmpty(options.NumberOfTokenOrEtherWasSentName) && !options.NumberOfTokenOrEtherWasSentName.Equals("ETH"))
             {
-                options.NumberOfTokenOrEtherWasSentName = _dbContext.Erc20Tokens
+                var token = _dbContext.Erc20Tokens
                     .FirstOrDefault(t => t.Symbol.Equals(options.NumberOfTokenOrEtherWasSentName,
-                        StringComparison.CurrentCultureIgnoreCase))
-                    ?.Address;
+                        StringComparison.CurrentCultureIgnoreCase));
+                options.NumberOfTokenOrEtherWasSentName = token?.Address;
+                options.TokenSentDecimalPlaces = token?.DecimalPlaces ?? 18;
             }
             if (!string.IsNullOrEmpty(options.TokenOrEtherReceivedName) && !options.TokenOrEtherReceivedName.Equals("ETH"))
             {
@@ -178,10 +180,11 @@ namespace Wallet.Controllers
             }
             if (!string.IsNullOrEmpty(options.TokenOrEtherWasReceivedName) && !options.TokenOrEtherWasReceivedName.Equals("ETH"))
             {
-                options.TokenOrEtherWasReceivedName = _dbContext.Erc20Tokens
+                var token = _dbContext.Erc20Tokens
                     .FirstOrDefault(t => t.Symbol.Equals(options.TokenOrEtherWasReceivedName,
-                        StringComparison.CurrentCultureIgnoreCase))
-                    ?.Address;
+                        StringComparison.CurrentCultureIgnoreCase));
+                options.TokenOrEtherWasReceivedName = token?.Address;
+                options.TokenReceivedDecimalPlaces = token?.DecimalPlaces ?? 18;
             }
 
             return options;
