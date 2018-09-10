@@ -38,7 +38,7 @@ export class WatchlistService extends BaseService {
   }
 
   getNotificationOptions(address: string) {
-    const params = new HttpParams().set('address', address);
+    const params = new HttpParams().set('address', address).set('userEmail', localStorage.getItem('userName'));
     return this.http
       .get(this.hostUrl + this.baseUrl + '/GetNotificationOptions', { params })
       .catch(this.handleError);

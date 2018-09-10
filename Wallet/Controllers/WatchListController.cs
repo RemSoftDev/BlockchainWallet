@@ -44,9 +44,9 @@ namespace Wallet.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetNotificationOptions(string address)
+        public async Task<IActionResult> GetNotificationOptions(string address, string userEmail)
         {
-            var watchlistModel = await _dbContext.UserWatchlist.Where(w =>
+            var watchlistModel = await _dbContext.UserWatchlist.Where(w => w.UserEmail.Equals(userEmail, StringComparison.CurrentCultureIgnoreCase) &&
                 w.Address.Equals(address, StringComparison.CurrentCultureIgnoreCase)).Include(w=>w.NotificationOptions).FirstOrDefaultAsync();
 
             if (watchlistModel != null)
