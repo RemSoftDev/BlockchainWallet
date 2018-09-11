@@ -14,18 +14,17 @@
     </div>
 
     <div *ngIf="isContractsOpened" class="col-md-10">
-      <div>
-        Current Check Block : {{statusSync.currentBlock}}
-        <p>
-        Last Block : {{statusSync.lastBlockBl}}
-</div>
+
+      <div *ngIf="isStatusLoaded" class="row">
+        <p>Current Check Block : {{statusSync.currentBlock}}</p>
+        <p>Last Block : {{statusSync.lastBlockBl}}</p>
+      </div>
 
       <form #myForm="ngForm" (ngSubmit)="getSmartContract(myForm)">
 
-
         <div class="form-group">
           <label for="addressBTC">Contract Address</label>
-          <input class="form-control" name="contractAddress" ngModel />
+          <input class="form-control" name="contractAddress" ngModel/>
         </div>
 
         <div class="form-group">
@@ -39,27 +38,27 @@
 
         <div class="form-group">
           <label for="name">Name</label>
-          <input class="form-control" [(ngModel)]="token.name" name="name" ngModel />
+          <input class="form-control" [(ngModel)]="token.name" name="name" ngModel/>
         </div>
 
         <div class="form-group">
           <label for="symbol">Symbol</label>
-          <input class="form-control" [(ngModel)]="token.symbol" name="symbol" ngModel />
+          <input class="form-control" [(ngModel)]="token.symbol" name="symbol" ngModel/>
         </div>
 
         <div class="form-group">
           <label for="DecimalPlaces">Decimal Places</label>
-          <input class="form-control" [(ngModel)]="token.DecimalPlaces" name="DecimalPlaces" ngModel />
+          <input class="form-control" [(ngModel)]="token.DecimalPlaces" name="DecimalPlaces" ngModel/>
         </div>
 
         <div class="form-group">
           <label for="webSiteLink">Web Site Link</label>
-          <input class="form-control" [(ngModel)]="token.webSiteLink" name="webSiteLink" ngModel />
+          <input class="form-control" [(ngModel)]="token.webSiteLink" name="webSiteLink" ngModel/>
         </div>
 
         <div class="form-group">
           <label for="createdDate">Created date</label>
-          <input type="date" class="form-control" [ngModel]="token.createdDate | date:'yyyy-MM-dd'" (ngModelChange)="token.createdDate = $event" name="createdDate" ngModel />
+          <input type="date" class="form-control" [ngModel]="token.createdDate | date:'yyyy-MM-dd'" (ngModelChange)="token.createdDate = $event" name="createdDate" ngModel/>
         </div>
 
         <div class="form-group">
@@ -72,19 +71,18 @@
       </form>
     </div>
 
-
     <div *ngIf="isContentOpened" class="col-md-10">
 
       <form *ngIf="isRequested" #myForm="ngForm" (ngSubmit)="postData(myForm)">
 
         <div class="form-group">
           <label for="addressBTC">Tips BTC</label>
-          <input class="form-control" [(ngModel)]="addressBTC.elementData" name="addressBTC" ngModel />
+          <input class="form-control" [(ngModel)]="addressBTC.elementData" name="addressBTC" ngModel/>
         </div>
 
         <div class="form-group">
           <label for="addressETH">Tips ETH</label>
-          <input class="form-control" [(ngModel)]="addressETH.elementData" name="addressETH" ngModel />
+          <input class="form-control" [(ngModel)]="addressETH.elementData" name="addressETH" ngModel/>
         </div>
 
         <div class="form-group">
@@ -117,32 +115,32 @@
 
       <div class="form-group">
         <label for="addressBTC">Address</label>
-        <input class="form-control" name="address" ngModel />
+        <input class="form-control" name="address" ngModel/>
       </div>
 
       <div class="form-group">
         <label for="addressBTC">Name</label>
-        <input class="form-control" name="name" ngModel />
+        <input class="form-control" name="name" ngModel/>
       </div>
 
       <div class="form-group">
         <label for="addressBTC">Symbol</label>
-        <input class="form-control" name="symbol" ngModel />
+        <input class="form-control" name="symbol" ngModel/>
       </div>
 
       <div class="form-group">
         <label for="addressBTC">Decimal Places</label>
-        <input class="form-control" name="decimalPlaces" ngModel />
+        <input class="form-control" name="decimalPlaces" ngModel/>
       </div>
 
       <div class="form-group">
         <label for="addressBTC">Web Site Link</label>
-        <input class="form-control" name="webSiteLink" ngModel />
+        <input class="form-control" name="webSiteLink" ngModel/>
       </div>
 
       <div class="form-group">
         <label for="addressBTC">Created date</label>
-        <input class="form-control" type="date" name="createdDate" ngModel />
+        <input class="form-control" type="date" name="createdDate" ngModel/>
       </div>
 
       <div class="form-group">
@@ -170,7 +168,7 @@
       <th scope="col">IsSynchronized</th>
     </tr>
     </thead>
-    <tbody>    
+    <tbody>
     <tr *ngFor="let tn of tokens">
       <td title="{{tn.address}}">{{tn.address}}</td>
       <td title="{{tn.name}}">{{tn.name}}</td>
@@ -190,5 +188,3 @@
   </div>
 
 </div>
-
-

@@ -19,7 +19,6 @@ namespace Wallet.Services
         private Timer _timer;
         private bool isRunning;
 
-
         public EventLogsService(IBlockchainExplorer explorer, IServiceScopeFactory scopeFactory)
         {
             _explorer = explorer;
@@ -74,11 +73,7 @@ namespace Wallet.Services
                             }
                         }
 
-                        token.LastSynchronizedBlockNumber = lastBlockNumber;
-                        token.IsSynchronized = true;
                         var tempLogs = new List<CustomEventLog>();
-                        var tempHolders = new List<TokenHolder>();
-
                         foreach (var customEventLog in logs)
                         {
                             tempLogs.Add(customEventLog);
@@ -89,10 +84,10 @@ namespace Wallet.Services
                                 tempLogs.Clear();
                             }
                         }
-
                         dbContext.CustomEventLogs.AddRange(tempLogs);
                         dbContext.SaveChanges();
 
+                        var tempHolders = new List<TokenHolder>();
                         foreach (var tokenHolder in holders)
                         {
                             tempHolders.Add(tokenHolder);
@@ -106,17 +101,21 @@ namespace Wallet.Services
                         dbContext.TokenHolders.AddRange(tempHolders);
                         dbContext.SaveChanges();
 
+                        token.LastSynchronizedBlockNumber = lastBlockNumber;
+                        token.IsSynchronized = true;
                         dbContext.Erc20Tokens.Update(token);
                         dbContext.SaveChanges();
+
                     }
                 }
+
+                isRunning = false;
             }
             catch (Exception e)
             {
                 isRunning = false;
 
             }
-            isRunning = false;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

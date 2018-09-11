@@ -50,7 +50,8 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   sortByReceivedTxNumber: boolean = true;
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute,
-    private BCservice: BlockchainService, private watchlistService: WatchlistService) {
+    private BCservice: BlockchainService, private watchlistService: WatchlistService)
+  {
     this.navigationSubscription = this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
         this.initialise();
@@ -313,7 +314,8 @@ export class ContractPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
+    }
   }
-
 }

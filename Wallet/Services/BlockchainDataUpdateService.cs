@@ -17,6 +17,7 @@ namespace Wallet.Services
         private readonly IServiceScopeFactory _scopeFactory;
         private IBlockchainExplorer _explorer;
         private Timer _timer;
+        private bool _isRunning;
 
         public BlockchainDataUpdateService(IBlockchainExplorer explorer, IServiceScopeFactory scopeFactory)
         {
@@ -41,11 +42,17 @@ namespace Wallet.Services
         {
             try
             {
+                if (_isRunning)
+                    return;
+
+                _isRunning = true;
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
 
-                    foreach (var token in dbContext.Erc20Tokens.ToList())
+                    var tokens = dbContext.Erc20Tokens.ToList();
+
+                    foreach (var token in tokens)
                     {
                         if (!token.IsSynchronized)
                             continue;
@@ -54,6 +61,7 @@ namespace Wallet.Services
 
                         var logs = await _explorer.GetFullEventLogs(token, lastBlockNumber,
                             token.LastSynchronizedBlockNumber + 1);
+
                         var holders = EventLogsExplorer.GetInfoFromLogs(logs);
 
                         for (int i = 0; i < holders.Count; i++)
@@ -89,17 +97,23 @@ namespace Wallet.Services
                                 dbContext.TokenHolders.Add(h);
                             }
                         });
+
                         token.LastSynchronizedBlockNumber = GetNewLastSearchedBlockNumber(lastBlockNumber,
                             token.LastSynchronizedBlockNumber + 1);
-                        dbContext.Erc20Tokens.Update(token);
+ 
                         dbContext.CustomEventLogs.AddRange(logs);
+
+                        dbContext.Erc20Tokens.Update(token);
                         dbContext.SaveChanges();
+
+                        _isRunning = false;
                     }
                 }
             }
 
             catch (Exception e)
             {
+                _isRunning = false;
             }
         }
 

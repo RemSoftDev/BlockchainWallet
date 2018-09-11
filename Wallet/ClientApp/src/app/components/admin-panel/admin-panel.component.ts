@@ -30,12 +30,13 @@ export class AdminPanelComponent implements OnInit {
   contactPage: PageData;
   tokens: TokenModel[];
   statusSync: StausSyncTr;
+  isStatusLoaded: boolean;
   errors: string;
 
-
-
-
-  constructor(private pageDataService: PageDataService, private tokenService: TokenService, private blockChainService: BlockchainService) {}
+  constructor(private pageDataService: PageDataService,
+    private tokenService: TokenService,
+    private blockChainService: BlockchainService) {
+  }
 
   ngOnInit() {
     this.loadData();
@@ -74,8 +75,9 @@ export class AdminPanelComponent implements OnInit {
       error => console.log(error));
 
     this.blockChainService.getSyncStatus().subscribe(res => {
-      this.statusSync = res;
-    },
+        this.isStatusLoaded = true;
+        this.statusSync = res;
+      },
       error => this.errors = error);
 
 
@@ -94,13 +96,13 @@ export class AdminPanelComponent implements OnInit {
     token.webSiteLink = form.value.webSiteLink;
     token.time = new Date(form.value.createdDate).getTime() / 1000;
     this.tokenService.addToken(token).subscribe(data => {
-      this.showAddNewContract = false;
-      alert("Added");
-    },
-     error => this.errors = error);
+        this.showAddNewContract = false;
+        alert("Added");
+      },
+      error => this.errors = error);
   }
 
-  updateContract(form: NgForm) {  
+  updateContract(form: NgForm) {
     this.tokenService.updateContract(this.token).subscribe(data => {
         alert("Updated");
       },
@@ -119,22 +121,12 @@ export class AdminPanelComponent implements OnInit {
   }
 
   getAllSmartContract(form: NgForm) {
-    this.errors = null;    
-    this.tokenService.getAllContractInfo().subscribe(res => {
-      this.tokens = res;
-    },
-      error => this.errors = error);
-  }
-
-  getSyncStatus(form: NgForm) {
     this.errors = null;
-    this.blockChainService.getSyncStatus().subscribe(res => {
-      this.statusSync = res;
-    },
+    this.tokenService.getAllContractInfo().subscribe(res => {
+        this.tokens = res;
+      },
       error => this.errors = error);
   }
-
-  
 
   switchToContent() {
     this.isContentOpened = true;
@@ -150,8 +142,8 @@ export class AdminPanelComponent implements OnInit {
     this.contractTabClass = 'active';
 
     this.tokenService.getAllContractInfo().subscribe(res => {
-      this.tokens = res;
-    },
+        this.tokens = res;
+      },
       error => this.errors = error);
   }
 
