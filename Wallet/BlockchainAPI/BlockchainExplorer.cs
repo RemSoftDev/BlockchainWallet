@@ -364,7 +364,7 @@ namespace Wallet.BlockchainAPI
             var eth = cont.GetFunction("totalSupply");
             return eth.CallAsync<BigInteger>();
         }
-        //add in db block num and find from this
+
         public async Task<List<CustomEventLog>> GetFullEventLogs(ERC20Token contract, int lastBlockNumber, int blocknum = 1)
         {
             var cont = web3.Eth.GetContract(Constants.Strings.ABI.Abi, contract.Address);
@@ -390,12 +390,14 @@ namespace Wallet.BlockchainAPI
 
             }
 
+            BlockWithTransactions block = null;
             foreach (var log in logs)
             {
-                var block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
-                    new HexBigInteger(log.Log.BlockNumber)).Result;
-
-                var timestamp = block.Timestamp.Value;
+                if (block == null || log.Log.BlockNumber.Value != block.Number.Value)
+                {
+                    block = web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(
+                        new HexBigInteger(log.Log.BlockNumber)).Result;
+                }
 
                 events.Add(new CustomEventLog()
                 {
@@ -404,7 +406,7 @@ namespace Wallet.BlockchainAPI
                     To = log.Event.AddressTo,
                     AmountOfToken = Web3.Convert.FromWei(log.Event.Value, contract.DecimalPlaces),
                     dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
-                        (long)(timestamp)),
+                        (long)(block.Timestamp.Value)),
                     BlockNumber = (int)log.Log.BlockNumber.Value
                 });
             }
