@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -44,7 +43,6 @@ namespace Wallet
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
             services.AddSingleton<IUserInfoInMemory,UserInfoInMemory>();
             services.AddHostedService<NotificationService>();
-            services.AddTransient<IParser, Parser>();
             services.AddHostedService<BlockchainDataUpdateService>();
             services.AddHostedService<EventLogsService>();
             services.AddHostedService<TransactionService>();

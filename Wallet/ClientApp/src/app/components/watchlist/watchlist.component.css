@@ -12,6 +12,12 @@ table {
   width: 100%;
 }
 
+th {
+  color: #3366BB;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .dot {
   height: 15px;
   width: 15px;

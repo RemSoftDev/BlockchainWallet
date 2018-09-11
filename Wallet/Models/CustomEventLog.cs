@@ -12,7 +12,7 @@ namespace Wallet.Models
 
         public decimal AmountOfToken { get; set; }
 
-        public DateTime dateTime { get; set; }
+        public DateTime WhenDateTime  { get; set; }
 
         public int BlockNumber { get; set; }
 

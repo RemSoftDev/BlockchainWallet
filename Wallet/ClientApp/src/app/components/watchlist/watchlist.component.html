@@ -3,18 +3,26 @@
     <table *ngIf="requested" class="table table-striped">
       <thead>
       <tr>
-        <th scope="col"> <a href (click)="sortTable('account')">Wallets</a> </th>
-        <th scope="col"> <a href (click)="sortTable('contract')">Smart Contracts</a> </th>
+        <th scope="col"> Wallets </th>
+        <th scope="col"> Smart Contracts </th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let entry of watchList">
-        <td (click)="goToAddress(entry.account.address)" class="tableRow">{{ entry.account.address }} <span *ngIf="entry.account.isNotificated" class="dot"></span></td>
-        <td (click)="goToContract(entry.contract.address)" class="tableRow">{{ entry.contract.address }} <span *ngIf="entry.contract.isNotificated" class="dot"></span></td>
+        <td class="tableRow">
+          <a [routerLink]='["/search/account", entry.account.address ]'>
+            {{ entry.account.address }}
+          </a>
+          <span *ngIf="entry.account.isNotificated" class="dot"></span>
+        </td>
+        <td class="tableRow">
+          <a [routerLink]='["/search/contract", entry.contract.address]'>
+            {{ entry.account.address }}
+          </a>
+          <span *ngIf="entry.contract.isNotificated" class="dot"></span>
+        </td>
       </tr>
       </tbody>
     </table>
   </div>
 </div>
-
-

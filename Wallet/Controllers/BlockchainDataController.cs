@@ -143,7 +143,7 @@ namespace Wallet.Controllers
                 var to = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Int64.Parse(secondsTo));
 
                 var logs = await _dbContext.CustomEventLogs.Where(l => l.ERC20TokenId == contractId)
-                    .Where(l => l.dateTime >= from && l.dateTime <= to).ToListAsync();
+                    .Where(l => l.WhenDateTime >= from && l.WhenDateTime <= to).ToListAsync();
 
                 var holders = EventLogsExplorer.GetInfoFromLogs(logs);
 

@@ -405,7 +405,7 @@ namespace Wallet.BlockchainAPI
                     From = log.Event.AddressFrom,
                     To = log.Event.AddressTo,
                     AmountOfToken = Web3.Convert.FromWei(log.Event.Value, contract.DecimalPlaces),
-                    dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
+                    WhenDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(
                         (long)(block.Timestamp.Value)),
                     BlockNumber = (int)log.Log.BlockNumber.Value
                 });

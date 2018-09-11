@@ -23,7 +23,6 @@ namespace Wallet.Services
         public EventLogsService(IBlockchainExplorer explorer, IServiceScopeFactory scopeFactory)
         {
             _explorer = explorer;
-
             _scopeFactory = scopeFactory;
         }
 

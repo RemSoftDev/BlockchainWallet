@@ -146,8 +146,8 @@ namespace Wallet.Notifications
                 if ((t.From?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false) &&
                     (t.Input?.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase) ?? false))
                 {
-                    if (Web3.Convert.FromWei(t.Value.Value, 18) >= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentFrom&&
-                        Web3.Convert.FromWei(t.Value.Value, 18) <= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentTo)
+                    if ((double)Web3.Convert.FromWei(t.Value.Value, 18) >= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentFrom&&
+                        (double)Web3.Convert.FromWei(t.Value.Value, 18) <= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentTo)
                     {
                         return true;
                     }
@@ -167,7 +167,7 @@ namespace Wallet.Notifications
                          StringComparison.CurrentCultureIgnoreCase) ?? false) &&
                     (t.From?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false))
                 {
-                    var value = Web3.Convert.FromWei(InputDecoder.GetTokenCountAndAddressFromInput(t.Input).Value, watchListLine.NotificationOptions.TokenSentDecimalPlaces);
+                    var value = (double)Web3.Convert.FromWei(InputDecoder.GetTokenCountAndAddressFromInput(t.Input).Value, watchListLine.NotificationOptions.TokenSentDecimalPlaces);
                     if (value >= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentFrom &&
                         value <= watchListLine.NotificationOptions.NumberOfTokenOrEtherThatWasSentTo)
                     {
@@ -216,7 +216,7 @@ namespace Wallet.Notifications
                 if ((t.To?.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase) ?? false) &&
                     (t.Input?.Equals(Constants.Strings.TransactionType.Usual, StringComparison.CurrentCultureIgnoreCase) ?? false))
                 {
-                    if (Web3.Convert.FromWei(t.Value.Value, 18) == watchListLine.NotificationOptions.NumberOfTokenOrEtherWasReceived)
+                    if ((double) Web3.Convert.FromWei(t.Value.Value, 18) == watchListLine.NotificationOptions.NumberOfTokenOrEtherWasReceived)
                     {
                         return true;
                     }
@@ -231,7 +231,7 @@ namespace Wallet.Notifications
             return (transactions?.Any(t =>
             {
                 var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input);
-                var value = Web3.Convert.FromWei(receiver.Value, watchListLine.NotificationOptions.TokenReceivedDecimalPlaces);
+                var value = (double)Web3.Convert.FromWei(receiver.Value, watchListLine.NotificationOptions.TokenReceivedDecimalPlaces);
 
                 if (receiver.To != null && receiver.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase)&&
                     value == watchListLine.NotificationOptions.NumberOfTokenOrEtherWasReceived)
@@ -249,7 +249,7 @@ namespace Wallet.Notifications
             {
                 if (t.To !=null && t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    var value = Web3.Convert.FromWei(InputDecoder.GetTokenCountAndAddressFromInput(t.Input).Value, watchListLine.TokenDecimalPlaces);
+                    var value = (double)Web3.Convert.FromWei(InputDecoder.GetTokenCountAndAddressFromInput(t.Input).Value, watchListLine.TokenDecimalPlaces);
 
                     if (value == watchListLine.NotificationOptions.NumberOfContractTokenWasSent)
                     {
@@ -268,7 +268,7 @@ namespace Wallet.Notifications
                 if (t.To != null && t.To.Equals(watchListLine.Address, StringComparison.CurrentCultureIgnoreCase))
                 {
                     var receiver = InputDecoder.GetTokenCountAndAddressFromInput(t.Input);
-                    var value = Web3.Convert.FromWei(receiver.Value, watchListLine.TokenDecimalPlaces);
+                    var value = (double)Web3.Convert.FromWei(receiver.Value, watchListLine.TokenDecimalPlaces);
 
                     if (value == watchListLine.NotificationOptions.NumberOfTokenWasReceivedByAddress &&
                         receiver.To.Equals(watchListLine.NotificationOptions.AddressThatReceivedNumberOfToken, StringComparison.CurrentCultureIgnoreCase))

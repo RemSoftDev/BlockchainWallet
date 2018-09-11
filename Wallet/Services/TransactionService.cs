@@ -18,7 +18,8 @@ namespace Wallet.Services
         private Timer _deleteTimer;
         private int _lastCheckedBlockNumber;
         private int _lastBlockNumber;
-        private bool isRunning;
+        private bool _isRunning;
+        private bool _isDeleting;
 
         public TransactionService(IBlockchainExplorer explorer, IServiceScopeFactory scopeFactory)
         {
@@ -40,7 +41,7 @@ namespace Wallet.Services
 
         private void DoWork(object state)
         {
-            if (isRunning)
+            if (_isRunning)
                 return;
 
             Task.Run(async () =>
@@ -54,7 +55,7 @@ namespace Wallet.Services
                         if (!(dbContext.PageData.FirstOrDefault()?.IsTransactionsSaved ?? false))
                             return;
 
-                        isRunning = true;
+                        _isRunning = true;
 
                         _lastBlockNumber = (int)(await _explorer.GetLastAvailableBlockNumber()).Value;
 
@@ -72,13 +73,13 @@ namespace Wallet.Services
                             _lastCheckedBlockNumber++;
                         }
 
-                        isRunning = false;
+                        _isRunning = false;
 
                     }
                 }
                 catch (Exception e)
                 {
-
+                    _isRunning = false;
                 }
             });           
         }
@@ -87,25 +88,31 @@ namespace Wallet.Services
         {
             try
             {
+                if (_isDeleting)
+                    return;
+
+                _isDeleting = true;
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
 
+                    var lastBlockNumber = dbContext.BlockChainTransactions
+                        .Max(w => w.BlockNumber);
+
                     var forDelete =
-                        dbContext.BlockChainTransactions.Where(t => t.BlockNumber < (_lastCheckedBlockNumber - Helpers.Constants.Ints.BlocksCount.SaveBlocksCount)).ToList();
+                        dbContext.BlockChainTransactions.Where(t => 
+                            t.BlockNumber < (lastBlockNumber - Helpers.Constants.Ints.BlocksCount.SaveBlocksCount)).Take(10000);
 
-                    foreach (var blockChainTransaction in forDelete)
-                    {
-                        dbContext.BlockChainTransactions.Remove(blockChainTransaction);
-                    }
-
+                    dbContext.BlockChainTransactions.RemoveRange(forDelete);
+                    
                     dbContext.SaveChanges();
-
                 }
+
+                _isDeleting = false;
             }
             catch (Exception e)
             {
-
+                _isDeleting = false;
             }
         }
 

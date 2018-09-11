@@ -3,7 +3,7 @@ import { RedirectionService } from '../../shared/services/redirection.service';
 import { WatchlistService } from '../../shared/services/watchlist.service';
 import { NotificationService } from '../../shared/services/notifications.service';
 import { Subscription } from 'rxjs/Subscription';
-import { Router} from '@angular/router';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -17,10 +17,12 @@ export class WatchlistComponent implements OnInit, OnDestroy {
   watchList;
   subscription: Subscription;
   requested = false;
-  fakeArray:any[];
 
-  constructor(private redirectionService: RedirectionService, private router: Router, private wlService: WatchlistService,
-    private notifService: NotificationService) { }
+  constructor(private redirectionService: RedirectionService,
+    private router: Router,
+    private wlService: WatchlistService,
+    private notifService: NotificationService) {
+  }
 
   ngOnInit() {
     this.subscription = this.notifService.receivingNavStatus$.subscribe(() => {
@@ -29,20 +31,11 @@ export class WatchlistComponent implements OnInit, OnDestroy {
     );
     this.getWatchlist();
     this.redirectionService.toWatchlistPage();
-
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
     this.redirectionService.fromWatchListPage();
-  }
-
-  goToAddress(address) {
-    this.router.navigate(['/search/account', address]);
-  }
-
-  goToContract(address) {
-    this.router.navigate(['/search/contract', address]);
   }
 
   getNitificatedData() {
@@ -56,10 +49,4 @@ export class WatchlistComponent implements OnInit, OnDestroy {
       },
       error => this.errors = error);
   }
-
-  sortTable(prop: string) {   
-    return false; // do not reload
-  }
-
 }
-
