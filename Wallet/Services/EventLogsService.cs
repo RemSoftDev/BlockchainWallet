@@ -42,37 +42,39 @@ namespace Wallet.Services
 
                 isRunning = true;
 
-                using (var scope = _scopeFactory.CreateScope())
+                List<ERC20Token> tokens;
+                using (var dbContext = new WalletDbContext(DbContextOptionsFactory.DbContextOptions()))
                 {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<WalletDbContext>();
+                    tokens = dbContext.Erc20Tokens.ToList();
+                }
 
-                    var tokens = dbContext.Erc20Tokens.ToList();
+                foreach (var token in tokens)
+                {
+                    if (token.IsSynchronized)
+                        continue;
 
-                    foreach (var token in tokens)
+                    var lastBlockNumber = (int) (_explorer.GetLastAvailableBlockNumber().Result.Value);
+
+                    var logs = _explorer.GetFullEventLogs(token, lastBlockNumber).Result;
+
+                    var holders = EventLogsExplorer.GetInfoFromLogs(logs);
+
+                    for (int i = 0; i < holders.Count; i++)
                     {
-                        if (token.IsSynchronized)
-                            continue;
-
-                        var lastBlockNumber = (int)(_explorer.GetLastAvailableBlockNumber().Result.Value);
-
-                        var logs = _explorer.GetFullEventLogs(token, lastBlockNumber).Result;
-
-                        var holders = EventLogsExplorer.GetInfoFromLogs(logs);
-
-                        for (int i = 0; i < holders.Count; i++)
+                        try
                         {
-                            try
-                            {
-                                var balance = _explorer.GetTokenHolderBalance(holders[i].Address, token.Address).Result;
-                                holders[i].Quantity = Web3.Convert.FromWei(balance, token.DecimalPlaces);
-                                holders[i].ERC20TokenId = token.Id;
-                            }
-                            catch (Exception e)
-                            {
-                                i--;
-                            }
+                            var balance = _explorer.GetTokenHolderBalance(holders[i].Address, token.Address).Result;
+                            holders[i].Quantity = Web3.Convert.FromWei(balance, token.DecimalPlaces);
+                            holders[i].ERC20TokenId = token.Id;
                         }
+                        catch (Exception e)
+                        {
+                            i--;
+                        }
+                    }
 
+                    using (var dbContext = new WalletDbContext(DbContextOptionsFactory.DbContextOptions()))
+                    {
                         var tempLogs = new List<CustomEventLog>();
                         foreach (var customEventLog in logs)
                         {
@@ -84,6 +86,7 @@ namespace Wallet.Services
                                 tempLogs.Clear();
                             }
                         }
+
                         dbContext.CustomEventLogs.AddRange(tempLogs);
                         dbContext.SaveChanges();
 
@@ -91,13 +94,14 @@ namespace Wallet.Services
                         foreach (var tokenHolder in holders)
                         {
                             tempHolders.Add(tokenHolder);
-                            if (tempHolders.Count==100)
+                            if (tempHolders.Count == 100)
                             {
                                 dbContext.TokenHolders.AddRange(tempHolders);
                                 dbContext.SaveChanges();
                                 tempHolders.Clear();
                             }
                         }
+
                         dbContext.TokenHolders.AddRange(tempHolders);
                         dbContext.SaveChanges();
 
@@ -105,16 +109,13 @@ namespace Wallet.Services
                         token.IsSynchronized = true;
                         dbContext.Erc20Tokens.Update(token);
                         dbContext.SaveChanges();
-
                     }
                 }
-
                 isRunning = false;
             }
             catch (Exception e)
             {
                 isRunning = false;
-
             }
         }
 
