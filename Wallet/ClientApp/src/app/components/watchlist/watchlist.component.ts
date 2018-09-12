@@ -5,7 +5,6 @@ import { NotificationService } from '../../shared/services/notifications.service
 import { Subscription } from 'rxjs/Subscription';
 import { Router } from '@angular/router';
 
-
 @Component({
   selector: 'app-watchlist',
   templateUrl: './watchlist.component.html',

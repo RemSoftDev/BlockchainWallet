@@ -280,13 +280,13 @@ namespace Wallet.Controllers
             try
             {
                 var token = _dbContext.Erc20Tokens.ToList().FirstOrDefault(t =>
-                    t.Name?.Equals(contractName) ?? false);
+                    t.Name?.Equals(contractName, StringComparison.CurrentCultureIgnoreCase) ?? false);
 
                 if (token == null)
                     return NotFound();
 
                 var res = _dbContext.BlockChainTransactions.Where(t =>
-                        t.ContractAddress.Equals(token.Address, StringComparison.CurrentCultureIgnoreCase))
+                        t.ContractAddress.Equals(token.Address))
                     .OrderByDescending(t => t.Date).Take(40);
 
                 return new OkObjectResult(

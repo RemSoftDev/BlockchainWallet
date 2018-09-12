@@ -17,7 +17,7 @@
         </td>
         <td class="tableRow">
           <a [routerLink]='["/search/contract", entry.contract.address]'>
-            {{ entry.account.address }}
+            {{ entry.contract.address }}
           </a>
           <span *ngIf="entry.contract.isNotificated" class="dot"></span>
         </td>
