@@ -73,38 +73,11 @@ namespace Wallet.Services
                         }
                     }
 
+                    SaveToDb(logs);
+                    SaveToDb(holders);
+
                     using (var dbContext = new WalletDbContext(DbContextOptionsFactory.DbContextOptions()))
                     {
-                        var tempLogs = new List<CustomEventLog>();
-                        foreach (var customEventLog in logs)
-                        {
-                            tempLogs.Add(customEventLog);
-                            if (tempLogs.Count == 100)
-                            {
-                                dbContext.CustomEventLogs.AddRange(tempLogs);
-                                dbContext.SaveChanges();
-                                tempLogs.Clear();
-                            }
-                        }
-
-                        dbContext.CustomEventLogs.AddRange(tempLogs);
-                        dbContext.SaveChanges();
-
-                        var tempHolders = new List<TokenHolder>();
-                        foreach (var tokenHolder in holders)
-                        {
-                            tempHolders.Add(tokenHolder);
-                            if (tempHolders.Count == 100)
-                            {
-                                dbContext.TokenHolders.AddRange(tempHolders);
-                                dbContext.SaveChanges();
-                                tempHolders.Clear();
-                            }
-                        }
-
-                        dbContext.TokenHolders.AddRange(tempHolders);
-                        dbContext.SaveChanges();
-
                         token.LastSynchronizedBlockNumber = lastBlockNumber;
                         token.IsSynchronized = true;
                         dbContext.Erc20Tokens.Update(token);
@@ -117,6 +90,49 @@ namespace Wallet.Services
             {
                 isRunning = false;
             }
+        }
+
+        private void SaveToDb<T>(List<T> collectionToInsert) where T:class
+        {
+            WalletDbContext context = null;
+            try
+            {
+                context = new WalletDbContext(DbContextOptionsFactory.DbContextOptions());
+                context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+                int count = 0;
+                foreach (var entity in collectionToInsert)
+                {
+                    ++count;
+                    context = AddToContext(context, entity, count, 100, true);
+                }
+
+                context.SaveChanges();
+            }
+            finally
+            {
+                if (context != null)
+                    context.Dispose();
+            }
+        }
+
+        private WalletDbContext AddToContext<T>(WalletDbContext context,
+            T entity, int count, int commitCount, bool recreateContext) where T:class
+        {
+            context.Set<T>().Add(entity);
+
+            if (count % commitCount == 0)
+            {
+                context.SaveChanges();
+                if (recreateContext)
+                {
+                    context.Dispose();
+                    context = new WalletDbContext(DbContextOptionsFactory.DbContextOptions());
+                    context.ChangeTracker.AutoDetectChangesEnabled = false;
+                }
+            }
+
+            return context;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
