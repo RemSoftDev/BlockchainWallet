@@ -8,7 +8,7 @@ namespace Wallet.Helpers
         public static DbContextOptions<WalletDbContext> DbContextOptions()
         {
             var optionsBuilder = new DbContextOptionsBuilder<WalletDbContext>();
-            optionsBuilder.UseSqlServer("Server=WIN-2J5M9KDIB2V\\SQLEXPRESS;Initial Catalog=WalletDB;User Id=walletbc;Password=strongpas;MultipleActiveResultSets=true");
+            optionsBuilder.UseSqlServer(Startup.ConnectionString);
 
             return optionsBuilder.Options;
         }

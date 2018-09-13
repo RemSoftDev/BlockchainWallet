@@ -20,6 +20,7 @@ namespace Wallet
 {
     public class Startup
     {
+        public static string ConnectionString { get; private set; }
 
         private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVkH";
         private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
@@ -27,6 +28,7 @@ namespace Wallet
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            ConnectionString = Configuration.GetConnectionString("ProdConn");
         }
 
         public IConfiguration Configuration { get; }
@@ -36,8 +38,7 @@ namespace Wallet
         {
 
             services.AddDbContext<WalletDbContext>(options =>
-            //options.UseSqlServer(Configuration.GetConnectionString("ProdConn")));
-            options.UseSqlServer(Configuration.GetConnectionString("TestConn2")));
+                options.UseSqlServer(ConnectionString));
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<IBlockchainExplorer, BlockchainExplorer>();
